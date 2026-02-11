@@ -53,7 +53,17 @@
 
      <footer class="h3" style="margin-top: 10px; color: red;" data-lang="about"><a href="download.html" style="color: #d9d9d9; font-size: 14px;" >A propos de l'app</a></footer>
      <p class="h3" style="margin-top: 10px;">@Myme - 2025</p>
-
+<script type="importmap">
+{
+  "imports": {
+    "firebase/app": "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js",
+    "firebase/auth": "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js",
+    "firebase/firestore": "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js",
+    "firebase/database": "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js",
+    "firebase/storage": "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js"
+  }
+}
+</script>
 <script type="module">
   // 1. Imports (Regroupés et propres)
   import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
@@ -197,4 +207,5 @@
   applyTranslations();
 </script>
 </body>
+
 </html>
