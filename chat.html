@@ -399,24 +399,34 @@
     }
 
     async function requestAndroidPermissions() {
-        if (Capacitor.isNativePlatform()) {
+        // On vérifie d'abord si l'objet Capacitor existe ET si on est sur mobile
+        // window.Capacitor && ... évite l'erreur "ReferenceError"
+        if (window.Capacitor && window.Capacitor.isNativePlatform()) {
             try {
-                // 1. Demande pour le Filesystem (utile pour ton dossier CACHE)
+                // 1. Demande pour le Filesystem
                 await Filesystem.requestPermissions();
 
-                // 2. Demande pour les Médias (indispensable pour que Media.savePhoto fonctionne)
-                // Cela affichera "Autoriser l'application à accéder aux photos et vidéos"
+                // 2. Demande pour les Médias
                 const { Media } = Capacitor.Plugins;
-                await Media.requestPermissions();
+                if (Media) {
+                    await Media.requestPermissions();
+                }
 
-                // 3. Demande pour le micro
-                await navigator.mediaDevices.getUserMedia({ audio: true });
+                // 3. Demande pour le micro (Fonctionne aussi sur certains navigateurs PC)
+                if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                    await navigator.mediaDevices.getUserMedia({ audio: true });
+                }
 
             } catch (e) {
                 console.log("Erreur ou refus des permissions", e);
             }
+        } else {
+            // Optionnel : ce qui se passe sur PC
+            console.log("Mode Web : Permissions natives ignorées.");
         }
     }
+
+    // Lancement de la fonction
     requestAndroidPermissions();
 
     // Appelé quand on clique sur "Répondre" dans le menu
@@ -1378,3 +1388,4 @@
 </body>
 
 </html>
+
