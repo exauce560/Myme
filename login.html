@@ -85,7 +85,12 @@
 <script type="module">
   // 1. UTILISER LES LIENS DIRECTS (Indispensable pour GitHub Pages)
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getAuth, signInWithCredential, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+  import { 
+    getAuth, 
+    signInWithCredential, 
+    GoogleAuthProvider, 
+    signInWithPopup // Ajouté ici pour le mode Web
+  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
   // 2. LE PATCH (Pour éviter l'erreur "GoogleAuth is not defined")
   const GoogleAuth = window.GoogleAuth || {
@@ -135,25 +140,24 @@
 
     // 5. CONNEXION NATIVE
     btnLogin.addEventListener('click', async () => {
-        try {
-            if (window.Capacitor && window.Capacitor.isNativePlatform()) {
-                // CODE POUR L'APK (Natif)
-                const googleUser = await GoogleAuth.signIn();
-                const credential = GoogleAuthProvider.credential(googleUser.authentication.idToken);
-                await signInWithCredential(auth, credential);
-            } else {
-                // CODE POUR GITHUB PAGES (Navigateur)
-                const provider = new GoogleAuthProvider();
-                import { signInWithPopup } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-                await signInWithPopup(auth, provider);
-            }
-        
-            window.location.href = "authent_num.html";
-        } catch (error) {
-            console.error("Erreur:", error);
-            errorMsg.innerText = "Erreur: " + error;
-        }
-    });
+      try {
+          // Vérification si on est sur mobile (Capacitor)
+          if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+              const googleUser = await GoogleAuth.signIn();
+              const credential = GoogleAuthProvider.credential(googleUser.authentication.idToken);
+              await signInWithCredential(auth, credential);
+          } else {
+              // MODE WEB (GitHub Pages)
+              const provider = new GoogleAuthProvider();
+              await signInWithPopup(auth, provider);
+          }
+      
+          window.location.href = "authent_num.html";
+      } catch (error) {
+          console.error("Erreur:", error);
+          errorMsg.innerText = "Erreur: " + (error.message || error);
+      }
+  });
 
     applyTranslations();
 </script>
@@ -161,4 +165,5 @@
 </body>
 
 </html>
+
 
