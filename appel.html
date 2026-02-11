@@ -181,10 +181,10 @@
     </nav>
 
     <script type="module">
-        import { initializeApp } from "firebase/app";
-
-        // Plus besoin de liens https://www.gstatic.com/...
-        import { getFirestore, collection,
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { 
+            getFirestore, 
+            collection,
             getDocs,
             onSnapshot,
             query,
@@ -194,9 +194,9 @@
             orderBy,
             addDoc,
             serverTimestamp
-        } from "firebase/firestore";
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyA3YTGXBA9Cf9QNaGau0PCBgyuGSJv5pi0",
@@ -455,4 +455,5 @@
         });
     </script>
 </body>
+
 </html>
