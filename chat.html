@@ -815,7 +815,44 @@
             console.error("🔥 ERREUR FIRESTORE :", error.code, error.message);
         });
     }
+    // 1. Fonction pour mettre à jour mon statut
+    async function updateMyStatus(status) {
+        const user = auth.currentUser;
+        if (user) {
+            const myDocRef = doc(db, "users", user.uid);
+            try {
+                await updateDoc(myDocRef, {
+                    isOnline: status,
+                    lastSeen: serverTimestamp() // Utile pour afficher "Vu pour la dernière fois le..."
+                });
+                console.log("Mon statut est maintenant :", status ? "En ligne" : "Hors ligne");
+            } catch (e) {
+                console.error("Erreur mise à jour statut :", e);
+            }
+        }
+    }
 
+    // 2. Détecter la connexion / déconnexion
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            // Je viens de me connecter ou j'ouvre l'appli
+            updateMyStatus(true);
+        }
+    });
+
+    // 3. Détecter quand l'utilisateur ferme l'onglet ou le navigateur
+    window.addEventListener('beforeunload', () => {
+        updateMyStatus(false);
+    });
+
+    // 4. (Optionnel) Détecter si l'utilisateur change d'onglet (économie d'énergie)
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+            updateMyStatus(true);
+        } else {
+            updateMyStatus(false);
+        }
+    });
     // Fonction helper pour mettre à jour l'interface
     function updateTargetUI(data) {
         console.log("Données reçues pour l'UI :", data);
@@ -848,10 +885,12 @@
         const text = document.getElementById('presence-text');
 
         if (dot && text) {
-            if (data.isOnline === true) { // Vérification stricte
+            // On vérifie si data.isOnline existe ET s'il est égal à true
+            if (data && data.isOnline === true) {
                 dot.className = "status-dot online";
                 text.textContent = "En ligne";
             } else {
+                // Si c'est false, undefined ou null, on met Hors ligne
                 dot.className = "status-dot offline";
                 text.textContent = "Hors ligne";
             }
@@ -1431,6 +1470,7 @@
 </body>
 
 </html>
+
 
 
 
