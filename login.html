@@ -136,27 +136,22 @@
     // 5. CONNEXION NATIVE
     btnLogin.addEventListener('click', async () => {
         try {
-            // A. Appel de la fenêtre native Android
-            const googleUser = await GoogleAuth.signIn();
-
-            // B. Conversion du jeton pour Firebase
-            const credential = GoogleAuthProvider.credential(googleUser.authentication.idToken);
-
-            // C. Connexion Firebase
-            const res = await signInWithCredential(auth, credential);
-            const user = res.user; // <-- On récupère l'utilisateur ici !
-
-            console.log("Succès ! ID:", user.uid);
-            localStorage.setItem("myme_user_session", JSON.stringify({
-                uid: user.uid,
-                displayName: user.displayName
-            }));
+            if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+                // CODE POUR L'APK (Natif)
+                const googleUser = await GoogleAuth.signIn();
+                const credential = GoogleAuthProvider.credential(googleUser.authentication.idToken);
+                await signInWithCredential(auth, credential);
+            } else {
+                // CODE POUR GITHUB PAGES (Navigateur)
+                const provider = new GoogleAuthProvider();
+                import { signInWithPopup } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+                await signInWithPopup(auth, provider);
+            }
+        
             window.location.href = "authent_num.html";
-
         } catch (error) {
-            console.error("Erreur complète:", error);
-            // Si l'erreur affiche "code 10", vérifie ton SHA-1 dans Firebase
-            errorMsg.innerText = "Erreur: " + (error.message || "Veuillez réessayer");
+            console.error("Erreur:", error);
+            errorMsg.innerText = "Erreur: " + error;
         }
     });
 
@@ -166,3 +161,4 @@
 </body>
 
 </html>
+
