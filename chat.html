@@ -773,24 +773,29 @@
 
     // 2. Ta fonction loadTargetUserInfo simplifiée
     async function loadTargetUserInfo() {
+        // 1. Priorité absolue : Affichage immédiat depuis TON localStorage (très rapide)
         const cachedData = JSON.parse(localStorage.getItem(`cache_user_${targetUid}`) || "null");
-
         if (cachedData) {
             updateTargetUI(cachedData);
-            updateBlockButton(); // <-- ON L'APPELLE ICI AUSSI
+            updateBlockButton();
         }
 
-        try {
-            const userSnap = await getDoc(doc(db, "users", targetUid));
-            if (userSnap.exists()) {
-                const data = userSnap.data();
+        // 2. Écouteur en temps réel (Gère le hors-ligne Firestore automatiquement)
+        // onSnapshot cherche d'abord dans le cache de Firebase, puis sur le serveur
+        onSnapshot(doc(db, "users", targetUid), (snapshot) => {
+            if (snapshot.exists()) {
+                const data = snapshot.data();
+            
+                // On met à jour ton localStorage pour la prochaine fois
                 localStorage.setItem(`cache_user_${targetUid}`, JSON.stringify(data));
+            
+                // Mise à jour de l'UI (si l'utilisateur passe en ligne/hors ligne, ça changera tout seul !)
                 updateTargetUI(data);
-                updateBlockButton(); // <-- ON L'APPELLE ICI APRÈS CHARGEMENT
+                updateBlockButton();
             }
-        } catch (e) {
-            console.log("Mode hors-ligne : Données locales.");
-        }
+        }, (error) => {
+            console.log("Erreur Firestore (normal si hors-ligne total) :", error);
+        });
     }
 
     // Fonction helper pour mettre à jour l'interface
@@ -1388,5 +1393,6 @@
 </body>
 
 </html>
+
 
 
