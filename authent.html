@@ -53,24 +53,12 @@
 
      <footer class="h3" style="margin-top: 10px; color: red;" data-lang="about"><a href="download.html" style="color: #d9d9d9; font-size: 14px;" >A propos de l'app</a></footer>
      <p class="h3" style="margin-top: 10px;">@Myme - 2025</p>
-<script type="importmap">
-{
-  "imports": {
-    "firebase/app": "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js",
-    "firebase/auth": "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js",
-    "firebase/firestore": "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js",
-    "@capacitor/core": "https://cdn.jsdelivr.net/npm/@capacitor/core@5.7.0/dist/index.js",
-    "@codetrix-studio/capacitor-google-auth": "https://cdn.jsdelivr.net/npm/@codetrix-studio/capacitor-google-auth@3.3.0/dist/esm/index.js"
-  }
-}
-</script>
 
 <script type="module">
   // 1. Imports (Le navigateur utilisera l'importmap ci-dessus)
-  import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
-  import { initializeApp } from "firebase/app";
-  import { getAuth, onAuthStateChanged, signInWithCredential, GoogleAuthProvider } from "firebase/auth";
-  import { getFirestore, doc, setDoc } from "firebase/firestore";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
   // 2. Configuration Firebase
   const firebaseConfig = {
@@ -88,7 +76,6 @@
   const db = getFirestore(app);
 
   console.log("Firebase et GoogleAuth sont prêts sur GitHub Pages !");
-
 
   // Initialisation UNIQUE du Plugin Google (Utilise ton Client ID Web)
   GoogleAuth.initialize({
@@ -213,6 +200,7 @@
 </body>
 
 </html>
+
 
 
 
