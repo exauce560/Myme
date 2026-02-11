@@ -59,32 +59,35 @@
     "firebase/app": "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js",
     "firebase/auth": "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js",
     "firebase/firestore": "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js",
-    "firebase/database": "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js",
-    "firebase/storage": "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js"
+    "@codetrix-studio/capacitor-google-auth": "https://cdn.jsdelivr.net/npm/@codetrix-studio/capacitor-google-auth@3.3.0/dist/esm/index.js"
   }
 }
 </script>
+
 <script type="module">
-  // 1. Imports (Regroupés et propres)
+  // 1. Imports (Le navigateur utilisera l'importmap ci-dessus)
   import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
   import { initializeApp } from "firebase/app";
-  import { getAuth, signInWithCredential, GoogleAuthProvider } from "firebase/auth";
+  import { getAuth, onAuthStateChanged, signInWithCredential, GoogleAuthProvider } from "firebase/auth";
   import { getFirestore, doc, setDoc } from "firebase/firestore";
 
   // 2. Configuration Firebase
   const firebaseConfig = {
-    apiKey: "AIzaSyA3YTGXBA9Cf9QNaGau0PCBgyuGSJv5pi0",
-    authDomain: "myme-31f3c.firebaseapp.com",
-    projectId: "myme-31f3c",
-    storageBucket: "myme-31f3c.firebasestorage.app",
-    messagingSenderId: "598768810366",
-    appId: "1:598768810366:web:b401c77010102e8988db2f"
+      apiKey: "AIzaSyA3YTGXBA9Cf9QNaGau0PCBgyuGSJv5pi0",
+      authDomain: "myme-31f3c.firebaseapp.com",
+      projectId: "myme-31f3c",
+      storageBucket: "myme-31f3c.firebasestorage.app",
+      messagingSenderId: "598768810366",
+      appId: "1:598768810366:web:b401c77010102e8988db2f"
   };
 
-  // 3. Initialisation des Services
+  // 3. Initialisation
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getFirestore(app);
+
+  console.log("Firebase et GoogleAuth sont prêts sur GitHub Pages !");
+
 
   // Initialisation UNIQUE du Plugin Google (Utilise ton Client ID Web)
   GoogleAuth.initialize({
@@ -209,3 +212,4 @@
 </body>
 
 </html>
+
