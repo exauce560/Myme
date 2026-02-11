@@ -55,12 +55,18 @@
      <p class="h3" style="margin-top: 10px;">@Myme - 2025</p>
 
 <script type="module">
-  // 1. Imports (Le navigateur utilisera l'importmap ci-dessus)
+  // 1. Imports Firebase (OK maintenant)
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
   import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-  // 2. Configuration Firebase
+  // 2. LE PATCH : On crée un GoogleAuth vide pour éviter l'erreur sur GitHub
+  const GoogleAuth = window.GoogleAuth || {
+    initialize: () => console.log("GoogleAuth simulé pour le Web"),
+    signIn: () => Promise.reject("Utilisez l'APK pour la connexion Google")
+  };
+
+  // 3. Configuration Firebase
   const firebaseConfig = {
       apiKey: "AIzaSyA3YTGXBA9Cf9QNaGau0PCBgyuGSJv5pi0",
       authDomain: "myme-31f3c.firebaseapp.com",
@@ -70,14 +76,14 @@
       appId: "1:598768810366:web:b401c77010102e8988db2f"
   };
 
-  // 3. Initialisation
+  // 4. Initialisation
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getFirestore(app);
 
-  console.log("Firebase et GoogleAuth sont prêts sur GitHub Pages !");
+  console.log("Firebase est prêt !");
 
-  // Initialisation UNIQUE du Plugin Google (Utilise ton Client ID Web)
+  // 5. Initialisation du Plugin (ne plantera plus)
   GoogleAuth.initialize({
     clientId: '598768810366-b9irg6kifn0sfp7svd0lfuu7ps34a6ti.apps.googleusercontent.com',
     scopes: ['profile', 'email'],
@@ -200,6 +206,7 @@
 </body>
 
 </html>
+
 
 
 
