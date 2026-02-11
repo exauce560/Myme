@@ -251,18 +251,25 @@
     </nav>
 
 <script type="module">
-    import { initializeApp } from "firebase/app";
-    import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import {
-        initializeFirestore, // <-- On utilise ça à la place de getFirestore
+        initializeFirestore,
         persistentLocalCache,
-        collection, query, onSnapshot,
-        getDoc, doc, enableIndexedDbPersistence,
-        collectionGroup, where
-    } from "firebase/firestore";
+        collection, 
+        query, 
+        onSnapshot,
+        getDoc, 
+        doc,
+        collectionGroup, 
+        where
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // Ton import Capacitor que tu as déjà corrigé
-    import { App } from '@capacitor/app';
+    // 2. PATCH POUR CAPACITOR (Évite l'erreur sur le module '@capacitor/app')
+    const App = window.App || {
+        addListener: () => console.log("App listener simulé sur le Web"),
+        exitApp: () => console.log("Sortie d'app simulée")
+    };
 
 
     const firebaseConfig = {
@@ -637,4 +644,5 @@
 
 </script>
 </body>
+
 </html>
