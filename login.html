@@ -83,30 +83,38 @@
 </div>
 
 <script type="module">
-    import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
-    import { initializeApp } from "firebase/app";
-    import { getAuth, signInWithCredential, GoogleAuthProvider } from "firebase/auth";
+  // 1. UTILISER LES LIENS DIRECTS (Indispensable pour GitHub Pages)
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getAuth, signInWithCredential, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-    // 2. CONFIGURATION FIREBASE
-    const firebaseConfig = {
-        apiKey: "AIzaSyA3YTGXBA9Cf9QNaGau0PCBgyuGSJv5pi0",
-        authDomain: "myme-31f3c.firebaseapp.com",
-        projectId: "myme-31f3c",
-        storageBucket: "myme-31f3c.firebasestorage.app",
-        messagingSenderId: "598768810366",
-        appId: "1:598768810366:web:b401c77010102e8988db2f"
-    };
+  // 2. LE PATCH (Pour éviter l'erreur "GoogleAuth is not defined")
+  const GoogleAuth = window.GoogleAuth || {
+    initialize: () => console.log("GoogleAuth simulé"),
+    signIn: () => Promise.reject("Utilisez l'APK pour Google")
+  };
 
-    // 3. INITIALISATION DES SERVICES
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
+  // 3. CONFIGURATION FIREBASE
+  const firebaseConfig = {
+      apiKey: "AIzaSyA3YTGXBA9Cf9QNaGau0PCBgyuGSJv5pi0",
+      authDomain: "myme-31f3c.firebaseapp.com",
+      projectId: "myme-31f3c",
+      storageBucket: "myme-31f3c.firebasestorage.app",
+      messagingSenderId: "598768810366",
+      appId: "1:598768810366:web:b401c77010102e8988db2f"
+  };
 
-    // Initialisation du Plugin Google avec ton Client ID Web
-    GoogleAuth.initialize({
-        clientId: '598768810366-b9irg6kifn0sfp7svd0lfuu7ps34a6ti.apps.googleusercontent.com',
-        scopes: ['profile', 'email'],
-        grantOfflineAccess: true,
-    });
+  // 4. INITIALISATION DES SERVICES
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  // 5. INITIALISATION DU PLUGIN
+  GoogleAuth.initialize({
+      clientId: '598768810366-b9irg6kifn0sfp7svd0lfuu7ps34a6ti.apps.googleusercontent.com',
+      scopes: ['profile', 'email'],
+      grantOfflineAccess: true,
+  });
+
+  console.log("Cette page est prête sur GitHub !");
 
     // 4. LOGIQUE DOM ET TRADUCTION
     const btnLogin = document.getElementById('btn-login');
@@ -156,4 +164,5 @@
 </script>
 
 </body>
+
 </html>
