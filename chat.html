@@ -340,13 +340,13 @@
 
     <div id="toast"></div>
 <script type="module">
-    import { initializeApp } from "firebase/app";
-    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, deleteDoc, serverTimestamp, updateDoc, getDocs, getDoc, where, arrayUnion, setDoc } from "firebase/firestore";
-    import { getAuth, onAuthStateChanged } from "firebase/auth";
-    import { App } from '@capacitor/app';
-    import { Capacitor } from '@capacitor/core';
-    import { Filesystem } from '@capacitor/filesystem';
-    import { Media } from '@capacitor-community/media';
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { 
+        getFirestore, collection, addDoc, onSnapshot, query, orderBy, 
+        doc, deleteDoc, serverTimestamp, updateDoc, getDocs, getDoc, 
+        where, arrayUnion, setDoc 
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyA3YTGXBA9Cf9QNaGau0PCBgyuGSJv5pi0",
@@ -701,30 +701,46 @@
         // --- 2. TÉLÉCHARGEMENT --- mediaRecorder
     window.downloadImage = async (base64Data) => {
         try {
-            const { Filesystem, Share } = Capacitor.Plugins;
+            // Vérifie si on est sur mobile ou sur PC
+            const isNative = window.Capacitor && window.Capacitor.isNativePlatform();
 
-            // 1. On prépare le fichier dans le cache de l'app (pas besoin de permission pour ça)
-            const fileName = `Myme_Image_${Date.now()}.jpg`;
-            const base64Content = base64Data.includes(',') ? base64Data.split(',')[1] : base64Data;
+            if (isNative) {
+                // --- LOGIQUE TÉLÉPHONE (Android/iOS) ---
+                const { Filesystem, Share } = Capacitor.Plugins;
+                const fileName = `Myme_Image_${Date.now()}.jpg`;
+                const base64Content = base64Data.includes(',') ? base64Data.split(',')[1] : base64Data;
 
-            const result = await Filesystem.writeFile({
-                path: fileName,
-                data: base64Content,
-                directory: 'CACHE'
-            });
+                const result = await Filesystem.writeFile({
+                    path: fileName,
+                    data: base64Content,
+                    directory: 'CACHE'
+                });
 
-            // 2. On ouvre le menu de partage natif avec le fichier
-            // L'utilisateur pourra choisir "Enregistrer sur l'appareil" ou l'envoyer
-            await Share.share({
-                title: "Enregistrer l'image",
-                text: "Sauvegarder mon image Myme",
-                url: result.uri,
-                dialogTitle: "Sauvegarder l'image"
-            });
+                await Share.share({
+                    title: "Enregistrer l'image",
+                    url: result.uri
+                });
+
+            } else {
+                // --- LOGIQUE PC WINDOWS (Navigateur/GitHub Pages) ---
+                const fileName = `Myme_Image_${Date.now()}.jpg`;
+            
+                // On crée un lien invisible pour forcer le téléchargement
+                const link = document.createElement('a');
+                link.href = base64Data;
+                link.download = fileName;
+            
+                // On simule un clic
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            
+                console.log("Image téléchargée sur le PC");
+            }
 
         } catch (e) {
             console.error("Erreur :", e);
-            window.showToast("Impossible d'ouvrir le menu de partage");
+            if (window.showToast) window.showToast("Erreur lors de la sauvegarde");
         }
     };
     // 1. Mets la fonction updateBlockButton SEULE, en dehors des autres
@@ -1360,4 +1376,5 @@
     });
 </script>
 </body>
+
 </html>
