@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Appel - Myme</title>
+    <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Rock+Salt&family=Caveat:wght@400;700&family=Shadows+Into+Light&family=Gochi+Hand&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg: #ffffff; --text: #1c1e21; --gray: #65676b;
+            --myme-blue: #0866ff; --hover-bg: #f2f2f2;
+            --header-bg: #ffffff; --card-border: #f0f2f5;
+            --danger: #ff3b30;
+            --app-font-size: 16px;
+            --app-font-family: 'Segoe UI', sans-serif;
+            --app-radius: 20px;
+            --app-spacing: normal;
+            --app-border-weight: 1px;
+        }
+
+        body.dark-mode {
+            --bg: #18191a; --text: #e4e6eb; --gray: #b0b3b8;
+            --hover-bg: #3a3b3c; --header-bg: #242526; --card-border: #3e4042;
+        }
+
+        body {
+            background-color: var(--bg); color: var(--text);
+            font-family: var(--app-font-family); font-size: var(--app-font-size);
+            letter-spacing: var(--app-spacing);
+            margin: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden;
+            transition: background 0.3s ease;
+        }
+
+        .top-bar {
+            padding: 15px 20px; display: flex; align-items: center; gap: 15px;
+            background: var(--header-bg); border-bottom: var(--app-border-weight) solid var(--card-border);
+            z-index: 10;
+        }
+        .back-btn { background: none; border: none; color: var(--text); cursor: pointer; padding: 5px; display: flex; align-items: center; }
+
+        .content { flex: 1; overflow-y: auto; padding-bottom: 100px; scrollbar-width: none; }
+        .content::-webkit-scrollbar { display: none; }
+
+        .user-item {
+            display: flex; align-items: center; padding: 12px 20px;
+            border-bottom: var(--app-border-weight) solid var(--card-border); cursor: pointer;
+            transition: background 0.2s;
+        }
+        .user-item:active { background: var(--hover-bg); }
+        .avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; background: #eee; border: var(--app-border-weight) solid var(--card-border); }
+        .info { flex: 1; margin-left: 15px; }
+        .info h4 { margin: 0; font-size: 15px; font-weight: 600; font-family: inherit; }
+        .info p { margin: 2px 0 0; font-size: 13px; color: var(--gray); font-family: inherit; }
+
+        #contactModal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg); z-index: 1000; display: none;
+            flex-direction: column; animation: slideUp 0.3s ease-out;
+        }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+        .search-box { padding: 10px 20px; background: var(--header-bg); border-bottom: var(--app-border-weight) solid var(--card-border); }
+        .search-box input {
+            width: 100%; padding: 10px 15px; border-radius: var(--app-radius);
+            border: none; background: var(--hover-bg); color: var(--text);
+            outline: none; font-family: inherit; box-sizing: border-box;
+        }
+
+        .fab {
+            position: fixed; bottom: 85px; right: 20px;
+            width: 56px; height: 56px; background: var(--myme-blue);
+            color: white; border-radius: 50%; display: flex;
+            align-items: center; justify-content: center;
+            box-shadow: 0 4px 15px rgba(8, 102, 255, 0.4);
+            border: none; cursor: pointer; z-index: 100;
+        }
+        header {
+            padding: 12px 15px; display: flex; justify-content: space-between;
+            align-items: center; background: var(--header-bg);
+            border-bottom: var(--app-border-weight) solid var(--card-border); z-index: 10;
+        }
+        .menu-dots {
+            cursor: pointer; padding: 10px; display: flex; flex-direction: column; gap: 3px;
+        }
+        .menu-dots span { width: 4px; height: 4px; background: var(--gray); border-radius: 50%; }
+        #dropdown-menu {
+            position: absolute; top: 60px; right: 15px; background: var(--header-bg);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2); border-radius: 12px;
+            display: none; flex-direction: column; width: 220px; z-index: 1000; padding: 8px 0;
+            border: var(--app-border-weight) solid var(--card-border);
+        }
+        .menu-item { padding: 12px 20px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; color: var(--text); text-decoration: none; }
+        .menu-item:hover { background: var(--hover-bg); }
+
+        .switch { position: relative; display: inline-block; width: 40px; height: 20px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--myme-blue); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        nav {
+            background: var(--header-bg); display: flex; justify-content: space-around;
+            padding: 10px 0; border-top: var(--app-border-weight) solid var(--card-border);
+            position: fixed; bottom: 0; width: 100%; z-index: 10;
+        }
+        #toast {
+            position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
+            background: #323232; color: white; padding: 12px 24px; border-radius: 50px;
+            font-size: 14px; display: none; z-index: 2000;
+        }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--gray); text-decoration: none; font-size: 11px; flex: 1; }
+        .nav-item.active { color: var(--myme-blue); font-weight: bold; }
+        nav svg { width: 24px; height: 24px; fill: currentColor; margin-bottom: 2px; }
+    </style>
+</head>
+<body>
+
+    <div id="toast"></div>
+    <header>
+      <div class="top-bar">
+        <button class="back-btn" onclick="window.history.back()">
+            <i data-lucide="arrow-left"></i>
+        </button>
+        <h2 style="margin:0; font-size: 20px;" data-lang="nav_calls">Appels</h2>
+      </div>
+      <div class="menu-dots" onclick="toggleMenu(event)">
+            <span></span><span></span><span></span>
+      </div>
+      <div id="dropdown-menu">
+        <a href="fond_ecran.html" class="menu-item" data-lang="font">Fond & Style</a>
+        <a href="parametres.html" class="menu-item" data-lang="parameter">Paramètres</a>
+        <div class="menu-item" onclick="event.stopPropagation()">
+            <span data-lang="dark_mode">Mode Sombre</span>
+            <label class="switch">
+                <input type="checkbox" id="theme-switch" onchange="toggleTheme()">
+                <span class="slider"></span>
+            </label>
+        </div>
+        <hr style="border: 0; border-top: 1px solid var(--card-border); margin: 4px 0;">
+        <div class="menu-item" style="color: #ff4d4d;" onclick="logout()" data-lang="logout">Déconnexion</div>
+      </div>
+    </header>
+
+
+    <div class="content" id="callHistory">
+        <p id="emptyMsg" style="text-align:center; color:var(--gray); margin-top:50px;" data-lang="calls-now">Tes appels récents s'afficheront ici.</p>
+    </div>
+
+    <div id="contactModal">
+        <div class="top-bar">
+            <button class="back-btn" onclick="closeContacts()">
+                <i data-lucide="x"></i>
+            </button>
+            <h2 style="margin:0; font-size: 20px;" data-lang="new-calls">Nouvel appel</h2>
+        </div>
+        <div class="search-box">
+            <input type="text" id="contactSearch" placeholder="Rechercher..." oninput="filterContacts()">
+        </div>
+        <div class="content" id="contactList"></div>
+    </div>
+
+    <button class="fab" onclick="openContacts()">
+        <i data-lucide="phone-call"></i>
+    </button>
+
+    <nav>
+        <a href="ACCEUIL.html" class="nav-item">
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.14 2 11.25c0 2.913 1.45 5.503 3.71 7.218.158.119.24.32.21.516l-.37 2.417a.75.75 0 0 0 1.056.79l2.766-1.303a.75.75 0 0 1 .458-.063c.633.14 1.294.215 1.97.215 5.523 0 10-4.14 10-9.25S17.523 2 12 2Z"/></svg>
+            <span data-lang="nav_chats">Discussion</span>
+        </a>
+        <a href="appel.html" class="nav-item active">
+            <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+            <span data-lang="nav_calls">Appels</span>
+        </a>
+        <a href="note.html" class="nav-item">
+            <svg viewBox="0 0 24 24"><path d="M20,2H4C2.9,2,2,2.9,2,4v12c0,1.1,0.9,2,2,2h4l4,4l4-4h4c1.1,0,2-0.9,2-2V4C22,2.9,21.1,2,20,2z" fill="none" stroke="currentColor" stroke-width="2"/><line x1="7" y1="8" x2="17" y2="8" stroke="currentColor" stroke-width="2"/><line x1="7" y1="12" x2="13" y2="12" stroke="currentColor" stroke-width="2"/></svg>
+            <span data-lang="nav_notes">Note</span>
+        </a>
+    </nav>
+
+    <script type="module">
+        import { initializeApp } from "firebase/app";
+
+        // Plus besoin de liens https://www.gstatic.com/...
+        import { getFirestore, collection,
+            getDocs,
+            onSnapshot,
+            query,
+            initializeFirestore,
+            persistentLocalCache,
+            where,
+            orderBy,
+            addDoc,
+            serverTimestamp
+        } from "firebase/firestore";
+
+        import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyA3YTGXBA9Cf9QNaGau0PCBgyuGSJv5pi0",
+            authDomain: "myme-31f3c.firebaseapp.com",
+            projectId: "myme-31f3c",
+            storageBucket: "myme-31f3c.firebasestorage.app",
+            messagingSenderId: "598768810366",
+            appId: "1:598768810366:web:b401c77010102e8988db2f"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = initializeFirestore(app, { experimentalForceLongPolling: true });
+        const auth = getAuth(app);
+
+        let allUsers = [];
+        window.toggleMenu = (e) => {
+            e.stopPropagation();
+            const m = document.getElementById('dropdown-menu');
+            m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
+        };
+        // --- TRADUCTION GLOBALE ---
+        window.applyTranslations = async function() {
+            const currentLang = localStorage.getItem("lang") || "fr";
+            try {
+                const res = await fetch("lang.json");
+                const data = await res.json();
+                if (!data[currentLang]) return;
+
+                document.querySelectorAll("[data-lang]").forEach(el => {
+                    const key = el.getAttribute("data-lang");
+                    const translation = data[currentLang][key];
+                    if (translation) {
+                        if (el.tagName === "INPUT") el.placeholder = translation;
+                        else el.textContent = translation;
+                    }
+                });
+                document.documentElement.lang = currentLang;
+            } catch (error) { console.error("Lang error:", error); }
+        };
+        function syncMymeStyle() {
+            const fs = localStorage.getItem('myme-fsize') || '16px';
+            const ff = localStorage.getItem('myme-ffam') || "'Segoe UI'";
+            const rad = localStorage.getItem('myme-radius') || '25px';
+            const theme = localStorage.getItem('theme');
+
+        // Appliquer les variables CSS
+            document.documentElement.style.setProperty('--app-font-size', fs);
+            document.documentElement.style.setProperty('--app-font-family', ff);
+            document.documentElement.style.setProperty('--app-radius', rad);
+
+        // Gérer le mode sombre
+            if (theme === 'dark') {
+                document.body.classList.add('dark-mode');
+                const ts = document.getElementById('theme-switch');
+                if(ts) ts.checked = true;
+            } else {
+                document.body.classList.remove('dark-mode');
+                const ts = document.getElementById('theme-switch');
+                if(ts) ts.checked = false;
+            }
+        }
+
+        // Appelle syncMymeStyle() dès le début du script module
+        syncMymeStyle();
+
+
+        // --- TOAST PERSONNALISÉ ---
+        window.showToastByLang = async (langKey) => {
+            const currentLang = localStorage.getItem("lang") || "fr";
+            const res = await fetch("lang.json");
+            const data = await res.json();
+            const message = data[currentLang]?.[langKey] || langKey;
+
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 3000);
+        };
+
+        function refreshIcons() { if (typeof lucide !== 'undefined') lucide.createIcons(); }
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                const q = query(collection(db, "calls"), where("participants", "array-contains", user.uid), orderBy("timestamp", "desc"));
+                onSnapshot(q, (snapshot) => {
+                    const container = document.getElementById('callHistory');
+                    const emptyMsg = document.getElementById('emptyMsg');
+
+                    container.querySelectorAll('.user-item').forEach(el => el.remove());
+
+                    if (snapshot.empty) {
+                        emptyMsg.style.display = 'block';
+                    } else {
+                        emptyMsg.style.display = 'none';
+                        snapshot.forEach(docSnap => {
+                            // ON PASSE L'UID DE L'UTILISATEUR CONNECTÉ ICI
+                            renderHistoryItem(docSnap.data(), auth.currentUser.uid);
+                        });
+                    }
+                    refreshIcons();
+                });
+            } else {
+                window.location.href = "authent.html";
+            }
+        });
+
+        function renderHistoryItem(call, currentUid) {
+            const container = document.getElementById('callHistory');
+            const div = document.createElement('div');
+            div.className = 'user-item';
+
+            // Si c'est moi qui ai lancé l'appel
+            const isOutgoing = call.callerId === currentUid;
+            const displayName = isOutgoing ? call.receiverName : call.callerName;
+            const displayPhoto = isOutgoing ? call.receiverPhoto : call.callerPhoto;
+
+            const time = call.timestamp ? new Date(call.timestamp.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
+
+            div.innerHTML = `
+                <img src="${displayPhoto || 'https://ui-avatars.com/api/?name=' + displayName}" class="avatar">
+                <div class="info">
+                        <h4>${displayName}</h4>
+                    <p>
+                        <i data-lucide="${isOutgoing ? 'phone-outgoing' : 'phone-incoming'}" size="12"></i>
+                        ${isOutgoing ? 'Sortant' : 'Entrant'} • ${time}
+                    </p>
+                </div>
+                <i data-lucide="phone" size="18" color="var(--myme-blue)"></i>`;
+            container.appendChild(div);
+        }
+
+        window.closeMenu = () => {
+            const m = document.getElementById('dropdown-menu');
+            if(m) m.style.display = 'none';
+        }
+        window.toggleTheme = () => {
+            const isDark = document.body.classList.toggle('dark-mode');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        };
+
+
+
+        window.openContacts = async () => {
+            document.getElementById('contactModal').style.display = 'flex';
+            const list = document.getElementById('contactList');
+            list.innerHTML = '<p style="text-align:center; padding:20px;" data-lang="loading">Chargement...</p>';
+            applyTranslations();
+
+            try {
+        // 1. Récupérer la liste des contacts de l'utilisateur connecté
+                const userDoc = await getDocs(query(collection(db, "users"), where("__name__", "==", auth.currentUser.uid)));
+                let myContactsIds = [];
+
+                userDoc.forEach(doc => {
+                    myContactsIds = doc.data().contactList || [];
+                });
+
+        // 2. Récupérer tous les utilisateurs
+                const querySnapshot = await getDocs(collection(db, "users"));
+                allUsers = [];
+                list.innerHTML = "";
+
+                querySnapshot.forEach((doc) => {
+                    const u = doc.data();
+            // FILTRE : On n'ajoute que si l'ID est dans la liste des contacts
+                    if (myContactsIds.includes(doc.id)) {
+                        const userData = { id: doc.id, ...u };
+                        allUsers.push(userData);
+                        renderContactRow(userData);
+                    }
+                });
+
+        // Si après filtrage la liste est vide
+                if (allUsers.length === 0) {
+                    list.innerHTML = '<p style="text-align:center; padding:20px;" data-lang="no-contact-yet">Aucun contact enregistré.</p>';
+                    applyTranslations();
+                }
+
+                refreshIcons();
+            } catch (err) {
+                console.error(err);
+                list.innerHTML = '<p style="text-align:center; padding:20px; color:red;">Erreur de chargement.</p>';
+            }
+        };
+
+        function renderContactRow(u) {
+            const list = document.getElementById('contactList');
+            const row = document.createElement('div');
+            row.className = 'user-item';
+            row.onclick = () => makeCall(u, u.id);
+
+            const name = (u.prenom && u.nom) ? `${u.prenom} ${u.nom}` : (u.nom || "Contact Myme");
+            row.innerHTML = `
+                <img src="${u.photoURL || 'https://ui-avatars.com/api/?name=' + name}" class="avatar">
+                <div class="info">
+                    <h4>${name}</h4>
+                    <p data-lang="no-number">${u.telephone || 'Aucun numéro'}</p>
+                </div>
+                <i data-lucide="phone" color="var(--myme-blue)"></i>`;
+            list.appendChild(row);
+            applyTranslations(); // Traduction dynamique
+        }
+
+
+        window.filterContacts = () => {
+            const val = document.getElementById('contactSearch').value.trim().toLowerCase();
+            const list = document.getElementById('contactList');
+            list.innerHTML = "";
+            const filtered = allUsers.filter(u => {
+                const fullName = `${u.prenom || ""} ${u.nom || ""}`.toLowerCase();
+                return fullName.includes(val) || (u.telephone || "").includes(val);
+            });
+            if (filtered.length === 0) {
+                list.innerHTML = '<p style="text-align:center; padding:20px; color:var(--gray);" data-lang="no-contact-found">Aucun contact trouvé.</p>';
+                applyTranslations();
+            } else { filtered.forEach(u => renderContactRow(u)); }
+            refreshIcons();
+        };
+
+        window.makeCall = async (contact, contactId) => {
+            if (!contact.telephone || contact.telephone.trim() === "") {
+                window.showToastByLang('this-contact');
+                return;
+            }
+
+            const myUser = auth.currentUser;
+            // On récupère mes propres infos stockées en local ou dans un état global
+            const myName = localStorage.getItem('myme-user-name') || "Moi";
+            const myPhoto = localStorage.getItem('myme-user-photo') || "";
+
+            const targetName = (contact.prenom && contact.nom) ? `${contact.prenom} ${contact.nom}` : (contact.nom || "Contact");
+
+            try {
+                await addDoc(collection(db, "calls"), {
+                    participants: [myUser.uid, contactId],
+                    callerId: myUser.uid,      // ID de celui qui appelle
+                    callerName: myName,
+                    callerPhoto: myPhoto,
+                    receiverId: contactId,    // ID de celui qui reçoit
+                    receiverName: targetName,
+                    receiverPhoto: contact.photoURL || "",
+                    timestamp: serverTimestamp()
+                });
+                window.location.href = `tel:${contact.telephone}`;
+            } catch (error) {
+                console.error(error);
+                window.location.href = `tel:${contact.telephone}`;
+            }
+        };
+
+        window.closeContacts = () => { document.getElementById('contactModal').style.display = 'none'; };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.syncMymeStyle) window.syncMymeStyle();
+            applyTranslations();
+        });
+    </script>
+</body>
+</html>

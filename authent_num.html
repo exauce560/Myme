@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Authent1</title>
+    <style>
+        /* ... (Tes styles restent les mêmes) ... */
+        body{ font-family:'Century Gothic'; text-align:center; color:#919191; font-size:10px; }
+        .image-num{ display:block; margin: auto; }
+        .fleche-retour { position: absolute; top: 20px; left: 20px; width: 40px; height: 40px; background: none; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; }
+        .fleche-retour::before { content: ''; position: absolute; width: 25px; height: 3px; background-color: #000; border-radius: 2px; }
+        .fleche-retour::after { content: ''; position: absolute; left: 8px; width: 12px; height: 12px; border-left: 3px solid #000; border-bottom: 3px solid #000; transform: rotate(45deg); }
+        .fleche-retour:hover { transform: scale(1.1); background-color: #bcbcbc; }
+        .fleche-retour:hover::before { background-color: #fff; }
+        .fleche-retour:hover::after { border-color: #fff; }
+        .container{ background: white; padding: 30px; border-radius: 8px; width: 100%; max-width: 350px; }
+        .phone-input-wrapper { display:flex; justify-content:center; gap:10px; margin-bottom: 30px; }
+        select, .num-input{ border:none; border-bottom: 2px solid #0866ff; padding: 8px 0; font-size: 18px; outline: none; }
+        .country-select { width:50%; margin-bottom:10px; cursor: pointer; }
+        .prefix{ width: 45px; text-align: center; color: #000; border:none; border-bottom: 2px solid #0866ff; font-size: 18px; }
+        .num-input{ width: 180px; }
+        .btn-next { background-color:#0866ff; color: white; border:none; padding: 10px 20px; border-radius: 3px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
+        .btn-next:hover{ background-color: #0657d8; }
+    </style>
+</head>
+<body>
+
+<button class="fleche-retour" onclick="window.history.back()"></button>
+
+<div class="image-num">
+    <img src="img_num.jpg" width="200" height="200" alt="Illustration">
+</div>
+
+<h1 data-lang="welcome">Bienvenue</h1>
+<p data-lang="enter_phone">Veuillez entrer votre numéro de téléphone</p>
+
+<select class="country-select" id="country" onchange="document.getElementById('prefix-display').value = this.value">
+    <option value="213">Algérie (+213)</option>
+    <option value="226">Burkina Faso (+226)</option>
+    <option value="237">Cameroun (+237)</option>
+    <option value="212">Maroc (+212)</option>
+    <option value="223">Mali (+223)</option>
+    <option value="243">RD Congo (+243)</option>
+    <option value="242">République du congo (+242)</option>
+    <option value="255">Tanzanie (+255)</option>
+    <option value="216">Tunisie (+216)</option>
+</select>
+
+
+<div class="phone-input-wrapper">
+    <div style="display: flex; align-items: center;">
+        <span style="font-size:18px; color: #000;">+</span>
+        <input type="tel" id="prefix-display" class="prefix" value="213" readonly>
+    </div>
+    <input type="tel" id="phone-number" class="num-input" placeholder="Numéro" data-lang="phone_placeholder" maxlength="10">
+</div>
+
+<button class="btn-next" id="btn-submit" >
+    <span data-lang="next">Suivant</span>
+</button>
+
+<p id="error" style="font-weight: bold;"></p>
+
+<script type="module">
+    import { initializeApp } from "firebase/app";
+    import { getAuth, onAuthStateChanged } from "firebase/auth";
+    import {
+        getFirestore, doc, setDoc, getDoc,
+        collection, query, where, getDocs
+    } from "firebase/firestore";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyA3YTGXBA9Cf9QNaGau0PCBgyuGSJv5pi0",
+        authDomain: "myme-31f3c.firebaseapp.com",
+        projectId: "myme-31f3c",
+        storageBucket: "myme-31f3c.firebasestorage.app",
+        messagingSenderId: "598768810366",
+        appId: "1:598768810366:web:b401c77010102e8988db2f"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    const errorDisplay = document.getElementById("error");
+    const phoneInput = document.getElementById('phone-number');
+    const btnSubmit = document.getElementById('btn-submit');
+    const countrySelect = document.getElementById('country');
+
+    // --- 1. VÉRIFICATION AU CHARGEMENT (Redirection automatique) ---
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            const userSnap = await getDoc(doc(db, "users", user.uid));
+            // Si le numéro existe déjà dans son profil, on passe directement à l'accueil
+            if (userSnap.exists() && userSnap.data().telephone) {
+                window.location.href = 'ACCEUIL.html';
+            }
+        } else {
+            window.location.href = 'authent.html';
+        }
+    });
+
+    // Sécurité input
+    phoneInput.addEventListener('input', (e) => {
+        e.target.value = e.target.value.replace(/[^0-9]/g, '');
+    });
+
+    const lang = localStorage.getItem("lang") || "en";
+
+    async function applyTranslations() {
+        try {
+            const res = await fetch("lang.json");
+            const data = await res.json();
+            document.querySelectorAll("[data-lang]").forEach(el => {
+                const key = el.getAttribute("data-lang");
+                if (!data[lang] || !data[lang][key]) return;
+                if (el.tagName === "INPUT") { el.placeholder = data[lang][key]; }
+                else { el.textContent = data[lang][key]; }
+            });
+        } catch (error) { console.error(error); }
+    }
+
+    // --- 2. LOGIQUE DU BOUTON SUIVANT ---
+    btnSubmit.addEventListener('click', async () => {
+        const user = auth.currentUser;
+        let number = phoneInput.value.trim();
+
+        if (number.startsWith('0')) number = number.substring(1);
+        const fullPhoneNumber = "+" + countrySelect.value + number;
+
+        if (number.length < 7) {
+            errorDisplay.textContent = "Numéro trop court";
+            errorDisplay.style.color = "red";
+            return;
+        }
+
+        try {
+            btnSubmit.disabled = true;
+            errorDisplay.textContent = "Vérification...";
+
+            // A. VÉRIFIER SI LE NUMÉRO EXISTE DÉJÀ CHEZ UN AUTRE UTILISATEUR
+            const q = query(collection(db, "users"), where("telephone", "==", fullPhoneNumber));
+            const querySnapshot = await getDocs(q);
+
+            if (!querySnapshot.empty) {
+                // Le numéro est déjà utilisé !
+                errorDisplay.textContent = "Ce numéro est déjà utilisé par un autre compte.";
+                errorDisplay.style.color = "red";
+                btnSubmit.disabled = false;
+                return;
+            }
+
+            // B. SI UNIQUE, ENREGISTRER ET CONTINUER
+            await setDoc(doc(db, "users", user.uid), {
+                uid: user.uid,
+                email: user.email,
+                telephone: fullPhoneNumber,
+                phoneNumber: fullPhoneNumber,
+                updatedAt: new Date()
+            }, { merge: true });
+
+            window.location.href = 'profil.html';
+
+        } catch (e) {
+            console.error(e);
+            errorDisplay.textContent = "Erreur serveur.";
+            btnSubmit.disabled = false;
+        }
+    });
+
+    applyTranslations();
+</script>
+</body>
+</html>

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page d'authent</title>
+    <style>
+        body{ text-align:center; font-family:'Century Gothic'; background-color:#0866ff; color: white; }
+        #connect{ background-color:#0866ff; color:#fff; position:fixed; top:20px; right:4px; padding:10px; border-radius: 50px; border: 2px solid #fff; cursor: pointer; }
+        #connect:hover{ background-color:#0657d8; }
+
+        .fleche-retour { position: absolute; top: 20px; left: 20px; width: 40px; height: 40px; background: none; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .fleche-retour::after { content: ''; width: 12px; height: 12px; border-left: 3px solid #000; border-bottom: 3px solid #000; transform: rotate(45deg); }
+
+        .tout{ display: flex; flex-direction: column; align-items: center; margin-top: 50px; }
+        .tout input{ width: 300px; height: 45px; border-radius: 20px; border: 2px solid white; margin-bottom: 5px; padding: 0 15px; text-align: center; }
+
+        .google-btn{ background-color: white; color:#6b6b6b; border-radius:20px; border:none; width:300px; height:50px; display:flex; align-items: center; justify-content: center; margin: 20px auto; cursor:pointer; box-shadow: 0px 4px 6px rgba(0,0,0,0.1); }
+        .logo-g{ width: 24px; height: 24px; margin-right: 10px; }
+
+        p { font-size: 12px; margin: 5px 0; font-weight: bold; }
+        @media screen and (max-width: 700px){ .tout input, .google-btn{ width: 250px; } }
+    </style>
+</head>
+<body>
+     <button id="connect" data-lang="login">Login</button>
+     <button class="fleche-retour" onclick="window.history.back()"></button>
+
+     <h1>Myme</h1>
+     <img src="img4.jpg" width="120" height="150" style="border-radius: 20px;">
+
+     <div class="tout">
+          <div class="s2">
+            <input type="text" id="name" data-lang="first_name" placeholder="Prénom" maxlength="15">
+            <p id="errorn"></p>
+          </div>
+         <div class="s4">
+            <input type="text" id="post-name" data-lang="last_name" placeholder="Post-nom" maxlength="15">
+            <p id="errorp"></p>
+          </div>
+         <div class="s3">
+            <input type="date" id="naissance">
+            <p id="errord"></p>
+         </div>
+
+         <button type="button" id="google" class="google-btn">
+                <img src="img_google.png" class="logo-g">
+                <span class="btn-text" data-lang="connect-with-google">Continuer avec Google</span>
+         </button>
+
+         <p id="errorconnexion"></p>
+     </div>
+
+     <footer class="h3" style="margin-top: 10px; color: red;" data-lang="about"><a href="download.html" style="color: #d9d9d9; font-size: 14px;" >A propos de l'app</a></footer>
+     <p class="h3" style="margin-top: 10px;">@Myme - 2025</p>
+
+<script type="module">
+  // 1. Imports (Regroupés et propres)
+  import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
+  import { initializeApp } from "firebase/app";
+  import { getAuth, signInWithCredential, GoogleAuthProvider } from "firebase/auth";
+  import { getFirestore, doc, setDoc } from "firebase/firestore";
+
+  // 2. Configuration Firebase
+  const firebaseConfig = {
+    apiKey: "AIzaSyA3YTGXBA9Cf9QNaGau0PCBgyuGSJv5pi0",
+    authDomain: "myme-31f3c.firebaseapp.com",
+    projectId: "myme-31f3c",
+    storageBucket: "myme-31f3c.firebasestorage.app",
+    messagingSenderId: "598768810366",
+    appId: "1:598768810366:web:b401c77010102e8988db2f"
+  };
+
+  // 3. Initialisation des Services
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  // Initialisation UNIQUE du Plugin Google (Utilise ton Client ID Web)
+  GoogleAuth.initialize({
+    clientId: '598768810366-b9irg6kifn0sfp7svd0lfuu7ps34a6ti.apps.googleusercontent.com',
+    scopes: ['profile', 'email'],
+    grantOfflineAccess: true,
+  });
+
+  // 4. Éléments du DOM
+  const btnLoginHeader = document.getElementById('connect');
+  const btnGoogle = document.getElementById('google');
+  const prenom = document.getElementById('name');
+  const post = document.getElementById('post-name');
+  const naissance = document.getElementById('naissance');
+
+  // Messages d'erreur
+  const errn = document.getElementById('errorn');
+  const errp = document.getElementById('errorp');
+  const errd = document.getElementById('errord');
+  const errorcon = document.getElementById('errorconnexion');
+
+  // 5. Système de Traduction
+  async function applyTranslations() {
+    const currentLang = localStorage.getItem("lang") || "fr";
+    try {
+        const res = await fetch("lang.json");
+        const data = await res.json();
+        const dict = data[currentLang];
+
+        document.querySelectorAll("[data-lang]").forEach(el => {
+            const key = el.getAttribute("data-lang");
+            if (dict && dict[key]) {
+                if (el.tagName === "INPUT") {
+                    el.placeholder = dict[key];
+                } else {
+                    el.textContent = dict[key];
+                }
+            }
+        });
+    } catch (e) {
+        console.error("Erreur chargement langues:", e);
+    }
+  }
+
+  // 6. Logique d'Inscription et Connexion Google
+  async function demarrerInscription() {
+      let hasError = false;
+      const regexLettres = /^[a-zA-ZÀ-ÿ\s\-]+$/;
+
+      // Reset des messages d'erreur
+      if(errn) errn.textContent = "";
+      if(errp) errp.textContent = "";
+      if(errd) errd.textContent = "";
+      if(errorcon) errorcon.textContent = "";
+
+      // Validation des champs
+      if (!prenom.value.trim() || !regexLettres.test(prenom.value)) {
+          errn.setAttribute("data-lang", "please_enter_your_name");
+          hasError = true;
+      }
+      if (!post.value.trim() || !regexLettres.test(post.value)) {
+          errp.setAttribute("data-lang", "please_enter_your_name");
+          hasError = true;
+      }
+      if (!naissance.value) {
+          errd.setAttribute("data-lang", "date-inv");
+          hasError = true;
+      }
+
+      if (hasError) {
+          await applyTranslations();
+          return;
+      }
+
+      try {
+          // A. CONNEXION NATIVE (Ouvre la fenêtre Google sur Android)
+          const googleUser = await GoogleAuth.signIn();
+
+          // B. AUTHENTIFICATION FIREBASE (Échange du jeton Google contre accès Firebase)
+          const credential = GoogleAuthProvider.credential(googleUser.authentication.idToken);
+          const result = await signInWithCredential(auth, credential);
+          const user = result.user;
+
+          // C. ENREGISTREMENT DANS FIRESTORE
+          await setDoc(doc(db, "utilisateurs", user.uid), {
+              uid: user.uid,
+              prenom: prenom.value,
+              postNom: post.value,
+              dateNaissance: naissance.value,
+              email: user.email,
+              contactList: [],
+              photo: user.photoURL || "",
+              dateInscription: new Date()
+          });
+
+          // D. REDIRECTION VERS L'ÉTAPE SUIVANTE
+          window.location.href = "authent_num.html";
+
+      } catch (error) {
+          console.error("Erreur détaillée:", error);
+          if(errorcon) {
+            errorcon.textContent = "Code: " + (error.code || "Inconnu") + "|" + error.message;
+            errocon.style.color = "red";
+          }
+      }
+  }
+
+  // 7. Événements
+  if(btnGoogle) {
+      btnGoogle.addEventListener('click', demarrerInscription);
+  }
+
+  if(btnLoginHeader) {
+      btnLoginHeader.addEventListener('click', () => {
+          window.location.href = "login.html";
+      });
+  }
+
+  // Lancement initial
+  applyTranslations();
+</script>
+</body>
+</html>

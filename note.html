@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Note - Myme</title>
+    <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Rock+Salt&family=Caveat:wght@400;700&family=Shadows+Into+Light&family=Gochi+Hand&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #ffffff; --text: #1c1e21; --gray: #65676b;
+            --myme-blue: #0866ff; --hover-bg: #f2f2f2;
+            --header-bg: #ffffff; --card-border: #f0f2f5;
+            --note-grad: linear-gradient(135deg, #0866ff, #00c6ff);
+            --back-btn-color: #1c1e21;
+            /* Variables dynamiques */
+            --app-font-size: 16px;
+            --app-font-family: 'Segoe UI', system-ui, sans-serif;
+            --app-radius: 20px;
+            --app-spacing: normal;
+        }
+
+        body.dark-mode {
+            --bg: #18191a; --text: #e4e6eb; --gray: #b0b3b8;
+            --hover-bg: #3a3b3c; --header-bg: #242526; --card-border: #3e4042;
+            --note-grad: linear-gradient(135deg, #0866ff, #4facfe);
+            --back-btn-color: #e4e6eb;
+        }
+
+        body {
+            background-color: var(--bg); color: var(--text);
+            font-family: var(--app-font-family);
+            font-size: var(--app-font-size);
+            letter-spacing: var(--app-spacing);
+            margin-bottom: 10px;
+            transition: background 0.3s ease;
+            height: 100vh; display: flex; flex-direction: column; overflow: hidden;
+        }
+
+        .brand-container {
+            display: flex; flex-direction: column; align-items: center;
+            margin: 20px 0 10px 0;
+        }
+        .brand-img {
+            width: 100px; height: 100px; object-fit: contain;
+            filter: drop-shadow(0 5px 15px rgba(8, 102, 255, 0.3));
+            animation: bounce 3s infinite ease-in-out;
+        }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+        .fleche-retour {
+            position: fixed; top: 20px; left: 20px; width: 40px; height: 40px;
+            background: var(--bg); border: 1px solid var(--card-border); border-radius: 50%;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: 0.3s; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            color: var(--back-btn-color);
+        }
+
+        .content { flex: 1; padding: 20px; overflow-y: auto; scrollbar-width: none; }
+        .content::-webkit-scrollbar { display: none; }
+
+        h2 { text-align: center; font-size: 24px; font-weight: 800; margin-bottom: 20px; color: var(--myme-blue); font-family: inherit; }
+
+        .publish-card {
+            background: var(--header-bg); border-radius: var(--app-radius);
+            padding: 10px 15px; margin: 0 auto 30px auto;
+            display: flex; align-items: center; gap: 10px;
+            border: 1px solid var(--card-border); max-width: 500px;
+            width: 90%; /* S'adapte à l'écran sur mobile */
+            box-sizing: border-box; /* Crucial : inclut le padding dans la largeur */
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .publish-card input {
+            flex: 1; background: none; border: none;
+            outline: none; color: var(--text); font-size: 15px;
+            padding: 8px; font-family: inherit;
+            min-width: 0; /* Empêche l'input de pousser les bords s'il y a trop de texte */
+            overflow: hidden;
+        }
+
+        .btn-post {
+            background: var(--myme-blue); color: white; border: none;
+            padding: 10px 16px; /* Réduit un peu pour laisser de la place */
+            border-radius: var(--app-radius); font-weight: bold; cursor: pointer; font-family: inherit;
+            white-space: nowrap; /* Empêche le bouton de s'écrire sur deux lignes */
+            flex-shrink: 0; /* Empêche le bouton de s'écraser si l'input grandit */
+        }
+        /* Style pour TA note en haut */
+        .my-note-special {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto 30px auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .my-note-special .note-bubble {
+            width: 85%; /* Plus large que les autres */
+            background: linear-gradient(135deg, #0866ff, #8a3ffc); /* Dégradé différent (violet/bleu) */
+            padding: 20px;
+            font-size: 1.1em;
+            border: 2px solid rgba(255,255,255,0.2);
+            box-shadow: 0 10px 25px rgba(8, 102, 255, 0.4);
+        }
+
+        .my-note-special .avatar {
+            width: 80px;
+            height: 80px;
+            border: 4px solid var(--myme-blue);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .notes-grid {
+            display: flex; overflow-x: auto; overflow-y: hidden; gap: 15px; margin-bottom: 60px; padding: 10px 5px; scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+        }
+        .notes-grid::-webkit-scrollbar { display: none; }
+        .note-item { display: flex; flex-direction: column; align-items: center; flex: 0 0 85px; }
+
+        .note-bubble {
+            background: var(--note-grad); color: white; padding: 12px 14px;
+            border-radius: var(--app-radius);
+            font-size: 0.85em; margin-bottom: 12px;
+            position: relative; word-wrap: break-word; width: 90px;
+            box-shadow: 0 6px 15px rgba(8, 102, 255, 0.25);
+            font-weight: 500; line-height: 1.3;
+            font-family: inherit;
+            display: flex;
+            flex-direction: column; justify-content: center; overflow-wrap: break-word; /* Casse les mots trop longs */
+            word-break: break-word; min-height: 40px;
+        }
+        .note-bubble::after {
+            content: ''; position: absolute; bottom: -8px; left: 50%;
+            transform: translateX(-50%); border-left: 8px solid transparent;
+            border-right: 8px solid transparent; border-top: 8px solid var(--myme-blue);
+        }
+        /* Pour que TA note prenne plus de place et soit centrée */
+        .my-note-special {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        /* La bulle de TA note plus imposante */
+        .my-note-special .note-bubble {
+            width: 50% !important; /* Plus large que les bulles de la grille */
+            max-width: 400px;
+            padding: 20px;
+            background: linear-gradient(135deg, #0866ff, #4facfe); /* Dégradé unique */
+            font-size: 1.1em;
+        }
+
+        .note-reply-btn {
+            position: absolute;
+            bottom: 8px;
+            right: 12px;
+            cursor: pointer;
+            opacity: 0.7;
+        }
+
+        .avatar {
+            width: 70px; height: 70px; border-radius: 50%;
+            object-fit: cover; border: 3px solid var(--bg);
+            box-shadow: 0 0 0 2px var(--myme-blue);
+        }
+        .user-name { font-size: 11px; margin-top: 8px; font-weight: 700; color: var(--text); font-family: inherit; }
+
+        nav {
+            background: var(--header-bg); display: flex; justify-content: space-around;
+            padding: 12px 0; border-top: 1px solid var(--card-border);
+            position: fixed; bottom: 0; width: 100%; z-index: 10;
+            backdrop-filter: blur(10px);
+        }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--gray); text-decoration: none; font-size: 11px; flex: 1; }
+        .nav-item.active { color: var(--myme-blue); font-weight: bold; }
+        nav svg { width: 26px; height: 26px; fill: currentColor; margin-bottom: 4px; }
+        .note-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            margin-top: 5px;
+            opacity: 0.8;
+        }
+
+        /* Style quand la bulle est likée */
+        .is-liked {
+            border: 1px solid #0866ff !important; /* Bordure bleue */
+        }
+
+        .heart-icon {
+            color: #0866ff;
+            font-weight: bold;
+        }
+
+        .reply-link {
+            font-size: 11px;
+            color: #0866ff;
+            margin-top: 5px;
+            text-align: right;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+
+    <button class="fleche-retour" onclick="window.history.back()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+    </button>
+
+    <div class="content">
+        <div class="brand-container">
+            <img src="img_screen.jpg" id="logo-img" alt="Myme Logo" class="brand-img">
+            <h2>Notes</h2>
+        </div>
+        <div class="publish-card">
+            <input type="text" id="note-text" placeholder="Partagez une pensée..." data-lang="share-a-thought" maxlength="60">
+            <button class="btn-post" onclick="postNote()" data-lang="publish">Publier</button>
+        </div>
+        <div id="my-own-note-container"></div>
+
+        <div id="separator-text" style="display:none; font-size: 12px; color: var(--gray); margin: 20px 0 10px 5px; font-weight: bold;" data-lang="recent-notes">Notes récentes</div>
+
+        <div class="notes-grid" id="notes-list"></div>
+    </div>
+    <div id="deleteMenu" style="display:none; position:fixed; z-index:3000; background:var(--card); border:1px solid var(--border); border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.2); padding:5px;">
+        <button id="btnDeleteConfirm" style="background:none; border:none; color:var(--danger); padding:10px 20px; font-weight:bold; cursor:pointer; width:100%; display:flex; align-items:center; gap:8px;">
+            <i data-lucide="trash-2" size="16"></i> <span data-lang="delete-note">Supprimer la note</span>
+        </button>
+    </div>
+
+
+    <nav>
+        <a href="ACCEUIL.html" class="nav-item">
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.14 2 11.25c0 2.913 1.45 5.503 3.71 7.218.158.119.24.32.21.516l-.37 2.417a.75.75 0 0 0 1.056.79l2.766-1.303a.75.75 0 0 1 .458-.063c.633.14 1.294.215 1.97.215 5.523 0 10-4.14 10-9.25S17.523 2 12 2Z"/></svg>
+            <span data-lang="nav_chats">Discuter</span>
+        </a>
+        <a href="appel.html" class="nav-item">
+            <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.28-.28.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+            <span data-lang="nav_calls">Appels</span>
+        </a>
+        <a href="note.html" class="nav-item active">
+            <svg viewBox="0 0 24 24"><path d="M20,2H4C2.9,2,2,2.9,2,4v12c0,1.1,0.9,2,2,2h4l4,4l4-4h4c1.1,0,2-0.9,2-2V4C22,2.9,21.1,2,20,2z" fill="none" stroke="currentColor" stroke-width="2"/><line x1="7" y1="8" x2="17" y2="8" stroke="currentColor" stroke-width="2"/><line x1="7" y1="12" x2="13" y2="12" stroke="currentColor" stroke-width="2"/></svg>
+            <span>Note</span>
+        </a>
+    </nav>
+
+<script type="module">
+    import { initializeApp } from "firebase/app";
+    import { getFirestore, collection, onSnapshot, query, orderBy, setDoc, doc, deleteDoc, serverTimestamp, getDocs, getDoc, updateDoc } from "firebase/firestore";
+    import { getAuth, onAuthStateChanged } from "firebase/auth";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyA3YTGXBA9Cf9QNaGau0PCBgyuGSJv5pi0",
+        authDomain: "myme-31f3c.firebaseapp.com",
+        projectId: "myme-31f3c",
+        storageBucket: "myme-31f3c.firebasestorage.app",
+        messagingSenderId: "598768810366",
+        appId: "1:598768810366:web:b401c77010102e8988db2f"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    async function envoyerPush(targetPlayerId, titre, message) {
+        const apiKey = "os_v2_app_xse37kmadzf5bilygfagjzcppxcke2r3rfoe2jfgdgtqlv72wfn6uwijbxl7rlpfnc4yodwbszlau6jggtk4iv4kfbssmx46p3h2xbi";
+        try {
+            await fetch("https://onesignal.com/api/v1/notifications", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json; charset=utf-8",
+                    "Authorization": "Basic " + apiKey
+                },
+                body: JSON.stringify({
+                    app_id: "bc89bfa9-801e-4bd0-a178-314064e44f7d",
+                    include_player_ids: [targetPlayerId],
+                    headings: {"fr": titre},
+                    contents: {"fr": message},
+                    android_accent_color: "FF0000FF"
+                })
+            });
+        } catch (e) { console.error("Erreur envoi push:", e); }
+    }
+
+    // --- SYNCHRONISATION DU STYLE ET DARK MODE ---
+    function syncMymeStyle() {
+        const fs = localStorage.getItem('myme-fsize') || '16px';
+        const ff = localStorage.getItem('myme-ffam') || "'Segoe UI'";
+        const gh = localStorage.getItem('myme-ghost') || '1';
+        const fi = localStorage.getItem('myme-filter') || 'none';
+        const rad = localStorage.getItem('myme-radius') || '20px';
+        const spc = localStorage.getItem('myme-spacing') || 'normal';
+        const brw = localStorage.getItem('myme-border') || '1px';
+        const theme = localStorage.getItem('theme');
+
+        // Appliquer le Dark Mode si nécessaire
+        if (theme === 'dark') {
+            document.body.classList.add('dark-mode');
+            const logo = document.getElementById('logo-img');
+            if(logo) logo.src = 'img4.jpg';
+        } else {
+            document.body.classList.remove('dark-mode');
+            const logo = document.getElementById('logo-img');
+            if(logo) logo.src = 'img_screen.jpg';
+        }
+
+        document.documentElement.style.setProperty('--app-font-size', fs);
+        document.documentElement.style.setProperty('--app-font-family', ff);
+        document.documentElement.style.setProperty('--app-radius', rad);
+        document.documentElement.style.setProperty('--app-spacing', spc);
+
+        document.body.style.fontSize = fs;
+        document.body.style.fontFamily = ff;
+        document.body.style.opacity = gh;
+        document.body.style.filter = fi;
+        document.body.style.letterSpacing = spc;
+
+        const pubCard = document.querySelector('.publish-card');
+        if(pubCard) pubCard.style.borderWidth = brw;
+    }
+
+    // --- LOGIQUE DE TRADUCTION ---
+    async function applyTranslations() {
+        const currentLang = localStorage.getItem("lang") || "fr";
+        try {
+            const res = await fetch("lang.json");
+            const data = await res.json();
+            if (!data[currentLang]) return;
+
+            document.querySelectorAll("[data-lang]").forEach(el => {
+                const key = el.getAttribute("data-lang");
+                const translation = data[currentLang][key];
+                if (translation) {
+                    if (el.tagName === "INPUT") { el.placeholder = translation; }
+                    else { el.textContent = translation; }
+                }
+            });
+            document.documentElement.lang = currentLang;
+        } catch (error) { console.error("Erreur lang:", error); }
+    }
+
+    // Initialisation
+    syncMymeStyle();
+    applyTranslations();
+
+    // Menu contextuel logic
+    const deleteMenu = document.getElementById('deleteMenu');
+    let currentNoteToDelete = null;
+
+    window.showDeleteMenu = (x, y, noteId) => {
+        currentNoteToDelete = noteId;
+        deleteMenu.style.left = x + "px";
+        deleteMenu.style.top = y + "px";
+        deleteMenu.style.display = "block";
+    };
+
+
+    document.addEventListener('click', () => { deleteMenu.style.display = "none"; });
+
+    document.getElementById('btnDeleteConfirm').onclick = async () => {
+        if (currentNoteToDelete) {
+            try {
+                await deleteDoc(doc(db, "notes", currentNoteToDelete));
+                deleteMenu.style.display = "none";
+            } catch (e) { console.error(e); }
+        }
+    };
+
+    // --- 1. FONCTION LIKE ---
+    window.likeNote = async (noteId) => {
+        const user = auth.currentUser;
+        if (!user) return;
+
+        const noteRef = doc(db, "notes", noteId);
+        const noteSnap = await getDoc(noteRef);
+
+        if (noteSnap.exists()) {
+            let likes = noteSnap.data().likes || [];
+            if (likes.includes(user.uid)) {
+                // Déjà liké -> On enlève le like
+                likes = likes.filter(id => id !== user.uid);
+            } else {
+                // Pas encore liké -> On ajoute
+                likes.push(user.uid);
+            }
+            await updateDoc(noteRef, { likes: likes });
+        }
+    };
+
+    // --- 2. FONCTION RÉPONDRE ---
+    window.replyToNote = (authorId) => {
+        // Redirige vers la page de chat avec l'ID de l'auteur
+        window.location.href = `chat.html?uid=${authorId}`;
+    };
+
+    // --- 3. ENREGISTRER UNE VUE (Appelé automatiquement) ---
+    async function registerView(noteId, authorId) {
+        const user = auth.currentUser;
+        if (!user || user.uid === authorId) return; // On ne compte pas sa propre vue
+
+        const noteRef = doc(db, "notes", noteId);
+        const noteSnap = await getDoc(noteRef);
+
+        if (noteSnap.exists()) {
+            let views = noteSnap.data().views || [];
+            if (!views.includes(user.uid)) {
+                views.push(user.uid);
+                await updateDoc(noteRef, { views: views });
+            }
+        }
+    }
+
+    window.postNote = async () => {
+        const input = document.getElementById('note-text');
+        const text = input.value.trim();
+        if (!text) return;
+
+        const user = auth.currentUser;
+        if (!user) return;
+
+        try {
+            // Enregistrer la note
+            await setDoc(doc(db, "notes", user.uid), {
+                authorId: user.uid,
+                texte: text,
+                createdAt: serverTimestamp()
+            });
+
+            // Récupérer tes infos pour la notification (pour que tes amis sachent qui écrit)
+            const myDoc = await getDoc(doc(db, "users", user.uid));
+            const myData = myDoc.data();
+            const monNom = myData?.prenom || "Friend";
+            const myContacts = myData?.contactList || [];
+
+            // Envoyer la notification aux amis
+            for (const friendId of myContacts) {
+                const friendDoc = await getDoc(doc(db, "users", friendId));
+                const friendData = friendDoc.data();
+
+                if (friendData && friendData.oneSignalPlayerId) {
+                    envoyerPush(
+                        friendData.oneSignalPlayerId,
+                        "Myme Note 📝",
+                        `${monNom} New note` // Corrigé : c'est ton nom ici
+                    );
+                }
+            }
+
+            input.value = "";
+            window.showToast?.("Publish!"); // Si tu as une fonction toast
+        } catch (e) {
+            console.error("Erreur postNote:", e);
+        }
+    };
+
+
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            // 1. Écouter mon profil pour avoir ma liste d'amis
+            const userRef = doc(db, "users", user.uid);
+            onSnapshot(userRef, async (userDoc) => {
+                const userData = userDoc.data();
+                // Sécurité : si contactList n'existe pas, on prend un tableau vide
+                if (userData && userData.contactList === undefined) {
+                    await updateDoc(userRef, { contactList: [] });
+                    return; // Le prochain snapshot s'occupera du reste
+                }
+                const myContacts = userData?.contactList || [];
+                const allowedIds = [...myContacts, user.uid];
+
+                // 2. Écouter les notes (Limitées aux dernières 24h par la logique, mais on charge tout le reste)
+                const q = query(collection(db, "notes"), orderBy("createdAt", "desc"));
+
+                onSnapshot(q, async (snapshot) => {
+                    const list = document.getElementById('notes-list');
+                    const myContainer = document.getElementById('my-own-note-container');
+                    const separator = document.getElementById('separator-text');
+
+                    list.innerHTML = "";
+                    myContainer.innerHTML = "";
+
+                    const maintenant = Date.now();
+                    const uneJourneeEnMs = 24 * 60 * 60 * 1000;
+
+                    let hasOtherNotes = false;
+
+                    // On utilise Promise.all pour charger tous les avatars en même temps (Vitesse ++ )
+                    const notePromises = snapshot.docs.map(async (docNote) => {
+                        const noteData = docNote.data();
+                        const authorId = noteData.authorId;
+
+                        // FILTRE : Est-ce un ami ou moi ?
+                        if (!allowedIds.includes(authorId)) return;
+
+                        // FILTRE : Note de moins de 24h ?
+                        if (!noteData.createdAt || (maintenant - noteData.createdAt.toMillis() > uneJourneeEnMs)) return;
+
+                        const userSnap = await getDoc(doc(db, "users", authorId));
+                        if (!userSnap.exists()) return;
+
+                        const authorData = userSnap.data();
+                        return { id: docNote.id, ...noteData, authorData };
+                    });
+
+                    const validNotes = (await Promise.all(notePromises)).filter(n => n !== undefined);
+
+                    validNotes.forEach(note => {
+                        const isMyNote = (user.uid === note.authorId);
+                        const fullName = `${note.authorData.prenom || ''} ${note.authorData.nom || ''}`.trim();
+                        const photo = note.authorData.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName)}`;
+
+                        const noteHTML = `
+                            <div class="note-bubble">
+                                ${note.texte}
+                                ${!isMyNote ? `
+                                    <div class="note-reply-btn" onclick="replyToNote('${note.authorId}')">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-14c.9 0 1.8.2 2.6.6a8.5 8.5 0 0 1 5.9 9.6z"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                                    </div>` : ''}
+                            </div>
+                            <img src="${photo}" class="avatar">
+                            <span class="user-name">${isMyNote ? "Moi" : fullName}</span>
+                        `;
+
+                        if (isMyNote) {
+                            const myDiv = document.createElement('div');
+                            myDiv.className = "my-note-special";
+                            myDiv.innerHTML = noteHTML;
+                            myContainer.appendChild(myDiv);
+                            setupNoteInteractions(myDiv, user.uid, note.authorId);
+                        } else {
+                            hasOtherNotes = true;
+                            const otherDiv = document.createElement('div');
+                            otherDiv.className = "note-item";
+                            otherDiv.innerHTML = noteHTML;
+                            list.appendChild(otherDiv);
+                            setupNoteInteractions(otherDiv, user.uid, note.authorId);
+                        }
+                    });
+
+                    separator.style.display = hasOtherNotes ? "block" : "none";
+                    syncMymeStyle();
+                });
+            });
+        } else {
+            window.location.href = "authent.html";
+        }
+    });
+
+// Fonction utilitaire pour le menu de suppression (pour plus de clarté)
+    function setupNoteInteractions(container, currentUid, authorId) {
+        let pressTimer;
+        const handlePress = (e) => {
+            if (currentUid !== authorId) return;
+            const x = e.touches ? e.touches[0].clientX : e.clientX;
+            const y = e.touches ? e.touches[0].clientY : e.clientY;
+            pressTimer = setTimeout(() => {
+                window.showDeleteMenu(x, y, authorId);
+                if(window.navigator.vibrate) window.navigator.vibrate(50);
+            }, 700);
+        };
+        container.oncontextmenu = (e) => { if (currentUid === authorId) e.preventDefault(); };
+        container.addEventListener('touchstart', handlePress);
+        container.addEventListener('mousedown', handlePress);
+        container.addEventListener('touchend', () => clearTimeout(pressTimer));
+        container.addEventListener('mouseup', () => clearTimeout(pressTimer));
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Myme - Choisir votre langue</title>
+    <style>
+        body {
+            font-family: 'Century Gothic', sans-serif;
+            font-size: 16px;
+            text-align: center;
+            background-color: #ffffff;
+            color: #4d4d4d;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .image-container {
+            margin-top: 50px;
+            margin-bottom: 20px;
+        }
+
+        .image-container img {
+            width: 200px;
+            height: 200px;
+            object-fit: contain;
+            /* Si l'image est ovale par erreur, décommente la ligne suivante : */
+            /* border-radius: 50%; */
+        }
+
+        .welcome-text {
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        h3 {
+            color: #0866ff;
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        #lang-form {
+            width: 100%;
+            max-width: 300px;
+            text-align: left;
+            display: inline-block;
+        }
+
+        .lang-option {
+            background-color: #f0f2f5;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 10px;
+            display: block;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-weight: bold;
+        }
+
+        .lang-option:hover {
+            background-color: #e4e6eb;
+        }
+
+        .lang-option input {
+            margin-right: 15px;
+            transform: scale(1.2);
+        }
+
+        .btn-next {
+            background-color: #0866ff;
+            color: #ffffff;
+            position: fixed;
+            bottom: 30px;
+            right: 20px;
+            padding: 12px 25px;
+            border-radius: 50px; /* Style bouton pilule moderne */
+            border: none;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(8, 102, 255, 0.3);
+            transition: transform 0.2s, background 0.3s;
+        }
+
+        .btn-next:hover {
+            background-color: #0052d1;
+            transform: translateY(-2px);
+        }
+
+        .btn-next:active {
+            transform: translateY(0);
+        }
+
+        /* --- RESPONSIVE --- */
+        @media screen and (max-width: 480px) {
+            .btn-next {
+                width: calc(100% - 40px);
+                right: 20px;
+                left: 20px;
+                bottom: 20px;
+            }
+            .welcome-text { font-size: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+   <div class="image-container">
+       <img src="img_screen3.jpg" alt="Logo Myme">
+   </div>
+
+   <div class="welcome-text">
+        <p>Welcome to <b>Myme</b>, a messaging app.<br>
+        To continue, please indicate the language you wish to use in the application.</p>
+   </div>
+
+   <h3>Choisissez votre langue / Choose your language</h3>
+
+   <form id="lang-form">
+       <label class="lang-option">
+           <input type="radio" name="lang" value="fr"> Français
+       </label>
+       <label class="lang-option">
+           <input type="radio" name="lang" value="en"> English
+       </label>
+
+       <button type="submit" class="btn-next">Suivant / Next</button>
+   </form>
+
+<script>
+    const form = document.getElementById('lang-form');
+
+    // 1. Charger la langue si elle a déjà été choisie (Clé harmonisée : lang)
+    const savedLang = localStorage.getItem("lang");
+    if (savedLang) {
+        const radio = document.querySelector(`input[name="lang"][value="${savedLang}"]`);
+        if (radio) radio.checked = true;
+    }
+
+    // 2. Gérer la soumission
+    form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const selected = document.querySelector('input[name="lang"]:checked');
+
+        if (selected) {
+            // Mémorise le choix avec la clé "lang"
+            localStorage.setItem("lang", selected.value);
+
+            // Redirige vers la page suivante
+            window.location.href = "authent.html";
+        } else {
+            alert("Veuillez choisir une langue / Please choose a language!");
+        }
+
+    });
+</script>
+
+</body>
+</html>

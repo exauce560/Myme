@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Myme - Chargement</title>
+    <style>
+        /* Empêche le défilement sur la splash screen */
+        html, body {
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+            background-color: #ffffff;
+        }
+
+        body {
+            font-family: 'Century Gothic', sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /* Centre verticalement */
+            align-items: center;     /* Centre horizontalement */
+            text-align: center;
+            animation: fadeIn 1.2s ease-in-out;
+        }
+
+        /* Animation d'apparition */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .logo-main {
+            width: 150px; /* Taille ajustable selon ton image */
+            height: auto;
+            margin-bottom: 10px;
+        }
+
+        .myme-text {
+            font-size: 28px;
+            font-weight: bold;
+            color: #4d4d4d;
+            margin: 0;
+        }
+
+        .footer {
+            position: fixed;
+            bottom: 30px;
+            width: 100px; /* Taille ajustable pour l'image tark.jpg */
+            height: auto;
+            opacity: 0.8;
+        }
+
+        /* Optionnel : Une petite barre de chargement discrète */
+        .loader {
+            width: 30px;
+            height: 30px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #0866ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-top: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="content">
+        <img src="img_screen.jpg" class="logo-main" alt="Logo Myme">
+        <p class="myme-text">Myme</p>
+        <div class="loader"></div> </div>
+
+    <img src="tark.jpg" class="footer" alt="Tark">
+
+<script type="module">
+    import { initializeApp } from "firebase/app";
+    import { getAuth, onAuthStateChanged } from "firebase/auth";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyA3YTGXBA9Cf9QNaGau0PCBgyuGSJv5pi0",
+        authDomain: "myme-31f3c.firebaseapp.com",
+        projectId: "myme-31f3c",
+        storageBucket: "myme-31f3c.firebasestorage.app",
+        messagingSenderId: "598768810366",
+        appId: "1:598768810366:web:b401c77010102e8988db2f"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    const tempsAffichageSplash = 2000;
+
+    // --- STRATÉGIE WHATSAPP (OFFLINE FIRST) ---
+    // On vérifie le stockage local AVANT le timeout pour gagner du temps
+    const localUser = localStorage.getItem("myme_user_session");
+
+    setTimeout(() => {
+        if (localUser) {
+            // L'utilisateur s'est déjà connecté auparavant, on fonce à l'accueil
+            console.log("Session locale trouvée, accès hors-ligne autorisé.");
+            window.location.href = "ACCEUIL.html";
+        } else {
+            // Pas de session locale, on laisse Firebase vérifier ou on va à la langue
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    localStorage.setItem("myme_user_session", JSON.stringify({ uid: user.uid }));
+                    window.location.href = "ACCEUIL.html";
+                } else {
+                    console.log("Pas de session, direction choix langue.");
+                    window.location.href = "langue.html";
+                }
+            });
+        }
+    }, tempsAffichageSplash);
+</script>
+
+</body>
+</html>

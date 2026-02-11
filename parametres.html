@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Paramètres</title>
+    <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Rock+Salt&family=Caveat:wght@400;700&family=Shadows+Into+Light&family=Gochi+Hand&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        :root {
+            --primary: #29bd49;
+            --bg: #F2F2F7;
+            --card: #FFFFFF;
+            --text: #1C1C1E;
+            --muted: #8E8E93;
+            --border: rgba(0,0,0,0.05);
+            --danger: #FF3B30;
+            --success: #34C759;
+            --glass: rgba(255, 255, 255, 0.7);
+            /* Variables dynamiques mises à jour */
+            --app-font-size: 16px;
+            --app-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            --app-radius: 20px;
+            --app-spacing: normal;
+        }
+
+        body.dark-mode {
+            --bg: #000000;
+            --card: #1C1C1E;
+            --text: #FFFFFF;
+            --muted: #8E8E93;
+            --border: rgba(255,255,255,0.1);
+            --glass: rgba(28, 28, 30, 0.8);
+        }
+
+
+        body {
+            margin: 0;
+            font-family: var(--app-font-family);
+            font-size: var(--app-font-size);
+            letter-spacing: var(--app-spacing); /* AJOUT ESPACEMENT */
+            background-color: var(--bg); color: var(--text);
+            transition: background 0.4s ease, font-size 0.2s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .container { width: 100%; max-width: 600px; margin: 0 auto; padding: 20px; box-sizing: border-box; }
+
+        .top-bar {
+            display: flex; align-items: center; justify-content: space-between;
+            position: sticky; top: 0; z-index: 100; padding: 15px 0; background: var(--bg);
+        }
+
+        .back-btn {
+            background: var(--card); border: 1px solid var(--border);
+            color: var(--text); width: 40px; height: 40px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: 0.2s;
+        }
+
+        .status-pill {
+            font-size: 11px; font-weight: 700; padding: 5px 12px; border-radius: 20px;
+            display: flex; align-items: center; gap: 5px; background: var(--glass);
+            border: 1px solid var(--border); backdrop-filter: blur(10px);
+        }
+
+        .profile-card {
+            background: var(--card); border-radius: var(--app-radius); /* MODIFIÉ PAR VAR */
+            padding: 30px;
+            display: flex; flex-direction: column; align-items: center;
+            text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+            margin-bottom: 25px; border: 1px solid var(--border);
+        }
+
+        .avatar-container {
+            width: 100px; height: 100px; border-radius: 35px;
+            background: linear-gradient(135deg, var(--primary), #5AC8FA);
+            position: relative; overflow: hidden;
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 15px; border: 3px solid var(--card);
+        }
+
+        .avatar-img { width: 100%; height: 100%; object-fit: cover; }
+        .avatar-initials { color: white; font-size: 2.5rem; font-weight: 800; text-transform: uppercase; }
+
+        .section-label {
+            font-size: 13px; font-weight: 600; color: var(--muted);
+            text-transform: uppercase; margin: 0 0 10px 15px; letter-spacing: 0.5px;
+        }
+
+        .settings-group {
+            background: var(--card);
+            border-radius: var(--app-radius); /* MODIFIÉ PAR VAR */
+            overflow: hidden; margin-bottom: 25px; border: 1px solid var(--border);
+        }
+        .setting-item { display: flex; align-items: center; padding: 16px 20px; gap: 15px; border-bottom: 1px solid var(--border); transition: 0.2s; }
+        .setting-item:last-child { border-bottom: none; }
+
+        .icon-wrap { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; }
+        .content { flex: 1; }
+        .label-small { font-size: 11px; color: var(--muted); text-transform: uppercase; font-weight: 700; margin: 0; }
+
+        .edit-input {
+            background: transparent; border: none; color: var(--text);
+            font-size: 15px; width: 100%; outline: none; padding: 2px 0;
+            border-bottom: 1px solid transparent; font-family: inherit;
+        }
+        .editing .edit-input { border-bottom-color: var(--primary); color: var(--primary); }
+
+        .photo-btn {
+            font-size: 14px; font-weight: 600; color: var(--primary);
+            background: transparent; border: 1px solid var(--primary);
+            padding: 6px 12px; border-radius: 8px; cursor: pointer; display: none; margin-top: 5px;
+        }
+        .editing .photo-btn { display: inline-block; }
+
+        .switch { width: 44px; height: 24px; background: #D1D1D6; border-radius: 12px; position: relative; transition: 0.3s; }
+        .switch::after { content: ''; position: absolute; width: 20px; height: 20px; background: white; border-radius: 50%; top: 2px; left: 2px; transition: 0.3s; }
+        .active-switch { background: var(--success); }
+        .active-switch::after { left: 22px; }
+
+        .btn-save-float {
+            position: fixed; bottom: 30px; right: 25px;
+            background: var(--primary); color: white; border: none;
+            padding: 15px 25px; border-radius: 30px; font-weight: 700;
+            box-shadow: 0 10px 25px rgba(0, 122, 255, 0.4);
+            display: none; align-items: center; gap: 10px; z-index: 1000;
+        }
+
+        #toast {
+            position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
+            background: #323232; color: white; padding: 12px 24px; border-radius: 50px;
+            font-size: 14px; display: none; z-index: 2000;
+        }
+
+        .spin { animation: rotate 1s linear infinite; }
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body id="appBody">
+
+<div class="container">
+    <div class="top-bar">
+        <button class="back-btn" onclick="window.location.href='ACCEUIL.html'">
+            <i data-lucide="arrow-left" size="20"></i>
+        </button>
+        <div id="netStatus" class="status-pill">
+            <div id="dot" style="width:7px; height:7px; background:var(--muted); border-radius:50%"></div>
+            <span data-lang="sync">Synchronisation...</span>
+        </div>
+    </div>
+
+    <div class="profile-card">
+        <div class="avatar-container">
+            <img id="userImg" class="avatar-img" src="" style="display:none">
+            <span id="avatarTxt" class="avatar-initials">--</span>
+        </div>
+        <h2 id="displayFull" style="margin: 5px 0 2px;" data-lang="loading">Chargement...</h2>
+        <p id="displayEmail" style="margin:0; font-size: 13px; color:var(--muted);">...</p>
+    </div>
+
+    <button id="mainEditBtn" class="btn-save-float" onclick="handleEditSave()">
+        <i data-lucide="save"></i> <span data-lang="save">Sauvegarder</span>
+    </button>
+
+    <div class="section-label" data-lang="personal-info">Informations Personnelles</div>
+    <div class="settings-group" id="groupInfo">
+        <div class="setting-item">
+            <div class="icon-wrap" style="background:#5856D6"><i data-lucide="user" size="18"></i></div>
+            <div class="content">
+                <p class="label-small" data-lang="prenom">Prénom</p>
+                <input type="text" id="inpPrenom" class="edit-input" disabled>
+            </div>
+        </div>
+        <div class="setting-item">
+            <div class="icon-wrap" style="background:#007AFF"><i data-lucide="user-check" size="18"></i></div>
+            <div class="content">
+                <p class="label-small" data-lang="first_name">Nom</p>
+                <input type="text" id="inpNom" class="edit-input" disabled>
+            </div>
+        </div>
+        <div class="setting-item">
+            <div class="icon-wrap" style="background:#AF52DE"><i data-lucide="user-plus" size="18"></i></div>
+            <div class="content">
+                <p class="label-small" data-lang="last_name">Post-Nom</p>
+                <input type="text" id="inpPostnom" class="edit-input" disabled>
+            </div>
+        </div>
+        <div class="setting-item">
+            <div class="icon-wrap" style="background:#FF9500"><i data-lucide="calendar" size="18"></i></div>
+            <div class="content">
+                <p class="label-small" data-lang="birthdate">Date de naissance</p>
+                <input type="date" id="inpDate" class="edit-input" disabled>
+            </div>
+        </div>
+        <div class="setting-item">
+            <div class="icon-wrap" style="background:#5AC8FA"><i data-lucide="camera" size="18"></i></div>
+            <div class="content">
+                <p class="label-small" data-lang="profil-picture">Photo de profil</p>
+                <button class="photo-btn" onclick="document.getElementById('fileInput').click()" data-lang="change-picture">Changer la photo</button>
+                <input type="file" id="fileInput" hidden accept="image/*" onchange="processAndCompressImage(this)">
+            </div>
+        </div>
+        <div class="setting-item">
+            <div class="icon-wrap" style="background:#34C759"><i data-lucide="phone" size="18"></i></div>
+            <div class="content">
+                <p class="label-small" data-lang="phone">Téléphone</p>
+                <input type="tel" id="inpTel" class="edit-input" disabled>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-label" data-lang="apparence">Apparence</div>
+    <div class="settings-group">
+        <div class="setting-item" onclick="openLangModal()" style="cursor:pointer">
+             <div class="icon-wrap" style="background:#FF3B30"><i data-lucide="languages" size="18"></i></div>
+             <div class="content">
+                <h4 data-lang="language-title">Langue app</h4>
+                <p id="currentLangDisplay" style="margin:0; font-size:12px; color:var(--muted)">Français</p>
+             </div>
+             <i data-lucide="chevron-right" size="16" color="#8E8E93"></i>
+        </div>
+        <div class="setting-item" onclick="window.location.href='fond_ecran.html'" style="cursor:pointer">
+            <div class="icon-wrap" style="background:#FF9500"><i data-lucide="image" size="18"></i></div>
+            <div class="content"><h4 data-lang="font-s">Fond d'écran & Style</h4><p style="margin:0; font-size:12px; color:var(--muted)">Police, taille et ambiance</p></div>
+            <i data-lucide="chevron-right" size="16" color="#8E8E93"></i>
+        </div>
+        <div class="section-label">Zone de danger</div>
+        <div class="settings-group">
+            <div class="setting-item" onclick="resetAllStyles()" style="cursor:pointer">
+                <div class="icon-wrap" style="background:#FF9500"><i data-lucide="refresh-ccw" size="18"></i></div>
+                <div class="content">
+                    <h4 data-lang="reset-style">Réinitialiser le style</h4>
+                    <p style="margin:0; font-size:12px; color:var(--muted)">Remettre les couleurs et polices par défaut</p>
+                </div>
+            </div>
+        </div>
+        <div class="setting-item" onclick="toggleDarkModeUI()" style="cursor:pointer">
+            <div class="icon-wrap" style="background:#1C1C1E"><i data-lucide="moon" size="18"></i></div>
+            <div class="content"><h4 data-lang="dark_mode">Mode Sombre</h4><p style="margin:0; font-size:12px; color:var(--muted)" data-lang="eco">Économie de batterie</p></div>
+            <div id="swDark" class="switch"></div>
+        </div>
+    </div>
+
+    <div class="section-label" data-lang="securite">Sécurité & Système</div>
+    <div class="settings-group">
+        <div class="setting-item" onclick="window.location.href='info.html'" style="cursor:pointer">
+            <div class="icon-wrap" style="background:#8E8E93"><i data-lucide="info" size="18"></i></div>
+            <div class="content">
+                <h4 data-lang="about-app" >A propos de l'app</h4>
+                <p style="margin:0; font-size:12px; color:var(--muted)">Version, crédits et infos</p>
+            </div>
+            <i data-lucide="chevron-right" size="16" color="#8E8E93"></i>
+        </div>
+        <div class="setting-item" onclick="shareMymeApp()" style="cursor:pointer">
+            <div class="icon-wrap" style="background:#34C759"><i data-lucide="share-2" size="18"></i></div>
+            <div class="content">
+                <h4 data-lang="invite-friend">Inviter un ami</h4>
+                <p style="margin:0; font-size:12px; color:var(--muted)">Partager le lien de l'application</p>
+            </div>
+            <i data-lucide="chevron-right" size="16" color="#8E8E93"></i>
+        </div>
+        <div id="editTrigger" class="setting-item" onclick="enableEdition()" style="cursor:pointer">
+            <div class="icon-wrap" style="background:#007AFF"><i data-lucide="edit-3" size="18"></i></div>
+            <div class="content"><h4 data-lang="edit-profile">Modifier le profil</h4><p style="margin:0; font-size:12px; color:var(--muted)"  data-lang="update-data">Mettre à jour vos données</p></div>
+            <i data-lucide="chevron-right" size="16" color="#8E8E93"></i>
+        </div>
+        <div class="setting-item" onclick="logout()" style="color:var(--danger); cursor:pointer">
+            <div class="icon-wrap" style="background:var(--danger)"><i data-lucide="log-out" size="18"></i></div>
+            <div class="content"><h4 data-lang="logout">Déconnexion</h4></div>
+        </div>
+    </div>
+
+    <div id="toast">Profil mis à jour !</div>
+</div>
+<div id="langModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:2000; align-items:center; justify-content:center;">
+    <div style="background:var(--card); width:80%; max-width:300px; border-radius:var(--app-radius); padding:20px; text-align:center; box-shadow: 0 20px 40px rgba(0,0,0,0.2);">
+        <h3 style="margin-top:0;" data-lang="language-title">Langue</h3>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+            <button onclick="changeLang('fr')" style="padding:15px; border-radius:12px; border:1px solid var(--border); background:var(--bg); color:var(--text); cursor:pointer; font-weight:600;">Français</button>
+            <button onclick="changeLang('en')" style="padding:15px; border-radius:12px; border:1px solid var(--border); background:var(--bg); color:var(--text); cursor:pointer; font-weight:600;">English</button>
+        </div>
+        <button onclick="closeLangModal()" style="margin-top:15px; background:none; border:none; color:var(--muted); cursor:pointer;" data-lang="cancel">Annuler</button>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "firebase/app";
+    import {
+        getFirestore, doc, onSnapshot, updateDoc, initializeFirestore,
+        persistentLocalCache, persistentMultipleTabManager, collection,
+        query, where, getDocs
+    } from "firebase/firestore";
+    import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyA3YTGXBA9Cf9QNaGau0PCBgyuGSJv5pi0",
+        authDomain: "myme-31f3c.firebaseapp.com",
+        projectId: "myme-31f3c",
+        storageBucket: "myme-31f3c.firebasestorage.app",
+        messagingSenderId: "598768810366",
+        appId: "1:598768810366:web:b401c77010102e8988db2f"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = initializeFirestore(app, {
+        localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
+    });
+    const auth = getAuth(app);
+
+    // --- RENDRE LES OBJETS ET FONCTIONS DISPONIBLES PARTOUT ---
+    window.auth = auth;
+    window.db = db;
+    window.collection = collection;
+    window.query = query;
+    window.where = where;
+    window.getDocs = getDocs;
+
+    window.syncMymeStyle = function() {
+        const fs = localStorage.getItem('myme-fsize') || '16px';
+        const ff = localStorage.getItem('myme-ffam') || "'Segoe UI'";
+        const gh = localStorage.getItem('myme-ghost') || '1';
+        const fi = localStorage.getItem('myme-filter') || 'none';
+        const rad = localStorage.getItem('myme-radius') || '20px';
+        const spc = localStorage.getItem('myme-spacing') || 'normal';
+        const brw = localStorage.getItem('myme-border') || '1px';
+
+        document.documentElement.style.setProperty('--app-font-size', fs);
+        document.documentElement.style.setProperty('--app-font-family', ff);
+        document.documentElement.style.setProperty('--app-radius', rad);
+        document.documentElement.style.setProperty('--app-spacing', spc);
+
+        document.body.style.opacity = gh;
+        document.body.style.filter = fi;
+        document.body.style.fontFamily = ff;
+        document.body.style.letterSpacing = spc;
+
+        document.querySelectorAll('.profile-card, .settings-group').forEach(el => {
+            el.style.borderRadius = rad;
+            el.style.borderWidth = brw;
+        });
+    }
+
+    // Lancement immédiat
+    window.syncMymeStyle();
+
+    window.openLangModal = function() {
+        document.getElementById('langModal').style.display = 'flex';
+    };
+
+    window.closeLangModal = function() {
+        document.getElementById('langModal').style.display = 'none';
+    };
+
+    window.changeLang = async function(newLang) {
+        localStorage.setItem("lang", newLang);
+        const display = document.getElementById('currentLangDisplay');
+        if(display) display.innerText = (newLang === 'fr') ? 'Français' : 'English';
+        window.closeLangModal();
+        if (typeof applyTranslations === "function") await applyTranslations(newLang);
+
+        const toast = document.getElementById('toast');
+        toast.innerText = (newLang === 'fr') ? "Langue modifiée !" : "Language updated !";
+        toast.style.display = 'block';
+        setTimeout(() => { toast.style.display = 'none'; }, 2000);
+    };
+
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            const userRef = doc(db, "users", user.uid);
+            onSnapshot(userRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    window.updateProfileUI(data, user.email);
+                    document.getElementById('inpDate').value = data.dateNaissance || "";
+                    document.getElementById('dot').style.background = 'var(--success)';
+                    document.querySelector('#netStatus span').innerText = "Synchronisé";
+                }
+            });
+        } else {
+            window.location.href = "authent.html";
+        }
+    });
+
+    window.resetAllStyles = () => {
+        if(confirm("Voulez-vous remettre tous les styles par défaut ?")) {
+            const styles = ['myme-fsize', 'myme-ffam', 'myme-ghost', 'myme-filter', 'myme-radius', 'myme-spacing', 'myme-border', 'theme'];
+            styles.forEach(key => localStorage.removeItem(key));
+            window.syncMymeStyle();
+            alert("Styles réinitialisés !");
+            window.location.reload();
+        }
+    };
+
+    window.updateFirebaseProfile = async (newData) => {
+        const user = auth.currentUser;
+        if (user) await updateDoc(doc(db, "users", user.uid), newData);
+    };
+
+    window.logout = async () => {
+        try {
+            await signOut(auth);
+            window.location.href = "authent.html";
+        } catch (error) {
+            localStorage.clear();
+            window.location.href = "authent.html";
+        }
+    };
+</script>
+<script>
+    lucide.createIcons();
+    window.pendingPhotoBase64 = null;
+
+    function processAndCompressImage(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const imgElement = new Image();
+                imgElement.src = e.target.result;
+                imgElement.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const MAX_SIZE = 400;
+                    let width = imgElement.width;
+                    let height = imgElement.height;
+                    if (width > height) {
+                        if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; }
+                    } else {
+                        if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; }
+                    }
+                    canvas.width = width; canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(imgElement, 0, 0, width, height);
+                    const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+                    const preview = document.getElementById('userImg');
+                    preview.src = compressedBase64;
+                    preview.style.display = 'block';
+                    document.getElementById('avatarTxt').style.display = 'none';
+                    window.pendingPhotoBase64 = compressedBase64;
+                };
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    window.updateProfileUI = function(data, email) {
+        if(!document.getElementById('groupInfo').classList.contains('editing')) {
+            document.getElementById('inpPrenom').value = data.prenom || "";
+            document.getElementById('inpNom').value = data.nom || "";
+            document.getElementById('inpPostnom').value = data.postnom || "";
+            document.getElementById('inpTel').value = data.telephone || "";
+            document.getElementById('inpDate').value = data.dateNaissance || ""; // AJOUTÉ ICI
+
+            if(data.photoURL) {
+                const img = document.getElementById('userImg');
+                img.src = data.photoURL;
+                img.style.display = 'block';
+                document.getElementById('avatarTxt').style.display = 'none';
+            } else {
+                handleImgError();
+            }
+        }
+        document.getElementById('displayEmail').innerText = email;
+
+        // CORRECTION LOGIQUE "UTILISATEUR" (SI NOM OU PRÉNOM MANQUE)
+        const full = (data.prenom || data.nom)? `${data.prenom || ''} ${data.nom || ''}`.trim(): "Utilisateur";
+        document.getElementById('displayFull').innerText = full;
+    }
+
+    function handleImgError() {
+        const img = document.getElementById('userImg');
+        const txt = document.getElementById('avatarTxt');
+        img.style.display = 'none';
+        txt.style.display = 'block';
+        const p = document.getElementById('inpPrenom').value.charAt(0) || "";
+        const n = document.getElementById('inpNom').value.charAt(0) || "";
+        txt.innerText = (p + n).toUpperCase() || "U";
+    }
+      // Fonction pour initialiser la langue stockée
+    function initLanguage() {
+        const savedLang = localStorage.getItem('lang') || 'fr';
+        const display = document.getElementById('currentLangDisplay');
+
+        if(display) {
+            display.innerText = savedLang === 'fr' ? 'Français' : 'English';
+        }
+
+    // Appelle ta fonction de traduction existante
+        if (typeof applyTranslations === "function") {
+            applyTranslations(savedLang);
+        }
+    }
+
+    function enableEdition() {
+        document.getElementById('groupInfo').classList.add('editing');
+        document.querySelectorAll('.edit-input').forEach(i => i.disabled = false);
+        document.getElementById('mainEditBtn').style.display = 'flex';
+        document.getElementById('editTrigger').style.opacity = '0.3';
+        document.getElementById('editTrigger').style.pointerEvents = 'none';
+    }
+
+    async function handleEditSave() {
+        const btn = document.getElementById('mainEditBtn');
+        const newTel = document.getElementById('inpTel').value;
+
+        // On récupère les objets globaux créés dans le script module
+        const auth = window.auth;
+        const db = window.db;
+        const currentUserId = auth.currentUser.uid;
+
+        btn.innerHTML = '<i data-lucide="loader" class="spin"></i> <span>Vérification...</span>';
+        lucide.createIcons();
+
+        try {
+            // Utilisation des fonctions Firestore globales
+            const q = window.query(window.collection(db, "users"), window.where("telephone", "==", newTel));
+            const querySnapshot = await window.getDocs(q);
+
+            let dejaPris = false;
+            querySnapshot.forEach((docSnap) => {
+                if (docSnap.id !== currentUserId) {
+                    dejaPris = true;
+                }
+            });
+
+            if (dejaPris) {
+                const toast = document.getElementById('toast');
+                const lang = localStorage.getItem("lang") || "fr";
+
+                try {
+                    const res = await fetch("lang.json");
+                    const data = await res.json();
+                    const msg = data[lang]["error-phone-taken"] || "❌ Ce numéro est déjà utilisé";
+                    toast.innerText = msg;
+                } catch(e) {
+                    toast.innerText = "❌ Numéro déjà utilisé";
+                }
+
+                toast.style.background = "var(--danger)";
+                toast.style.display = 'block';
+                setTimeout(() => {
+                    toast.style.display = 'none';
+                    toast.style.background = "#323232";
+                }, 3000);
+
+                btn.innerHTML = '<i data-lucide="save"></i> <span>Sauvegarder</span>';
+                lucide.createIcons();
+                return;
+            }
+
+            const updateData = {
+                prenom: document.getElementById('inpPrenom').value,
+                nom: document.getElementById('inpNom').value,
+                postnom: document.getElementById('inpPostnom').value,
+                telephone: newTel,
+                phoneNumber: newTel,
+                dateNaissance: document.getElementById('inpDate').value
+            };
+
+            if(window.pendingPhotoBase64) updateData.photoURL = window.pendingPhotoBase64;
+
+            btn.innerHTML = '<i data-lucide="loader" class="spin"></i> <span>Sauvegarde...</span>';
+            lucide.createIcons();
+
+            await window.updateFirebaseProfile(updateData);
+
+            // UI Reset
+            const toast = document.getElementById('toast');
+            toast.style.display = 'block';
+            toast.innerText = "Profil mis à jour !";
+            setTimeout(() => { toast.style.display = 'none'; }, 3000);
+
+            document.getElementById('groupInfo').classList.remove('editing');
+            document.querySelectorAll('.edit-input').forEach(i => i.disabled = true);
+            btn.style.display = 'none';
+            document.getElementById('editTrigger').style.opacity = '1';
+            document.getElementById('editTrigger').style.pointerEvents = 'auto';
+            window.pendingPhotoBase64 = null;
+
+        } catch (e) {
+            console.error(e);
+            alert("Erreur lors de la sauvegarde : " + e.message);
+        } finally {
+            btn.innerHTML = '<i data-lucide="save"></i> <span>Sauvegarder</span>';
+            lucide.createIcons();
+        }
+    }
+
+
+// 2. Fonction de traduction améliorée
+  async function applyTranslations() {
+    // Lit la clé "lang" (utilisée par ton langue.html)
+    const lang = localStorage.getItem("lang") || "fr";
+    try {
+        const res = await fetch("lang.json");
+        const data = await res.json();
+
+        document.querySelectorAll("[data-lang]").forEach(el => {
+            const key = el.getAttribute("data-lang");
+            if (!data[lang] || !data[lang][key]) return;
+
+            if (el.tagName === "INPUT") { el.placeholder = data[lang][key]; }
+            else { el.textContent = data[lang][key]; }
+        });
+    } catch (error) { console.error("Erreur:", error); }
+}
+
+// 3. Écouteur pour changer la langue en temps réel si modifiée ailleurs
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'lang') {
+        initLanguage();
+    }
+    if (e.key === 'myme-fsize' || e.key === 'myme-ffam') {
+        syncMymeStyle();
+    }
+  });
+
+// Appeler au démarrage save
+  document.addEventListener('DOMContentLoaded', () => {
+    syncMymeStyle();
+    initLanguage();
+  });
+
+    function toggleDarkModeUI() {
+        const isDark = document.getElementById('appBody').classList.toggle('dark-mode');
+        document.getElementById('swDark').classList.toggle('active-switch');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    }
+
+    if(localStorage.getItem('theme') === 'dark') {
+        document.getElementById('appBody').classList.add('dark-mode');
+        document.getElementById('swDark').classList.add('active-switch');
+    }
+    applyTranslations();
+  window.shareMymeApp = async function() {
+        const shareData = {
+            title: 'Rejoins-moi sur Myme !',
+            text: 'Salut ! Je t\'invite à tester Myme, une nouvelle application de messagerie personnalisable. Télécharge-la ici :',
+            url: 'https://exauce560.github.io/myme-app/' // Remplace par l'URL réelle de ta page download
+        };
+
+        try {
+            if (navigator.share) {
+                await navigator.share(shareData);
+            } else {
+                // Si le partage natif n'est pas supporté (ex: vieux navigateur)
+                const dummy = document.createElement('input');
+                document.body.appendChild(dummy);
+                dummy.value = shareData.url;
+                dummy.select();
+                document.execCommand('copy');
+                document.body.removeChild(dummy);
+                alert("Lien de téléchargement copié dans le presse-papier !");
+            }
+        } catch (err) {
+            console.log("Erreur de partage :", err);
+        }
+    };
+</script>
+
+</body>
+</html>

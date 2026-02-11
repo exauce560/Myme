@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Connexion - MyMe</title>
+    <style>
+        body {
+            font-family: 'Century Gothic', sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #333;
+        }
+
+        .login-card {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 100%;
+            max-width: 350px;
+        }
+
+        .logo-placeholder {
+            font-size: 24px;
+            font-weight: bold;
+            color: #0866ff;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        h1 { font-size: 20px; margin-bottom: 10px; }
+        p { font-size: 14px; color: #777; margin-bottom: 30px; }
+
+        .btn-google {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: white;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .btn-google:hover { background: #f9f9f9; border-color: #bbb; }
+        .btn-google img { width: 20px; }
+
+        /* Ton bouton retour conservé */
+        .fleche-retour {
+            position: absolute; top: 20px; left: 20px; width: 40px; height: 40px;
+            background: none; border: none; border-radius: 50%; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;
+        }
+        .fleche-retour::before { content: ''; position: absolute; width: 20px; height: 3px; background-color: #000; }
+        .fleche-retour::after { content: ''; position: absolute; left: 10px; width: 10px; height: 10px; border-left: 3px solid #000; border-bottom: 3px solid #000; transform: rotate(45deg); }
+        .fleche-retour:hover { background-color: #ddd; }
+    </style>
+</head>
+<body>
+
+<button class="fleche-retour" onclick="window.history.back()"></button>
+
+<div class="login-card">
+    <span class="logo-placeholder">Myme</span>
+    <h1 data-lang="glad">Content de vous revoir !</h1>
+    <p data-lang="connect-you">Connectez-vous pour continuer l'aventure.</p>
+
+    <button class="btn-google" id="btn-login">
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google Logo" >
+        <span data-lang="continue-with">Continuer avec Google</span>
+    </button>
+
+    <p id="error" style="color: red; margin-top: 20px; font-size: 12px;"></p>
+</div>
+
+<script type="module">
+    import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
+    import { initializeApp } from "firebase/app";
+    import { getAuth, signInWithCredential, GoogleAuthProvider } from "firebase/auth";
+
+    // 2. CONFIGURATION FIREBASE
+    const firebaseConfig = {
+        apiKey: "AIzaSyA3YTGXBA9Cf9QNaGau0PCBgyuGSJv5pi0",
+        authDomain: "myme-31f3c.firebaseapp.com",
+        projectId: "myme-31f3c",
+        storageBucket: "myme-31f3c.firebasestorage.app",
+        messagingSenderId: "598768810366",
+        appId: "1:598768810366:web:b401c77010102e8988db2f"
+    };
+
+    // 3. INITIALISATION DES SERVICES
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    // Initialisation du Plugin Google avec ton Client ID Web
+    GoogleAuth.initialize({
+        clientId: '598768810366-b9irg6kifn0sfp7svd0lfuu7ps34a6ti.apps.googleusercontent.com',
+        scopes: ['profile', 'email'],
+        grantOfflineAccess: true,
+    });
+
+    // 4. LOGIQUE DOM ET TRADUCTION
+    const btnLogin = document.getElementById('btn-login');
+    const errorMsg = document.getElementById('error');
+    const lang = localStorage.getItem("lang") || "en";
+
+    async function applyTranslations() {
+        try {
+            const res = await fetch("lang.json");
+            const data = await res.json();
+            document.querySelectorAll("[data-lang]").forEach(el => {
+                const key = el.getAttribute("data-lang");
+                if (!data[lang] || !data[lang][key]) return;
+                el.textContent = data[lang][key];
+            });
+        } catch (error) { console.error("Erreur de chargement des langues:", error); }
+    }
+
+    // 5. CONNEXION NATIVE
+    btnLogin.addEventListener('click', async () => {
+        try {
+            // A. Appel de la fenêtre native Android
+            const googleUser = await GoogleAuth.signIn();
+
+            // B. Conversion du jeton pour Firebase
+            const credential = GoogleAuthProvider.credential(googleUser.authentication.idToken);
+
+            // C. Connexion Firebase
+            const res = await signInWithCredential(auth, credential);
+            const user = res.user; // <-- On récupère l'utilisateur ici !
+
+            console.log("Succès ! ID:", user.uid);
+            localStorage.setItem("myme_user_session", JSON.stringify({
+                uid: user.uid,
+                displayName: user.displayName
+            }));
+            window.location.href = "authent_num.html";
+
+        } catch (error) {
+            console.error("Erreur complète:", error);
+            // Si l'erreur affiche "code 10", vérifie ton SHA-1 dans Firebase
+            errorMsg.innerText = "Erreur: " + (error.message || "Veuillez réessayer");
+        }
+    });
+
+    applyTranslations();
+</script>
+
+</body>
+</html>

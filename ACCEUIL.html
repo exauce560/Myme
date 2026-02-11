@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Myme - Accueil</title>
+    <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Rock+Salt&family=Caveat:wght@400;700&family=Shadows+Into+Light&family=Gochi+Hand&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #ffffff; --text: #1c1e21; --gray: #65676b;
+            --myme-blue: #0866ff; --hover-bg: #f2f2f2;
+            --header-bg: #ffffff; --card-border: #f0f2f5; --card-borde: #000000;
+            --fab-shadow: rgba(8, 102, 255, 0.3);
+            --app-font-size: 16px;
+            --app-font-family: 'Segoe UI';
+            --app-radius: 25px;
+            --app-spacing: normal;
+            --app-border-weight: 1px;
+        }
+
+        body.dark-mode {
+            --bg: #18191a; --text: #e4e6eb; --gray: #b0b3b8;
+            --hover-bg: #3a3b3c; --header-bg: #242526; --card-border: #3e4042;
+            --fab-shadow: rgba(0, 0, 0, 0.4);
+        }
+
+        body {
+            font-family: var(--app-font-family), system-ui, sans-serif;
+            font-size: var(--app-font-size);
+            letter-spacing: var(--app-spacing);
+            background: var(--bg); color: var(--text); margin: 0;
+            display: flex; flex-direction: column; height: 100vh; overflow: hidden;
+            transition: background 0.3s ease;
+        }
+
+        header {
+            padding: 12px 15px; display: flex; justify-content: space-between;
+            align-items: center; background: var(--header-bg);
+            border-bottom: var(--app-border-weight) solid var(--card-border); z-index: 10;
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-avatar-header {
+            width: 38px;
+            height: 35px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: var(--hover-bg);
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        .user-avatar-header:active {
+            transform: scale(0.9); /* Effet de pression */
+            border-color: var(--myme-blue);
+        }
+        #self-online-dot {
+            position: absolute;
+            bottom: 2px;
+            left: 28px; /* Ajusté pour tomber sur le bord de l'avatar */
+            width: 10px;
+            height: 10px;
+            background: #31a24c;
+            border: 2px solid var(--header-bg);
+            border-radius: 50%;
+            z-index: 5;
+        }
+
+        .logo {
+            font-size: 20px; /* Un peu plus petit pour laisser de la place */
+            font-weight: bold;
+            color: var(--text); /* Signal utilise souvent la couleur du texte pour le nom */
+            text-decoration: none;
+        }
+        /* Style pour l'état vide */
+        #empty-state {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 60%;
+            color: var(--gray);
+            text-align: center;
+            padding: 20px;
+        }
+
+        #empty-state svg {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        /* Animation de suppression */
+        .removing {
+            transform: translateX(-100%);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .menu-dots {
+            cursor: pointer; padding: 10px; display: flex; flex-direction: column; gap: 3px;
+        }
+        .menu-dots span { width: 4px; height: 4px; background: var(--gray); border-radius: 50%; }
+
+        /* Dropdown Menu */
+        #dropdown-menu {
+            position: absolute; top: 60px; right: 15px; background: var(--header-bg);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2); border-radius: 12px;
+            display: none; flex-direction: column; width: 220px; z-index: 1000; padding: 8px 0;
+            border: var(--app-border-weight) solid var(--card-border);
+        }
+        .menu-item { padding: 12px 20px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; color: var(--text); text-decoration: none; }
+        .menu-item:hover { background: var(--hover-bg); }
+
+        .switch { position: relative; display: inline-block; width: 40px; height: 20px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--myme-blue); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        /* Search */
+        .search-container { padding: 10px 16px; background: var(--bg); }
+        .search-bar {
+            width: 100%; box-sizing: border-box; padding: 8px 20px;
+            border-radius: var(--app-radius); border: none;
+            background: var(--hover-bg); color: var(--text); outline: none; font-family: inherit;
+        }
+
+        /* Chat List */
+        .chat-list { flex: 1; overflow-y: auto; }
+        .chat-item {
+            display: flex; padding: 16px ; align-items: center; gap: 16px; cursor: pointer;
+            border-bottom: 0.5px solid var(--card-border);
+        }
+        .chat-item:hover { background: var(--hover-bg); }
+
+        .online-indicator {
+            position: absolute; bottom: 2px; right: 2px;
+            width: 12px; height: 12px; background: #31a24c;
+            border: 2px solid var(--bg); border-radius: 50%; display: none;
+        }
+        .is-online .online-indicator { display: block; }
+
+        .avatar-note {
+            position: absolute; top: -5px; left: -10px;
+            background: var(--myme-blue); color: white;
+            font-size: 10px; padding: 3px 8px; border-radius: 15px;
+            max-width: 80px; overflow: hidden; text-overflow: ellipsis;
+            white-space: nowrap; border: 2px solid var(--bg); z-index: 2;
+        }
+        .self-badge-container {
+            position: absolute;
+            top: -2px;
+            left: 25px; /* Ajusté pour être en haut à droite de l'avatar */
+            background: #29bd49; /* Orang iOS/Signal */
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+            min-width: 16px;
+            height: 16px;
+            border-radius: 8px;
+            display: none; /* Caché par défaut */
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--header-bg);
+            z-index: 6;
+            padding: 0 4px;
+        }
+
+        /* FAB & Nav */
+        .fab {
+            position: fixed; bottom: 90px; right: 20px; background: var(--myme-blue);
+            color: white; width: 55px; height: 55px; border-radius: 16px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 15px var(--fab-shadow); border: none; cursor: pointer;
+        }
+        nav {
+            background: var(--header-bg); display: flex; justify-content: space-around;
+            padding: 12px 0 25px 0; border-top: 1px solid var(--card-border);
+        }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--gray); text-decoration: none; font-size: 11px; flex: 1; }
+        .nav-item.active { color: var(--myme-blue); font-weight: bold; }
+        nav svg { width: 24px; height: 24px; fill: currentColor; margin-bottom: 4px; }
+    </style>
+</head>
+<body onclick="closeMenu()">
+
+<header>
+    <div class="header-left">
+        <div style="position: relative; display: flex;">
+            <img id="headerUserImg" class="user-avatar-header" src="https://ui-avatars.com/api/?name=?" onclick="location.href='parametres.html'">
+            <div id="self-online-dot"></div>
+            <div id="global-unread-badge" class="self-badge-container">0</div>
+        </div>
+        <a href="ACCEUIL.html" class="logo">Myme</a>
+    </div>
+
+    <div class="menu-dots" onclick="toggleMenu(event)">
+        <span></span><span></span><span></span>
+    </div>
+
+    <div id="dropdown-menu">
+        <a href="fond_ecran.html" class="menu-item" data-lang="font">Fond & Style</a>
+        <a href="parametres.html" class="menu-item" data-lang="parameter">Paramètres</a>
+        <div class="menu-item" onclick="event.stopPropagation()">
+            <span data-lang="dark_mode">Mode Sombre</span>
+            <label class="switch">
+                <input type="checkbox" id="theme-switch" onchange="toggleTheme()">
+                <span class="slider"></span>
+            </label>
+        </div>
+        <hr style="border: 0; border-top: 1px solid var(--card-border); margin: 4px 0;">
+        <div class="menu-item" style="color: #ff4d4d;" onclick="logout()" data-lang="logout">Déconnexion</div>
+    </div>
+</header>
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignal.js" async></script>
+
+    <div class="search-container">
+        <input type="text" class="search-bar" id="search-input" placeholder="Rechercher..." data-lang="search_placeholder">
+    </div>
+
+    <div class="chat-list" id="chat-container">
+        </div>
+
+    <div id="empty-state">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+        <p id="empty-text" data-lang="no-chat">Aucune discussion</p>
+    </div>
+    <button class="fab" onclick="location.href='contacts.html'">
+        <svg viewBox="0 0 24 24" width="28" height="28" fill="white"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+    </button>
+
+    <nav>
+        <a href="ACCEUIL.html" class="nav-item active">
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.14 2 11.25c0 2.913 1.45 5.503 3.71 7.218.158.119.24.32.21.516l-.37 2.417a.75.75 0 0 0 1.056.79l2.766-1.303a.75.75 0 0 1 .458-.063c.633.14 1.294.215 1.97.215 5.523 0 10-4.14 10-9.25S17.523 2 12 2Z"/></svg>
+            <span data-lang="nav_chats">Discussion</span>
+        </a>
+        <a href="appel.html" class="nav-item">
+            <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+            <span data-lang="nav_calls">Appels</span>
+        </a>
+        <a href="note.html" class="nav-item">
+            <svg viewBox="0 0 24 24"><path d="M20,2H4C2.9,2,2,2.9,2,4v12c0,1.1,0.9,2,2,2h4l4,4l4-4h4c1.1,0,2-0.9,2-2V4C22,2.9,21.1,2,20,2z" fill="none" stroke="currentColor" stroke-width="2"/><line x1="7" y1="8" x2="17" y2="8" stroke="currentColor" stroke-width="2"/><line x1="7" y1="12" x2="13" y2="12" stroke="currentColor" stroke-width="2"/></svg>
+            <span data-lang="nav_notes">Note</span>
+        </a>
+    </nav>
+
+<script type="module">
+    import { initializeApp } from "firebase/app";
+    import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
+    import {
+        initializeFirestore, // <-- On utilise ça à la place de getFirestore
+        persistentLocalCache,
+        collection, query, onSnapshot,
+        getDoc, doc, enableIndexedDbPersistence,
+        collectionGroup, where
+    } from "firebase/firestore";
+
+    // Ton import Capacitor que tu as déjà corrigé
+    import { App } from '@capacitor/app';
+
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyA3YTGXBA9Cf9QNaGau0PCBgyuGSJv5pi0",
+        authDomain: "myme-31f3c.firebaseapp.com",
+        projectId: "myme-31f3c",
+        storageBucket: "myme-31f3c.firebasestorage.app",
+        messagingSenderId: "598768810366",
+        appId: "1:598768810366:web:b401c77010102e8988db2f"
+    };
+    async function setupBackButton() {
+        await App.addListener('backButton', ({ canGoBack }) => {
+            if (window.location.pathname.includes('ACCEUIL.html') || !canGoBack) {
+                App.exitApp();
+            }else {
+                window.history.back();
+            }
+        });
+    }
+    setupBackButton();
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    const db = initializeFirestore(app, {
+        localCache: persistentLocalCache()
+    });
+
+    // --- VARIABLES DE CONTRÔLE ---
+    let isRendering = false; // Le "verrou" pour éviter les doublons
+
+    window.toggleMenu = (e) => {
+        e.stopPropagation();
+        const m = document.getElementById('dropdown-menu');
+        m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
+    };
+    (function applyStyleImmediately() {
+        const fs = localStorage.getItem('myme-fsize') || '16px';
+        const ff = localStorage.getItem('myme-ffam') || "'Segoe UI'";
+        const rad = localStorage.getItem('myme-radius') || '25px';
+        const theme = localStorage.getItem('theme');
+
+        document.documentElement.style.setProperty('--app-font-size', fs);
+        document.documentElement.style.setProperty('--app-font-family', ff);
+        document.documentElement.style.setProperty('--app-radius', rad);
+
+        if (theme === 'dark') {
+            document.body.classList.add('dark-mode');
+        }
+    })();
+    window.closeMenu = () => {
+        const m = document.getElementById('dropdown-menu');
+        if(m) m.style.display = 'none';
+    }
+
+    window.toggleTheme = () => {
+        const isDark = document.body.classList.toggle('dark-mode');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    };
+
+    window.logout = async () => {
+        try {
+            // 1. On déconnecte Firebase
+            await signOut(auth);
+
+            window.location.href = "authent.html";
+        } catch (error) {
+            console.error("Erreur lors de la déconnexion:", error);
+            // Au cas où Firebase bug, on force quand même le nettoyage local
+            localStorage.clear();
+            window.location.href = "authent.html";
+        }
+    };
+    // Exemple à adapter dans ta page ACCEUIL.html
+    function ecouterMessagesNonLus(monUid, contactUid, elementBadgeId) {
+        const chatId = monUid < contactUid ? `${monUid}_${contactUid}` : `${contactUid}_${monUid}`;
+        const q = query(
+            collection(db, "chats", chatId, "messages"),
+            where("receiverId", "==", monUid),
+            where("read", "==", false)
+        );
+
+        onSnapshot(q, (snap) => {
+            const count = snap.size;
+            const badge = document.getElementById(elementBadgeId);
+            if (count > 0) {
+                badge.textContent = count;
+                badge.style.display = "flex"; // Affiche le rond rouge
+            } else {
+                badge.style.display = "none"; // Cache si tout est lu
+            }
+        });
+    }
+    function ecouterTotalMessagesNonLus(myUid) {
+        const qGlobal = query(
+            collectionGroup(db, "messages"),
+            where("receiverId", "==", myUid),
+            where("read", "==", false)
+        );
+
+        onSnapshot(qGlobal, (snap) => {
+            const total = snap.size;
+            const globalBadge = document.getElementById('global-unread-badge');
+
+            if (total > 0) {
+                globalBadge.textContent = total > 15 ? "15+" : total;
+                globalBadge.style.display = "flex";
+            } else {
+                globalBadge.style.display = "none";
+            }
+        });
+    }
+
+// Dans ton bloc <script type="module">
+
+    function syncMymeStyle() {
+        const fs = localStorage.getItem('myme-fsize') || '16px';
+        const ff = localStorage.getItem('myme-ffam') || "'Segoe UI'";
+        const rad = localStorage.getItem('myme-radius') || '25px';
+        const theme = localStorage.getItem('theme');
+
+    // Appliquer les variables CSS
+        document.documentElement.style.setProperty('--app-font-size', fs);
+        document.documentElement.style.setProperty('--app-font-family', ff);
+        document.documentElement.style.setProperty('--app-radius', rad);
+
+    // Gérer le mode sombre
+        if (theme === 'dark') {
+            document.body.classList.add('dark-mode');
+            const ts = document.getElementById('theme-switch');
+            if(ts) ts.checked = true;
+        } else {
+            document.body.classList.remove('dark-mode');
+            const ts = document.getElementById('theme-switch');
+            if(ts) ts.checked = false;
+        }
+    }
+
+// Appelle syncMymeStyle() dès le début du script module
+    syncMymeStyle();
+
+    onAuthStateChanged(auth, (user) => {
+        if (!user) {
+            window.location.href = "authent.html";
+            return;
+        }
+        ecouterTotalMessagesNonLus(user.uid);
+        // --- AJOUT : Charger la photo dans le header ---
+        onSnapshot(doc(db, "users", user.uid), (snap) => {
+            if (snap.exists()) {
+                const userData = snap.data();
+                const headerImg = document.getElementById('headerUserImg');
+                const onlineDot = document.getElementById('self-online-dot');
+
+                // Mise à jour de la photo
+                if (userData.photoURL) {
+                    headerImg.src = userData.photoURL;
+                } else {
+                    headerImg.src = `https://ui-avatars.com/api/?name=${userData.prenom}+${userData.nom}&background=0866ff&color=fff`;
+                }
+
+                // Gestion du point de statut (optionnel : l'afficher seulement si on est connecté)
+                if (userData.isOnline) {
+                    onlineDot.style.display = 'block';
+                } else {
+                    onlineDot.style.display = 'none';
+                }
+            }
+        });
+        syncMymeStyle();
+        applyTranslations();
+        // On utilise OneSignal (Gratuit)
+        initialiserNotifications(user.uid);
+        initMessagesListener(user.uid);
+    });
+    async function initialiserNotifications(userUid) {
+        window.OneSignal = window.OneSignal || [];
+        OneSignal.push(async function() {
+            try {
+                await OneSignal.init({
+                    appId: "bc89bfa9-801e-4bd0-a178-314064e44f7d",
+                    notifyButton: { enable: false },
+                });
+
+                const deviceState = await OneSignal.getDeviceState();
+                if (deviceState && deviceState.userId) {
+                    const { updateDoc, doc } = await import("https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js");
+                    await updateDoc(doc(db, "users", userUid), {
+                        oneSignalPlayerId: deviceState.userId,
+                        lastUpdate: new Date().getTime()
+                    });
+                }
+            } catch (err) {
+                console.error("OneSignal Error:", err);
+            }
+        });
+    }
+
+    // --- FONCTION POUR ENVOYER (À utiliser dans chat.html ou quand tu crées une note) ---
+    async function envoyerPush(targetPlayerId, titre, message) {
+        const apiKey = "os_v2_app_xse37kmadzf5bilygfagjzcppxcke2r3rfoe2jfgdgtqlv72wfn6uwijbxl7rlpfnc4yodwbszlau6jggtk4iv4kfbssmx46p3h2xbi";
+
+        await fetch("https://onesignal.com/api/v1/notifications", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json; charset=utf-8",
+                "Authorization": "Basic " + apiKey
+            },
+            body: JSON.stringify({
+                app_id: "bc89bfa9-801e-4bd0-a178-314064e44f7d",
+                include_player_ids: [targetPlayerId],
+                headings: {"fr": titre},
+                contents: {"fr": message},
+                android_accent_color: "FF0000FF",
+                priority: 10 // Pour que ça arrive instantanément
+            })
+        });
+    }
+
+    function initMessagesListener(myUid) {
+        const qNew = query(collectionGroup(db, "messages"), where("receiverId", "==", myUid));
+
+        // On écoute les changements
+        onSnapshot(qNew, () => {
+            renderList();
+        }, (error) => {
+            console.warn("Index manquant ou erreur :", error);
+            renderList(); // On essaie quand même d'afficher le local
+        });
+    }
+    window.deleteChat = (id, event) => {
+        event.stopPropagation(); // Empêche d'ouvrir le chat
+
+        const confirmDelete = confirm("Voulez-vous supprimer cette discussion ?");
+        if (confirmDelete) {
+            const item = document.getElementById(`item-${id}`);
+            item.classList.add('removing');
+
+            setTimeout(() => {
+                localStorage.removeItem(`chat_history_${id}`);
+                localStorage.removeItem(`cache_${id}`);
+                renderList(); // Rafraîchit la liste
+            }, 500);
+        }
+    };
+
+    // Remplace toute ta fonction renderList() par celle-ci :
+    async function renderList() {
+        if (isRendering) return;
+        isRendering = true;
+
+        const container = document.getElementById('chat-container');
+        const emptyState = document.getElementById('empty-state');
+        const myUid = auth.currentUser?.uid;
+
+        if (!myUid) { isRendering = false; return; }
+
+        const localKeys = Object.keys(localStorage).filter(k => k.startsWith('chat_history_'));
+        let uniqueIds = localKeys.map(k => k.replace('chat_history_', ''));
+
+        // GESTION DE L'AFFICHAGE VIDE
+        if (uniqueIds.length === 0) {
+            container.innerHTML = "";
+            emptyState.style.display = "flex";
+            isRendering = false;
+            return;
+        } else {
+            emptyState.style.display = "none";
+        }
+
+        uniqueIds.sort((a, b) => {
+            const histA = JSON.parse(localStorage.getItem(`chat_history_${a}`) || "[]");
+            const histB = JSON.parse(localStorage.getItem(`chat_history_${b}`) || "[]");
+            const getT = (h) => {
+                if (h.length === 0) return 0;
+                const last = h[h.length - 1];
+                return last.createdAt?.seconds || new Date(last.createdAt).getTime() / 1000 || 0;
+            };
+            return getT(histB) - getT(histA);
+        });
+
+        const fragment = document.createDocumentFragment();
+
+        for (const id of uniqueIds) {
+            const history = JSON.parse(localStorage.getItem(`chat_history_${id}`) || "[]");
+            const localCache = JSON.parse(localStorage.getItem(`cache_${id}`) || "{}");
+            const lastMsg = history.length > 0 ? history[history.length - 1] : { text: "...", type: "text" };
+            const timeStr = lastMsg.createdAt ? formatLastMsgTime(lastMsg.createdAt) : "";
+
+            const item = document.createElement('div');
+            item.className = `chat-item`;
+            item.id = `item-${id}`;
+
+            // --- GESTION DU CLIC LONG (Suppression) ---
+            let timer;
+            item.onmousedown = item.ontouchstart = () => {
+                timer = setTimeout(() => window.deleteChat(id, event), 800);
+            };
+            item.onmouseup = item.ontouchend = () => clearTimeout(timer);
+
+            item.onclick = () => window.location.href = `chat.html?uid=${id}`;
+
+            item.innerHTML = `
+                <div style="position:relative; width:55px; height:55px; flex-shrink:0;">
+                    <img id="img-${id}" src="${localCache.photo || 'https://ui-avatars.com/api/?name=?'}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">
+                    <div class="online-indicator" id="online-${id}"></div>
+                </div>
+                <div style="flex:1; overflow:hidden; margin-left:12px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <strong id="name-${id}" class="contact-name" style="color:var(--text); font-size:15px;">${localCache.nom || "Utilisateur"}</strong>
+                        <span style="font-size:11px; color:var(--gray);">${timeStr}</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+                        <p style="margin:0; font-size:13px; color:var(--gray); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1;">
+                            ${lastMsg.type === 'voice' ? '🎤 Vocal' : (lastMsg.type === 'image' ? '📷 Photo' : (lastMsg.text || ''))}
+                        </p>
+                        <span id="badge-${id}" style="background:var(--myme-blue); color:white; border-radius:50%; min-width:18px; height:18px; display:none; align-items:center; justify-content:center; font-size:10px; font-weight:bold; padding:2px; margin-left:8px;">0</span>
+                    </div>
+                </div>
+            `;
+            fragment.appendChild(item);
+
+            getDoc(doc(db, "users", id)).then(snap => {
+                if (snap.exists()) {
+                    const d = snap.data();
+                    const nameEl = document.getElementById(`name-${id}`);
+                    const imgEl = document.getElementById(`img-${id}`);
+                    if(nameEl) nameEl.textContent = d.prenom + " " + (d.nom || "");
+                    if(imgEl) imgEl.src = d.photoURL || imgEl.src;
+                    if(d.isOnline) document.getElementById(`item-${id}`)?.classList.add('is-online');
+                    localStorage.setItem(`cache_${id}`, JSON.stringify({ nom: d.prenom, photo: d.photoURL }));
+                }
+            });
+
+            ecouterMessagesNonLus(myUid, id, `badge-${id}`);
+        }
+
+        container.innerHTML = "";
+        container.appendChild(fragment);
+        isRendering = false;
+    }
+
+    async function applyTranslations() {
+        const lang = localStorage.getItem("lang") || "fr";
+        try {
+            const res = await fetch("lang.json");
+            if (res.ok) {
+                const trans = await res.json();
+                document.querySelectorAll("[data-lang]").forEach(el => {
+                    const key = el.getAttribute("data-lang");
+                    if (trans[lang]?.[key]) {
+                        if (el.tagName === "INPUT") el.placeholder = trans[lang][key];
+                        else el.textContent = trans[lang][key];
+                    }
+                });
+            }
+        } catch(e) {}
+    }
+    function formatLastMsgTime(timestamp) {
+        if (!timestamp) return "";
+        const date = timestamp.seconds ? new Date(timestamp.seconds * 1000) : new Date(timestamp);
+        return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    document.getElementById('search-input').oninput = (e) => {
+        const term = e.target.value.toLowerCase();
+        document.querySelectorAll('.chat-item').forEach(item => {
+            const name = item.querySelector('.contact-name').textContent.toLowerCase();
+            item.style.display = name.includes(term) ? 'flex' : 'none';
+        });
+    };
+
+</script>
+</body>
+</html>
