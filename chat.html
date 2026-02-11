@@ -347,6 +347,10 @@
         where, arrayUnion, setDoc 
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { onDisconnect, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+// Note : Le statut de présence utilise souvent Realtime Database car c'est plus rapide et moins cher que Firestore pour ça.
+
+
 
     const firebaseConfig = {
         apiKey: "AIzaSyA3YTGXBA9Cf9QNaGau0PCBgyuGSJv5pi0",
@@ -428,7 +432,19 @@
 
     // Lancement de la fonction
     requestAndroidPermissions();
+    // VERSION SIMPLE (Firestore uniquement)
+    function setPresence(uid) {
+        const userRef = doc(db, "users", uid);
 
+        // 1. On passe "En ligne" dès qu'on charge la page
+        updateDoc(userRef, { isOnline: true });
+
+        // 2. Problème : Comment passer "Hors ligne" quand on ferme l'appli ?
+        // Sur le Web, on utilise cet événement :
+        window.addEventListener('beforeunload', () => {
+            updateDoc(userRef, { isOnline: false });
+        });
+    }
     // Appelé quand on clique sur "Répondre" dans le menu
     window.prepareReply = () => {
         const history = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
@@ -802,23 +818,43 @@
 
     // Fonction helper pour mettre à jour l'interface
     function updateTargetUI(data) {
+        console.log("Données reçues pour l'UI :", data);
+
         const fullName = data.prenom + " " + (data.nom || "");
         const photo = data.photoURL || `https://ui-avatars.com/api/?name=${data.prenom}`;
 
-        document.getElementById('target-name').textContent = fullName;
-        document.getElementById('target-avatar').src = photo;
-        document.getElementById('profile-name-full').textContent = fullName;
-        document.getElementById('profile-img-full').src = photo;
-        document.getElementById('profile-phone-full').textContent = data.telephone || "Non renseigné";
+    // Fonction interne pour mettre à jour un texte sans faire planter le script
+        const safeText = (id, value) => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = value;
+            else console.warn(`Élément introuvable : ${id}`);
+        };
 
+        // Fonction interne pour mettre à jour une image
+        const safeSrc = (id, value) => {
+            const el = document.getElementById(id);
+            if (el) el.src = value;
+        };
+
+        // Mise à jour des infos de base
+        safeText('target-name', fullName);
+        safeSrc('target-avatar', photo);
+        safeText('profile-name-full', fullName);
+        safeSrc('profile-img-full', photo);
+        safeText('profile-phone-full', data.telephone || "Non renseigné");
+
+        // Gestion de la présence
         const dot = document.getElementById('presence-dot');
         const text = document.getElementById('presence-text');
-        if(data.isOnline) {
-            dot.className = "status-dot online";
-            text.textContent = "En ligne";
-        } else {
-            dot.className = "status-dot offline";
-            text.textContent = "Hors ligne";
+
+        if (dot && text) {
+            if (data.isOnline === true) { // Vérification stricte
+                dot.className = "status-dot online";
+                text.textContent = "En ligne";
+            } else {
+                dot.className = "status-dot offline";
+                text.textContent = "Hors ligne";
+            }
         }
     }
 
@@ -1395,6 +1431,7 @@
 </body>
 
 </html>
+
 
 
 
