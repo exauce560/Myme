@@ -52,13 +52,6 @@
             position: sticky; top: 0; z-index: 100; padding: 15px 0; background: var(--bg);
         }
 
-        .back-btn {
-            background: var(--card); border: 1px solid var(--border);
-            color: var(--text); width: 40px; height: 40px; border-radius: 12px;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: 0.2s;
-        }
-
         .status-pill {
             font-size: 11px; font-weight: 700; padding: 5px 12px; border-radius: 20px;
             display: flex; align-items: center; gap: 5px; background: var(--glass);
@@ -164,9 +157,6 @@
 
 <div class="container">
     <div class="top-bar">
-        <button class="back-btn" onclick="window.location.href='ACCEUIL.html'">
-            <i data-lucide="arrow-left" size="20"></i>
-        </button>
         <div id="netStatus" class="status-pill">
             <div id="dot" style="width:7px; height:7px; background:var(--muted); border-radius:50%"></div>
             <span data-lang="sync">Synchronisation...</span>
@@ -683,4 +673,5 @@
 </body>
 
 </html>
+
 
