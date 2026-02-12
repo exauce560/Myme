@@ -5,85 +5,121 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Myme - Choisir votre langue</title>
     <style>
+        :root {
+            --myme-blue: #0866ff;
+            --myme-bg-light: #f0f2f5;
+            --text-dark: #4d4d4d;
+        }
+
         body {
             font-family: 'Century Gothic', sans-serif;
-            font-size: 16px;
-            text-align: center;
-            background-color: #ffffff;
-            color: #4d4d4d;
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            background-color: var(--myme-blue); /* Fond bleu comme authent.html */
+            color: var(--text-dark);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Conteneur principal style "App Card" */
+        .main-container {
+            display: flex;
+            width: 90%;
+            max-width: 900px;
+            height: 550px;
+            background: white;
+            border-radius: 30px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        /* Côté Visuel (Gauche sur PC) */
+        .visual-side {
+            flex: 1;
+            background-color: var(--myme-bg-light);
             display: flex;
             flex-direction: column;
             align-items: center;
-            min-height: 100vh;
+            justify-content: center;
+            padding: 40px;
+            text-align: center;
         }
 
-        .image-container {
-            margin-top: 50px;
-            margin-bottom: 20px;
-        }
-
-        .image-container img {
+        .visual-side img {
             width: 200px;
             height: 200px;
             object-fit: contain;
-            /* Si l'image est ovale par erreur, décommente la ligne suivante : */
-            /* border-radius: 50%; */
+            margin-bottom: 20px;
+            border-radius: 20px;
         }
 
         .welcome-text {
-            margin-bottom: 30px;
-            line-height: 1.5;
+            font-size: 15px;
+            line-height: 1.6;
+            color: #65676b;
+        }
+
+        /* Côté Interaction (Droite sur PC) */
+        .action-side {
+            flex: 1;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: white;
         }
 
         h3 {
-            color: #0866ff;
-            font-size: 18px;
-            margin-bottom: 20px;
-        }
-
-        #lang-form {
-            width: 100%;
-            max-width: 300px;
-            text-align: left;
-            display: inline-block;
+            color: var(--myme-blue);
+            margin-bottom: 30px;
+            font-size: 22px;
         }
 
         .lang-option {
-            background-color: #f0f2f5;
-            margin: 10px 0;
-            padding: 15px;
-            border-radius: 10px;
-            display: block;
+            background-color: var(--myme-bg-light);
+            margin-bottom: 12px;
+            padding: 18px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
             cursor: pointer;
-            transition: background 0.3s;
+            transition: 0.3s;
             font-weight: bold;
+            border: 2px solid transparent;
         }
 
         .lang-option:hover {
             background-color: #e4e6eb;
         }
 
+        /* Style quand le radio est coché */
+        .lang-option:has(input:checked) {
+            border-color: var(--myme-blue);
+            background-color: #e7f3ff;
+            color: var(--myme-blue);
+        }
+
         .lang-option input {
             margin-right: 15px;
-            transform: scale(1.2);
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
         }
 
         .btn-next {
-            background-color: #0866ff;
-            color: #ffffff;
-            position: fixed;
-            bottom: 30px;
-            right: 20px;
-            padding: 12px 25px;
-            border-radius: 50px; /* Style bouton pilule moderne */
+            background-color: var(--myme-blue);
+            color: white;
+            padding: 15px;
+            border-radius: 15px;
             border: none;
             font-weight: bold;
             font-size: 16px;
             cursor: pointer;
-            box-shadow: 0 4px 10px rgba(8, 102, 255, 0.3);
-            transition: transform 0.2s, background 0.3s;
+            margin-top: 20px;
+            transition: 0.3s;
+            box-shadow: 0 4px 12px rgba(8, 102, 255, 0.2);
         }
 
         .btn-next:hover {
@@ -91,94 +127,69 @@
             transform: translateY(-2px);
         }
 
-        .btn-next:active {
-            transform: translateY(0);
-        }
-
-        /* --- RESPONSIVE --- */
-        @media screen and (max-width: 480px) {
-            .btn-next {
-                width: calc(100% - 40px);
-                right: 20px;
-                left: 20px;
-                bottom: 20px;
+        /* --- RESPONSIVE MOBILE --- */
+        @media screen and (max-width: 800px) {
+            .main-container {
+                flex-direction: column;
+                height: auto;
+                width: 95%;
+                margin: 20px;
             }
-            .welcome-text { font-size: 15px; }
+            .visual-side { padding: 30px 20px; }
+            .action-side { padding: 30px 20px; }
+            .visual-side img { width: 120px; height: 120px; }
         }
     </style>
-    <link rel="apple-touch-icon" sizes="57x57" href="apple-icon-57x57.png">
-<link rel="apple-touch-icon" sizes="60x60" href="apple-icon-60x60.png">
-<link rel="apple-touch-icon" sizes="72x72" href="apple-icon-72x72.png">
-<link rel="apple-touch-icon" sizes="76x76" href="apple-icon-76x76.png">
-<link rel="apple-touch-icon" sizes="114x114" href="apple-icon-114x114.png">
-<link rel="apple-touch-icon" sizes="120x120" href="apple-icon-120x120.png">
-<link rel="apple-touch-icon" sizes="144x144" href="apple-icon-144x144.png">
-<link rel="apple-touch-icon" sizes="152x152" href="apple-icon-152x152.png">
-<link rel="apple-touch-icon" sizes="180x180" href="apple-icon-180x180.png">
-
-<link rel="icon" type="image/png" sizes="192x192" href="android-icon-192x192.png">
-
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
-<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
-
-<link rel="manifest" href="manifest.json">
-<meta name="msapplication-TileColor" content="#ffffff">
-<meta name="msapplication-TileImage" content="ms-icon-144x144.png">
-<meta name="theme-color" content="#ffffff">
 </head>
 <body>
 
-   <div class="image-container">
-       <img src="img_screen3.jpg" alt="Logo Myme">
-   </div>
+    <div class="main-container">
+        <div class="visual-side">
+            <img src="img_screen3.jpg" alt="Myme Logo">
+            <div class="welcome-text">
+                <p>Welcome to <b>Myme</b>, a messaging app.<br>
+                To continue, please indicate the language you wish to use.</p>
+            </div>
+        </div>
 
-   <div class="welcome-text">
-        <p>Welcome to <b>Myme</b>, a messaging app.<br>
-        To continue, please indicate the language you wish to use in the application.</p>
-   </div>
+        <div class="action-side">
+            <h3>Langue / Language</h3>
 
-   <h3>Choisissez votre langue / Choose your language</h3>
+            <form id="lang-form">
+                <label class="lang-option">
+                    <input type="radio" name="lang" value="fr"> Français
+                </label>
+                <label class="lang-option">
+                    <input type="radio" name="lang" value="en"> English
+                </label>
 
-   <form id="lang-form">
-       <label class="lang-option">
-           <input type="radio" name="lang" value="fr"> Français
-       </label>
-       <label class="lang-option">
-           <input type="radio" name="lang" value="en"> English
-       </label>
-
-       <button type="submit" class="btn-next">Suivant / Next</button>
-   </form>
+                <button type="submit" class="btn-next">Suivant / Next</button>
+            </form>
+        </div>
+    </div>
 
 <script>
     const form = document.getElementById('lang-form');
 
-    // 1. Charger la langue si elle a déjà été choisie (Clé harmonisée : lang)
+    // Charger la langue sauvegardée
     const savedLang = localStorage.getItem("lang");
     if (savedLang) {
         const radio = document.querySelector(`input[name="lang"][value="${savedLang}"]`);
         if (radio) radio.checked = true;
     }
 
-    // 2. Gérer la soumission
     form.addEventListener("submit", (e) => {
         e.preventDefault();
         const selected = document.querySelector('input[name="lang"]:checked');
 
         if (selected) {
-            // Mémorise le choix avec la clé "lang"
             localStorage.setItem("lang", selected.value);
-
-            // Redirige vers la page suivante
             window.location.href = "authent.html";
         } else {
             alert("Veuillez choisir une langue / Please choose a language!");
         }
-
     });
 </script>
 
 </body>
-
 </html>
