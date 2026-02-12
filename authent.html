@@ -3,90 +3,199 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Page d'authent</title>
+    <title>Myme - Connexion</title>
     <style>
-        body{ text-align:center; font-family:'Century Gothic'; background-color:#0866ff; color: white; }
-        #connect{ background-color:#0866ff; color:#fff; position:fixed; top:20px; right:4px; padding:10px; border-radius: 50px; border: 2px solid #fff; cursor: pointer; }
-        #connect:hover{ background-color:#0657d8; }
+        :root {
+            --myme-blue: #0866ff;
+            --myme-hover: #0657d8;
+            --text-main: #ffffff;
+        }
 
-        .fleche-retour { position: absolute; top: 20px; left: 20px; width: 40px; height: 40px; background: none; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .fleche-retour::after { content: ''; width: 12px; height: 12px; border-left: 3px solid #000; border-bottom: 3px solid #000; transform: rotate(45deg); }
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Century Gothic', sans-serif;
+            background-color: var(--myme-blue);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-        .tout{ display: flex; flex-direction: column; align-items: center; margin-top: 50px; }
-        .tout input{ width: 300px; height: 45px; border-radius: 20px; border: 2px solid white; margin-bottom: 5px; padding: 0 15px; text-align: center; }
+        /* Conteneur principal qui gère le split screen sur PC */
+        .auth-container {
+            display: flex;
+            width: 90%;
+            max-width: 1000px;
+            height: 600px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
 
-        .google-btn{ background-color: white; color:#6b6b6b; border-radius:20px; border:none; width:300px; height:50px; display:flex; align-items: center; justify-content: center; margin: 20px auto; cursor:pointer; box-shadow: 0px 4px 6px rgba(0,0,0,0.1); }
-        .logo-g{ width: 24px; height: 24px; margin-right: 10px; }
+        /* Partie Gauche (Visuelle) */
+        .auth-visual {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 40px;
+        }
 
-        p { font-size: 12px; margin: 5px 0; font-weight: bold; }
-        @media screen and (max-width: 700px){ .tout input, .google-btn{ width: 250px; } }
+        .auth-visual img {
+            width: 180px;
+            height: 220px;
+            border-radius: 25px;
+            object-fit: cover;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
+        }
+
+        /* Partie Droite (Formulaire) */
+        .auth-form-side {
+            flex: 1;
+            background: white;
+            color: #1c1e21;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+        }
+
+        .auth-form-side h2 {
+            margin-bottom: 30px;
+            color: var(--myme-blue);
+            font-size: 28px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+            width: 100%;
+        }
+
+        input {
+            width: 100%;
+            box-sizing: border-box;
+            height: 50px;
+            border-radius: 12px;
+            border: 2px solid #eee;
+            padding: 0 15px;
+            font-size: 16px;
+            transition: 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--myme-blue);
+            outline: none;
+        }
+
+        .err-msg {
+            font-size: 12px;
+            color: #ff4d4d;
+            margin: 5px 0 0 5px;
+            text-align: left;
+            font-weight: bold;
+            min-height: 15px;
+        }
+
+        .google-btn {
+            background-color: #f8f9fa;
+            color: #444;
+            border-radius: 12px;
+            border: 1px solid #ddd;
+            width: 100%;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .google-btn:hover { background-color: #eee; }
+
+        .logo-g { width: 20px; margin-right: 10px; }
+
+        #connect {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--myme-blue);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        /* RESPONSIVE : Mobile */
+        @media (max-width: 850px) {
+            .auth-container {
+                flex-direction: column;
+                height: auto;
+                width: 95%;
+                background: none;
+                border: none;
+                box-shadow: none;
+            }
+            .auth-visual { background: none; padding: 20px 0; }
+            .auth-form-side { border-radius: 30px; padding: 30px 20px; }
+            #connect { position: fixed; top: 15px; right: 15px; }
+        }
     </style>
-    <link rel="apple-touch-icon" sizes="57x57" href="apple-icon-57x57.png">
-<link rel="apple-touch-icon" sizes="60x60" href="apple-icon-60x60.png">
-<link rel="apple-touch-icon" sizes="72x72" href="apple-icon-72x72.png">
-<link rel="apple-touch-icon" sizes="76x76" href="apple-icon-76x76.png">
-<link rel="apple-touch-icon" sizes="114x114" href="apple-icon-114x114.png">
-<link rel="apple-touch-icon" sizes="120x120" href="apple-icon-120x120.png">
-<link rel="apple-touch-icon" sizes="144x144" href="apple-icon-144x144.png">
-<link rel="apple-touch-icon" sizes="152x152" href="apple-icon-152x152.png">
-<link rel="apple-touch-icon" sizes="180x180" href="apple-icon-180x180.png">
-
-<link rel="icon" type="image/png" sizes="192x192" href="android-icon-192x192.png">
-
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
-<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
-
-<link rel="manifest" href="manifest.json">
-<meta name="msapplication-TileColor" content="#ffffff">
-<meta name="msapplication-TileImage" content="ms-icon-144x144.png">
-<meta name="theme-color" content="#ffffff">
 </head>
 <body>
-     <button id="connect" data-lang="login">Login</button>
-     <button class="fleche-retour" onclick="window.history.back()"></button>
 
-     <h1>Myme</h1>
-     <img src="img4.jpg" width="120" height="150" style="border-radius: 20px;">
+    <div class="auth-container">
+        <div class="auth-visual">
+            <h1 style="font-size: 45px; margin-bottom: 10px;">Myme</h1>
+            <p style="opacity: 0.8; margin-bottom: 30px;">Connectez-vous avec le monde.</p>
+            <img src="img4.jpg" alt="Myme Logo">
+        </div>
 
-     <div class="tout">
-          <div class="s2">
-            <input type="text" id="name" data-lang="first_name" placeholder="Prénom" maxlength="15">
-            <p id="errorn"></p>
-          </div>
-         <div class="s4">
-            <input type="text" id="post-name" data-lang="last_name" placeholder="Post-nom" maxlength="15">
-            <p id="errorp"></p>
-          </div>
-         <div class="s3">
-            <input type="date" id="naissance">
-            <p id="errord"></p>
-         </div>
+        <div class="auth-form-side">
+            <button id="connect" data-lang="login">Login</button>
+            
+            <h2 data-lang="create_account">Créer un compte</h2>
 
-         <button type="button" id="google" class="google-btn">
-                <img src="img_google.png" class="logo-g">
-                <span class="btn-text" data-lang="connect-with-google">Continuer avec Google</span>
-         </button>
+            <div class="input-group">
+                <input type="text" id="name" data-lang="first_name" placeholder="Prénom">
+                <p id="errorn" class="err-msg"></p>
+            </div>
 
-         <p id="errorconnexion"></p>
-     </div>
+            <div class="input-group">
+                <input type="text" id="post-name" data-lang="last_name" placeholder="Post-nom">
+                <p id="errorp" class="err-msg"></p>
+            </div>
 
-     <footer class="h3" style="margin-top: 10px; color: red;" data-lang="about"><a href="download.html" style="color: #d9d9d9; font-size: 14px;" >A propos de l'app</a></footer>
-     <p class="h3" style="margin-top: 10px;">@Myme - 2025</p>
+            <div class="input-group">
+                <input type="date" id="naissance">
+                <p id="errord" class="err-msg"></p>
+            </div>
 
-<script type="module">
-  // 1. Imports Firebase (OK maintenant)
+            <button type="button" id="google" class="google-btn">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="logo-g">
+                <span data-lang="connect-with-google">Continuer avec Google</span>
+            </button>
+
+            <p id="errorconnexion" class="err-msg" style="text-align:center; margin-top:10px;"></p>
+        </div>
+    </div>
+
+    <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+  import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
   import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-  // 2. LE PATCH : On crée un GoogleAuth vide pour éviter l'erreur sur GitHub
-  const GoogleAuth = window.GoogleAuth || {
-    initialize: () => console.log("GoogleAuth simulé pour le Web"),
-    signIn: () => Promise.reject("Utilisez l'APK pour la connexion Google")
-  };
-
-  // 3. Configuration Firebase
   const firebaseConfig = {
       apiKey: "AIzaSyA3YTGXBA9Cf9QNaGau0PCBgyuGSJv5pi0",
       authDomain: "myme-31f3c.firebaseapp.com",
@@ -96,100 +205,65 @@
       appId: "1:598768810366:web:b401c77010102e8988db2f"
   };
 
-  // 4. Initialisation
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getFirestore(app);
 
-  console.log("Firebase est prêt !");
-
-  // 5. Initialisation du Plugin (ne plantera plus)
-  GoogleAuth.initialize({
-    clientId: '598768810366-b9irg6kifn0sfp7svd0lfuu7ps34a6ti.apps.googleusercontent.com',
-    scopes: ['profile', 'email'],
-    grantOfflineAccess: true,
-  });
-
-  // 4. Éléments du DOM
-  const btnLoginHeader = document.getElementById('connect');
   const btnGoogle = document.getElementById('google');
-  const prenom = document.getElementById('name');
-  const post = document.getElementById('post-name');
-  const naissance = document.getElementById('naissance');
-
-  // Messages d'erreur
-  const errn = document.getElementById('errorn');
-  const errp = document.getElementById('errorp');
-  const errd = document.getElementById('errord');
   const errorcon = document.getElementById('errorconnexion');
 
-  // 5. Système de Traduction
+  // Système de Traduction simple
   async function applyTranslations() {
-    const currentLang = localStorage.getItem("lang") || "fr";
+    const lang = localStorage.getItem("lang") || "fr";
     try {
         const res = await fetch("lang.json");
         const data = await res.json();
-        const dict = data[currentLang];
-
+        const dict = data[lang];
         document.querySelectorAll("[data-lang]").forEach(el => {
             const key = el.getAttribute("data-lang");
-            if (dict && dict[key]) {
-                if (el.tagName === "INPUT") {
-                    el.placeholder = dict[key];
-                } else {
-                    el.textContent = dict[key];
-                }
+            if (dict?.[key]) {
+                if (el.tagName === "INPUT") el.placeholder = dict[key];
+                else el.textContent = dict[key];
             }
         });
-    } catch (e) {
-        console.error("Erreur chargement langues:", e);
-    }
+    } catch (e) { console.warn("Fichier lang.json non trouvé"); }
   }
 
-  // 6. Logique d'Inscription et Connexion Google
   async function demarrerInscription() {
+      const prenom = document.getElementById('name');
+      const post = document.getElementById('post-name');
+      const naissance = document.getElementById('naissance');
+      
+      const errn = document.getElementById('errorn');
+      const errp = document.getElementById('errorp');
+      const errd = document.getElementById('errord');
+
       let hasError = false;
       const regexLettres = /^[a-zA-ZÀ-ÿ\s\-]+$/;
-      const errorcon = document.getElementById('errorconnexion');
 
-      // Reset des messages
+      // Reset
       [errn, errp, errd, errorcon].forEach(el => { if(el) el.textContent = ""; });
 
-      // Validation
       if (!prenom.value.trim() || !regexLettres.test(prenom.value)) {
-          errn.setAttribute("data-lang", "please_enter_your_name");
+          errn.textContent = "Prénom invalide";
           hasError = true;
       }
       if (!post.value.trim() || !regexLettres.test(post.value)) {
-          errp.setAttribute("data-lang", "please_enter_your_name");
+          errp.textContent = "Post-nom invalide";
           hasError = true;
       }
       if (!naissance.value) {
-          errd.setAttribute("data-lang", "date-inv");
+          errd.textContent = "Date requise";
           hasError = true;
       }
 
-      if (hasError) {
-          await applyTranslations();
-          return;
-      }
+      if (hasError) return;
 
       try {
-          let user;
-
-          // VÉRIFICATION : APK ou WEB ?
-          if (window.Capacitor && window.Capacitor.isNativePlatform() && GoogleAuth) {
-              // MODE APK
-              const googleUser = await GoogleAuth.signIn();
-              const credential = GoogleAuthProvider.credential(googleUser.authentication.idToken);
-              const result = await signInWithCredential(auth, credential);
-              user = result.user;
-          } else {
-              // MODE WEB (Navigateur)
-              const provider = new GoogleAuthProvider();
-              const result = await signInWithPopup(auth, provider);
-              user = result.user;
-          }
+          // --- CONNEXION GOOGLE WEB ---
+          const provider = new GoogleAuthProvider();
+          const result = await signInWithPopup(auth, provider);
+          const user = result.user;
 
           // ENREGISTREMENT FIRESTORE
           await setDoc(doc(db, "utilisateurs", user.uid), {
@@ -205,36 +279,18 @@
           window.location.href = "authent_num.html";
 
       } catch (error) {
-          console.error("Erreur détaillée:", error);
+          console.error("Erreur:", error);
           if(errorcon) {
             errorcon.textContent = "Erreur: " + error.message;
-            errorcon.style.color = "red"; // Correction de la faute de frappe ici
+            errorcon.style.color = "red";
           }
       }
   }
 
-  // 7. Événements
-  if(btnGoogle) {
-      btnGoogle.addEventListener('click', demarrerInscription);
-  }
-
-  if(btnLoginHeader) {
-      btnLoginHeader.addEventListener('click', () => {
-          window.location.href = "login.html";
-      });
-  }
-
-  // Lancement initial
+  btnGoogle.addEventListener('click', demarrerInscription);
+  document.getElementById('connect').onclick = () => window.location.href = "login.html";
+  
   applyTranslations();
 </script>
 </body>
-
 </html>
-
-
-
-
-
-
-
-
