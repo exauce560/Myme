@@ -1,85 +1,169 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Authent1</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Myme - Vérification Téléphone</title>
     <style>
-        /* ... (Tes styles restent les mêmes) ... */
-        body{ font-family:'Century Gothic'; text-align:center; color:#919191; font-size:10px; }
-        .image-num{ display:block; margin: auto; }
-        .fleche-retour { position: absolute; top: 20px; left: 20px; width: 40px; height: 40px; background: none; border: none; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; }
-        .fleche-retour::before { content: ''; position: absolute; width: 25px; height: 3px; background-color: #000; border-radius: 2px; }
-        .fleche-retour::after { content: ''; position: absolute; left: 8px; width: 12px; height: 12px; border-left: 3px solid #000; border-bottom: 3px solid #000; transform: rotate(45deg); }
-        .fleche-retour:hover { transform: scale(1.1); background-color: #bcbcbc; }
-        .fleche-retour:hover::before { background-color: #fff; }
-        .fleche-retour:hover::after { border-color: #fff; }
-        .container{ background: white; padding: 30px; border-radius: 8px; width: 100%; max-width: 350px; }
-        .phone-input-wrapper { display:flex; justify-content:center; gap:10px; margin-bottom: 30px; }
-        select, .num-input{ border:none; border-bottom: 2px solid #0866ff; padding: 8px 0; font-size: 18px; outline: none; }
-        .country-select { width:50%; margin-bottom:10px; cursor: pointer; }
-        .prefix{ width: 45px; text-align: center; color: #000; border:none; border-bottom: 2px solid #0866ff; font-size: 18px; }
-        .num-input{ width: 180px; }
-        .btn-next { background-color:#0866ff; color: white; border:none; padding: 10px 20px; border-radius: 3px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
-        .btn-next:hover{ background-color: #0657d8; }
+        :root {
+            --myme-blue: #0866ff;
+            --myme-bg-light: #f0f2f5;
+        }
+
+        body {
+            font-family: 'Century Gothic', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--myme-blue);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Container Principal */
+        .auth-container {
+            display: flex;
+            width: 90%;
+            max-width: 900px;
+            height: 550px;
+            background: white;
+            border-radius: 30px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        /* Côté Visuel (PC) */
+        .visual-side {
+            flex: 1;
+            background-color: var(--myme-bg-light);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .visual-side img {
+            width: 220px;
+            height: 220px;
+            object-fit: contain;
+            margin-bottom: 20px;
+        }
+
+        /* Côté Formulaire (PC) */
+        .form-side {
+            flex: 1;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+        }
+
+        .fleche-retour {
+            position: absolute; top: 20px; left: 20px; width: 40px; height: 40px;
+            background: none; border: none; cursor: pointer; display: flex;
+            align-items: center; justify-content: center;
+        }
+        .fleche-retour::after {
+            content: ''; width: 10px; height: 10px;
+            border-left: 3px solid #ccc; border-bottom: 3px solid #ccc;
+            transform: rotate(45deg);
+        }
+
+        h1 { color: var(--myme-blue); margin-bottom: 10px; font-size: 24px; }
+        p.subtitle { color: #65676b; margin-bottom: 30px; font-size: 14px; }
+
+        .input-group { width: 100%; margin-bottom: 20px; }
+
+        select.country-select {
+            width: 100%; height: 45px; border-radius: 12px;
+            border: 2px solid #eee; padding: 0 10px; margin-bottom: 10px;
+            font-family: inherit; font-size: 15px; outline: none;
+        }
+
+        .phone-wrapper {
+            display: flex; gap: 10px;
+        }
+
+        .prefix-box {
+            width: 70px; height: 45px; border-bottom: 2px solid var(--myme-blue);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px; font-weight: bold; color: #1c1e21;
+        }
+
+        .num-input {
+            flex: 1; height: 45px; border: none;
+            border-bottom: 2px solid var(--myme-blue);
+            font-size: 18px; outline: none; letter-spacing: 1px;
+        }
+
+        .btn-next {
+            background-color: var(--myme-blue); color: white;
+            padding: 15px; border-radius: 15px; border: none;
+            font-weight: bold; font-size: 16px; cursor: pointer;
+            margin-top: 20px; transition: 0.3s;
+        }
+        .btn-next:hover { background-color: #0052d1; transform: translateY(-2px); }
+        .btn-next:disabled { background-color: #ccc; cursor: not-allowed; }
+
+        #error { font-size: 13px; font-weight: bold; margin-top: 15px; min-height: 20px; }
+
+        /* Responsive */
+        @media (max-width: 800px) {
+            .auth-container { flex-direction: column; height: auto; width: 95%; margin: 20px; }
+            .visual-side { padding: 30px 20px; }
+            .form-side { padding: 40px 20px; }
+            .visual-side img { width: 150px; height: 150px; }
+        }
     </style>
-    <link rel="apple-touch-icon" sizes="57x57" href="apple-icon-57x57.png">
-<link rel="apple-touch-icon" sizes="60x60" href="apple-icon-60x60.png">
-<link rel="apple-touch-icon" sizes="72x72" href="apple-icon-72x72.png">
-<link rel="apple-touch-icon" sizes="76x76" href="apple-icon-76x76.png">
-<link rel="apple-touch-icon" sizes="114x114" href="apple-icon-114x114.png">
-<link rel="apple-touch-icon" sizes="120x120" href="apple-icon-120x120.png">
-<link rel="apple-touch-icon" sizes="144x144" href="apple-icon-144x144.png">
-<link rel="apple-touch-icon" sizes="152x152" href="apple-icon-152x152.png">
-<link rel="apple-touch-icon" sizes="180x180" href="apple-icon-180x180.png">
-
-<link rel="icon" type="image/png" sizes="192x192" href="android-icon-192x192.png">
-
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
-<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
-
-<link rel="manifest" href="manifest.json">
-<meta name="msapplication-TileColor" content="#ffffff">
-<meta name="msapplication-TileImage" content="ms-icon-144x144.png">
-<meta name="theme-color" content="#ffffff">
 </head>
 <body>
 
-<button class="fleche-retour" onclick="window.history.back()"></button>
+    <div class="auth-container">
+        <div class="visual-side">
+            <img src="img_num.jpg" alt="Security Illustration">
+            <p style="color: #919191; font-size: 12px; max-width: 250px;">
+                La sécurité de votre compte est notre priorité. MyMe utilise votre numéro pour vous connecter avec vos proches.
+            </p>
+        </div>
 
-<div class="image-num">
-    <img src="img_num.jpg" width="200" height="200" alt="Illustration">
-</div>
+        <div class="form-side">
+            <button class="fleche-retour" onclick="window.history.back()"></button>
 
-<h1 data-lang="welcome">Bienvenue</h1>
-<p data-lang="enter_phone">Veuillez entrer votre numéro de téléphone</p>
+            <h1 data-lang="welcome">Bienvenue</h1>
+            <p class="subtitle" data-lang="enter_phone">Veuillez entrer votre numéro de téléphone</p>
 
-<select class="country-select" id="country" onchange="document.getElementById('prefix-display').value = this.value">
-    <option value="213">Algérie (+213)</option>
-    <option value="226">Burkina Faso (+226)</option>
-    <option value="237">Cameroun (+237)</option>
-    <option value="212">Maroc (+212)</option>
-    <option value="223">Mali (+223)</option>
-    <option value="243">RD Congo (+243)</option>
-    <option value="242">République du congo (+242)</option>
-    <option value="255">Tanzanie (+255)</option>
-    <option value="216">Tunisie (+216)</option>
-</select>
+            <div class="input-group">
+                <select class="country-select" id="country" onchange="document.getElementById('prefix-val').textContent = this.value">
+                    <option value="213">Algérie (+213)</option>
+                    <option value="226">Burkina Faso (+226)</option>
+                    <option value="237">Cameroun (+237)</option>
+                    <option value="212">Maroc (+212)</option>
+                    <option value="223">Mali (+223)</option>
+                    <option value="243" selected>RD Congo (+243)</option>
+                    <option value="242">République du Congo (+242)</option>
+                    <option value="255">Tanzanie (+255)</option>
+                    <option value="216">Tunisie (+216)</option>
+                </select>
 
+                <div class="phone-wrapper">
+                    <div class="prefix-box">
+                        <span>+</span><span id="prefix-val">243</span>
+                    </div>
+                    <input type="tel" id="phone-number" class="num-input" placeholder="Numéro" data-lang="phone_placeholder" maxlength="10">
+                </div>
+            </div>
 
-<div class="phone-input-wrapper">
-    <div style="display: flex; align-items: center;">
-        <span style="font-size:18px; color: #000;">+</span>
-        <input type="tel" id="prefix-display" class="prefix" value="213" readonly>
+            <button class="btn-next" id="btn-submit">
+                <span data-lang="next">Suivant</span>
+            </button>
+
+            <p id="error"></p>
+        </div>
     </div>
-    <input type="tel" id="phone-number" class="num-input" placeholder="Numéro" data-lang="phone_placeholder" maxlength="10">
-</div>
-
-<button class="btn-next" id="btn-submit" >
-    <span data-lang="next">Suivant</span>
-</button>
-
-<p id="error" style="font-weight: bold;"></p>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -107,11 +191,10 @@
     const btnSubmit = document.getElementById('btn-submit');
     const countrySelect = document.getElementById('country');
 
-    // --- 1. VÉRIFICATION AU CHARGEMENT (Redirection automatique) ---
+    // Vérification Session
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             const userSnap = await getDoc(doc(db, "users", user.uid));
-            // Si le numéro existe déjà dans son profil, on passe directement à l'accueil
             if (userSnap.exists() && userSnap.data().telephone) {
                 window.location.href = 'ACCEUIL.html';
             }
@@ -120,31 +203,31 @@
         }
     });
 
-    // Sécurité input
+    // Filtre numérique uniquement
     phoneInput.addEventListener('input', (e) => {
         e.target.value = e.target.value.replace(/[^0-9]/g, '');
     });
 
-    const lang = localStorage.getItem("lang") || "en";
-
     async function applyTranslations() {
+        const lang = localStorage.getItem("lang") || "fr";
         try {
             const res = await fetch("lang.json");
             const data = await res.json();
             document.querySelectorAll("[data-lang]").forEach(el => {
                 const key = el.getAttribute("data-lang");
-                if (!data[lang] || !data[lang][key]) return;
-                if (el.tagName === "INPUT") { el.placeholder = data[lang][key]; }
-                else { el.textContent = data[lang][key]; }
+                if (data[lang]?.[key]) {
+                    if (el.tagName === "INPUT") el.placeholder = data[lang][key];
+                    else el.textContent = data[lang][key];
+                }
             });
-        } catch (error) { console.error(error); }
+        } catch (e) { console.warn("Erreur langues non trouvées"); }
     }
 
-    // --- 2. LOGIQUE DU BOUTON SUIVANT ---
     btnSubmit.addEventListener('click', async () => {
         const user = auth.currentUser;
-        let number = phoneInput.value.trim();
+        if(!user) return;
 
+        let number = phoneInput.value.trim();
         if (number.startsWith('0')) number = number.substring(1);
         const fullPhoneNumber = "+" + countrySelect.value + number;
 
@@ -157,33 +240,30 @@
         try {
             btnSubmit.disabled = true;
             errorDisplay.textContent = "Vérification...";
+            errorDisplay.style.color = "orange";
 
-            // A. VÉRIFIER SI LE NUMÉRO EXISTE DÉJÀ CHEZ UN AUTRE UTILISATEUR
+            // Vérifier unicité
             const q = query(collection(db, "users"), where("telephone", "==", fullPhoneNumber));
             const querySnapshot = await getDocs(q);
 
             if (!querySnapshot.empty) {
-                // Le numéro est déjà utilisé !
-                errorDisplay.textContent = "Ce numéro est déjà utilisé par un autre compte.";
+                errorDisplay.textContent = "Ce numéro est déjà lié à un autre compte.";
                 errorDisplay.style.color = "red";
                 btnSubmit.disabled = false;
                 return;
             }
 
-            // B. SI UNIQUE, ENREGISTRER ET CONTINUER
+            // Enregistrement
             await setDoc(doc(db, "users", user.uid), {
-                uid: user.uid,
-                email: user.email,
                 telephone: fullPhoneNumber,
-                phoneNumber: fullPhoneNumber,
                 updatedAt: new Date()
             }, { merge: true });
 
             window.location.href = 'profil.html';
 
         } catch (e) {
-            console.error(e);
-            errorDisplay.textContent = "Erreur serveur.";
+            errorDisplay.textContent = "Erreur de connexion.";
+            errorDisplay.style.color = "red";
             btnSubmit.disabled = false;
         }
     });
@@ -191,6 +271,4 @@
     applyTranslations();
 </script>
 </body>
-
 </html>
-
