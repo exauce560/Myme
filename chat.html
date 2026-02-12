@@ -220,6 +220,10 @@
             background: var(--msg-them);
             color: var(--text);
         }
+        /* Cache le bouton retour si on est dans l'iframe desktop */
+        @media screen and (min-width: 900px) {
+            .back-button { display: none; }
+        }
     </style>
     <link rel="apple-touch-icon" sizes="57x57" href="apple-icon-57x57.png">
 <link rel="apple-touch-icon" sizes="60x60" href="apple-icon-60x60.png">
@@ -1490,6 +1494,7 @@
 </body>
 
 </html>
+
 
 
 
