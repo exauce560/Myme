@@ -4,102 +4,156 @@
     <meta charset="UTF-8">
     <title>Connexion - MyMe</title>
     <style>
+        :root {
+            --myme-blue: #0866ff;
+            --myme-gradient: linear-gradient(135deg, #0866ff 0%, #00d4ff 100%);
+        }
+
         body {
             font-family: 'Century Gothic', sans-serif;
-            background-color: #f4f7f6;
+            background: var(--myme-gradient);
+            background-attachment: fixed;
             margin: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            color: #333;
+            overflow: hidden;
         }
 
+        /* Décoration d'arrière-plan pour PC */
+        .bg-circle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            z-index: 0;
+        }
+
+        /* La carte de connexion version "Glassmorphism" */
         .login-card {
-            background: white;
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 50px 40px;
+            border-radius: 30px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.2);
             text-align: center;
-            width: 100%;
-            max-width: 350px;
+            width: 90%;
+            max-width: 400px;
+            position: relative;
+            z-index: 10;
         }
 
-        .logo-placeholder {
-            font-size: 24px;
+        .logo-container {
+            width: 80px;
+            height: 80px;
+            background: var(--myme-gradient);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: -90px auto 20px auto; /* Effet de dépassement */
+            box-shadow: 0 10px 20px rgba(8, 102, 255, 0.3);
+        }
+
+        .logo-container span {
+            color: white;
+            font-size: 30px;
             font-weight: bold;
-            color: #0866ff;
-            margin-bottom: 10px;
-            display: block;
         }
 
-        h1 { font-size: 20px; margin-bottom: 10px; }
-        p { font-size: 14px; color: #777; margin-bottom: 30px; }
+        h1 { 
+            font-size: 24px; 
+            color: #1c1e21; 
+            margin-bottom: 10px; 
+        }
 
+        p { 
+            font-size: 15px; 
+            color: #65676b; 
+            margin-bottom: 35px; 
+            line-height: 1.4;
+        }
+
+        /* Bouton Google ultra-moderne */
         .btn-google {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 15px;
             width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
+            padding: 14px;
+            border: 2px solid #f0f2f5;
+            border-radius: 15px;
             background: white;
+            color: #444;
             cursor: pointer;
             font-weight: bold;
-            transition: background 0.3s;
+            font-size: 16px;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        .btn-google:hover { background: #f9f9f9; border-color: #bbb; }
-        .btn-google img { width: 20px; }
+        .btn-google:hover { 
+            transform: scale(1.02);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            border-color: var(--myme-blue);
+        }
 
-        /* Ton bouton retour conservé */
+        .btn-google img { width: 22px; }
+
+        /* Bouton retour élégant */
         .fleche-retour {
-            position: absolute; top: 20px; left: 20px; width: 40px; height: 40px;
-            background: none; border: none; border-radius: 50%; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;
+            position: absolute; top: 30px; left: 30px; 
+            width: 45px; height: 45px;
+            background: rgba(255, 255, 255, 0.2); 
+            border: 1px solid rgba(255, 255, 255, 0.3); 
+            border-radius: 15px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; 
+            backdrop-filter: blur(5px); transition: 0.3s;
         }
-        .fleche-retour::before { content: ''; position: absolute; width: 20px; height: 3px; background-color: #000; }
-        .fleche-retour::after { content: ''; position: absolute; left: 10px; width: 10px; height: 10px; border-left: 3px solid #000; border-bottom: 3px solid #000; transform: rotate(45deg); }
-        .fleche-retour:hover { background-color: #ddd; }
+        
+        .fleche-retour::after { 
+            content: ''; width: 10px; height: 10px; 
+            border-left: 3px solid white; border-bottom: 3px solid white; 
+            transform: rotate(45deg); margin-left: 5px;
+        }
+
+        .fleche-retour:hover { background: white; }
+        .fleche-retour:hover::after { border-color: var(--myme-blue); }
+
+        #error { font-weight: bold; min-height: 20px; }
+
+        /* Animation pour PC */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        .login-card { animation: float 5s ease-in-out infinite; }
     </style>
-    <link rel="apple-touch-icon" sizes="57x57" href="apple-icon-57x57.png">
-<link rel="apple-touch-icon" sizes="60x60" href="apple-icon-60x60.png">
-<link rel="apple-touch-icon" sizes="72x72" href="apple-icon-72x72.png">
-<link rel="apple-touch-icon" sizes="76x76" href="apple-icon-76x76.png">
-<link rel="apple-touch-icon" sizes="114x114" href="apple-icon-114x114.png">
-<link rel="apple-touch-icon" sizes="120x120" href="apple-icon-120x120.png">
-<link rel="apple-touch-icon" sizes="144x144" href="apple-icon-144x144.png">
-<link rel="apple-touch-icon" sizes="152x152" href="apple-icon-152x152.png">
-<link rel="apple-touch-icon" sizes="180x180" href="apple-icon-180x180.png">
-
-<link rel="icon" type="image/png" sizes="192x192" href="android-icon-192x192.png">
-
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
-<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
-
-<link rel="manifest" href="manifest.json">
-<meta name="msapplication-TileColor" content="#ffffff">
-<meta name="msapplication-TileImage" content="ms-icon-144x144.png">
-<meta name="theme-color" content="#ffffff">
 </head>
 <body>
+
+<div class="bg-circle" style="width: 300px; height: 300px; top: -100px; right: -50px;"></div>
+<div class="bg-circle" style="width: 200px; height: 200px; bottom: -50px; left: -50px;"></div>
 
 <button class="fleche-retour" onclick="window.history.back()"></button>
 
 <div class="login-card">
-    <span class="logo-placeholder">Myme</span>
+    <div class="logo-container">
+        <span>M</span>
+    </div>
     <h1 data-lang="glad">Content de vous revoir !</h1>
     <p data-lang="connect-you">Connectez-vous pour continuer l'aventure.</p>
 
     <button class="btn-google" id="btn-login">
-        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google Logo" >
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google Logo">
         <span data-lang="continue-with">Continuer avec Google</span>
     </button>
 
-    <p id="error" style="color: red; margin-top: 20px; font-size: 12px;"></p>
+    <p id="error" style="color: #ff4d4d; margin-top: 25px; font-size: 13px;"></p>
+    
+    <div style="margin-top: 20px; font-size: 12px; color: #999;">
+        © 2026 MyMe App - Sécurisé par Firebase
+    </div>
 </div>
 
 <script type="module">
@@ -185,6 +239,7 @@
 </body>
 
 </html>
+
 
 
 
