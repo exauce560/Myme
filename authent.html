@@ -150,14 +150,12 @@
   async function demarrerInscription() {
       let hasError = false;
       const regexLettres = /^[a-zA-ZÀ-ÿ\s\-]+$/;
+      const errorcon = document.getElementById('errorconnexion');
 
-      // Reset des messages d'erreur
-      if(errn) errn.textContent = "";
-      if(errp) errp.textContent = "";
-      if(errd) errd.textContent = "";
-      if(errorcon) errorcon.textContent = "";
+      // Reset des messages
+      [errn, errp, errd, errorcon].forEach(el => { if(el) el.textContent = ""; });
 
-      // Validation des champs
+      // Validation
       if (!prenom.value.trim() || !regexLettres.test(prenom.value)) {
           errn.setAttribute("data-lang", "please_enter_your_name");
           hasError = true;
@@ -177,34 +175,40 @@
       }
 
       try {
-          // A. CONNEXION NATIVE (Ouvre la fenêtre Google sur Android)
-          const googleUser = await GoogleAuth.signIn();
+          let user;
 
-          // B. AUTHENTIFICATION FIREBASE (Échange du jeton Google contre accès Firebase)
-          const credential = GoogleAuthProvider.credential(googleUser.authentication.idToken);
-          const result = await signInWithCredential(auth, credential);
-          const user = result.user;
+          // VÉRIFICATION : APK ou WEB ?
+          if (window.Capacitor && window.Capacitor.isNativePlatform() && GoogleAuth) {
+              // MODE APK
+              const googleUser = await GoogleAuth.signIn();
+              const credential = GoogleAuthProvider.credential(googleUser.authentication.idToken);
+              const result = await signInWithCredential(auth, credential);
+              user = result.user;
+          } else {
+              // MODE WEB (Navigateur)
+              const provider = new GoogleAuthProvider();
+              const result = await signInWithPopup(auth, provider);
+              user = result.user;
+          }
 
-          // C. ENREGISTREMENT DANS FIRESTORE
+          // ENREGISTREMENT FIRESTORE
           await setDoc(doc(db, "utilisateurs", user.uid), {
               uid: user.uid,
               prenom: prenom.value,
               postNom: post.value,
               dateNaissance: naissance.value,
               email: user.email,
-              contactList: [],
               photo: user.photoURL || "",
               dateInscription: new Date()
           });
 
-          // D. REDIRECTION VERS L'ÉTAPE SUIVANTE
           window.location.href = "authent_num.html";
 
       } catch (error) {
           console.error("Erreur détaillée:", error);
           if(errorcon) {
-            errorcon.textContent = "Code: " + (error.code || "Inconnu") + "|" + error.message;
-            errocon.style.color = "red";
+            errorcon.textContent = "Erreur: " + error.message;
+            errorcon.style.color = "red"; // Correction de la faute de frappe ici
           }
       }
   }
@@ -226,6 +230,7 @@
 </body>
 
 </html>
+
 
 
 
