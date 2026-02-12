@@ -182,8 +182,9 @@
             <span style="margin-left: 10px; font-weight: bold; font-size: 14px;">Myme</span>
 
             <div id="dropdown-menu">
-                <a href="fond_ecran.html" class="menu-item" data-lang="font">Fond & Style</a>
-                <a href="parametres.html" class="menu-item" data-lang="parameter">Paramètres</a>
+                <div class="menu-item" onclick="openSettingsInChat('fond_ecran.html')" data-lang="font">Fond & Style</div>
+                <div class="menu-item" onclick="openSettingsInChat('parametres.html')" data-lang="parameter">Paramètres</div>
+    
                 <div class="menu-item" onclick="event.stopPropagation()">
                     <span data-lang="dark_mode">Mode Sombre</span>
                     <label class="switch">
@@ -294,6 +295,16 @@
     window.toggleTheme = () => {
         const isDark = document.body.classList.toggle('dark-mode');
         localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    };
+    window.openSettingsInChat = (page) => {
+        const iframe = document.getElementById('chat-iframe');
+        const welcome = document.getElementById('no-chat-welcome');
+
+        iframe.src = page; // Charge fond_ecran.html ou parametres.html
+        iframe.style.display = 'block';
+        if (welcome) welcome.style.display = 'none';
+    
+        window.closeMenu(); // Ferme le petit menu après le clic
     };
 
     window.logout = async () => {
@@ -612,4 +623,5 @@
 </body>
 
 </html>
+
 
