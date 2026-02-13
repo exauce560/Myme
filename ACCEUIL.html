@@ -4,20 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Myme - Accueil</title>
-    <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Rock+Salt&family=Caveat:wght@400;700&family=Shadows+Into+Light&family=Gochi+Hand&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg: #ffffff; --text: #1c1e21; --gray: #65676b;
             --myme-blue: #0866ff; --hover-bg: #f2f2f2;
             --header-bg: #ffffff; --card-border: #f0f2f5;
+            --sidebar-mini: #f7f8fa;
             --app-font-size: 16px;
             --app-font-family: 'Segoe UI';
             --app-radius: 25px;
         }
 
         body.dark-mode {
-            --bg: #18191a; --text: #e4e6eb; --gray: #000;
-            --hover-bg: #3a3b3c; --header-bg: #242526; --card-border: #3e4042;
+            --bg: #0a1014; --text: #e4e6eb; --gray: #b0b3b8;
+            --hover-bg: #202c33; --header-bg: #111b21; --card-border: #222d34;
+            --sidebar-mini: #111b21;
         }
 
         body {
@@ -27,117 +28,112 @@
             height: 100vh; overflow: hidden;
         }
 
-        /* --- NOUVELLE STRUCTURE PC --- */
-        .app-container {
-            display: flex;
-            height: 100vh;
-            width: 100vw;
-        }
+        .app-container { display: flex; height: 100vh; width: 100vw; }
 
-        /* Barre latérale (Sidebar) */
-        .sidebar {
-            width: 380px;
-            min-width: 320px;
+        /* --- 1. BARRE MINI (EXTRÊME GAUCHE) --- */
+        .sidebar-mini {
+            width: 65px;
+            background: var(--sidebar-mini);
             display: flex;
             flex-direction: column;
+            align-items: center;
+            padding: 20px 0;
             border-right: 1px solid var(--card-border);
-            background: var(--bg);
-        }
-
-        /* Navigation en haut à gauche */
-        .sidebar-nav-top {
-            padding: 15px;
-            display: flex;
             justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--card-border);
         }
 
-        .nav-icons-group { display: flex; gap: 18px; align-items: center; }
-        .nav-icons-group svg { width: 22px; height: 22px; fill: var(--gray); cursor: pointer; }
-        .nav-icons-group .active svg { fill: var(--myme-blue); }
+        .mini-nav-vertical { display: flex; flex-direction: column; gap: 25px; }
+        .mini-nav-vertical svg { width: 26px; height: 26px; fill: var(--gray); cursor: pointer; transition: 0.2s; }
+        .mini-nav-vertical .active svg { fill: var(--myme-blue); }
+        .mini-nav-vertical a:hover svg { transform: scale(1.1); fill: var(--myme-blue); }
 
-        .add-btn {
-            background: var(--myme-blue); border: none; border-radius: 12px;
-            width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; cursor: pointer;
-        }
-
-        /* Liste des chats */
-        .sidebar-content { flex: 1; overflow-y: auto; }
-
-        /* Profil en bas à gauche */
-        .sidebar-bottom {
-            padding: 12px 15px;
-            border-top: 1px solid var(--card-border);
+        .profile-section-bottom { 
+            position: relative; 
+            padding-bottom: 10px;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            position: relative;
         }
 
         .user-avatar-header {
-            width: 40px; height: 40px; border-radius: 50%;
-            object-fit: cover; cursor: pointer;
+            width: 42px; height: 42px; border-radius: 14px;
+            object-fit: cover; cursor: pointer; border: 2px solid transparent;
+            transition: 0.2s;
         }
+        .user-avatar-header:hover { border-color: var(--myme-blue); }
 
         #self-online-dot {
-            position: absolute; bottom: 12px; left: 45px;
-            width: 11px; height: 11px; background: #31a24c;
-            border: 2px solid var(--bg); border-radius: 50%;
+            position: absolute; bottom: 12px; right: 2px;
+            width: 12px; height: 12px; background: #31a24c;
+            border: 2px solid var(--sidebar-mini); border-radius: 50%;
         }
 
-        /* Zone de Chat à droite */
-        .main-chat-view {
-            flex: 1;
-            background: var(--hover-bg);
+        /* --- 2. COLONNE DISCUSSIONS --- */
+        .sidebar-main {
+            width: 350px;
             display: flex;
             flex-direction: column;
-            height: 100vh;
-            
+            background: var(--bg);
+            border-right: 1px solid var(--card-border);
         }
 
-        #chat-iframe {
-            width: 100%; height: 100%; border: none; display: none; flex: 1;
+        .sidebar-header {
+            padding: 20px 15px 10px 15px;
         }
+        .sidebar-header h1 { 
+            margin: 0; font-size: 22px; font-weight: 800; color: var(--myme-blue);
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .search-container { padding: 10px 15px; }
+        .search-bar {
+            width: 100%; box-sizing: border-box; padding: 10px 15px;
+            border-radius: 12px; border: none;
+            background: var(--hover-bg); color: var(--text); outline: none;
+        }
+
+        .sidebar-content { flex: 1; overflow-y: auto; }
+
+        /* Suppression de la couleur grise entre discussions */
+        .chat-item {
+            display: flex; padding: 12px 15px; align-items: center; cursor: pointer;
+            border-bottom: none; transition: 0.2s;
+        }
+        .chat-item:hover { background: var(--hover-bg); }
+
+        /* --- 3. VUE CHAT (DROITE) --- */
+        .main-chat-view { flex: 1; background: var(--hover-bg); position: relative; }
+        #chat-iframe { width: 100%; height: 100%; border: none; display: none; }
 
         .no-chat-selected {
             display: flex; flex-direction: column; align-items: center;
             justify-content: center; height: 100%; color: var(--gray);
         }
 
-        /* Dropdown repositionné pour le bas */
+        /* Dropdown style */
         #dropdown-menu {
-            position: absolute; bottom: 65px; left: 15px; background: var(--header-bg);
-            box-shadow: 0 -4px 15px rgba(0,0,0,0.1); border-radius: 12px;
-            display: none; flex-direction: column; width: 200px; z-index: 1000; padding: 8px 0;
+            position: absolute; bottom: 70px; left: 70px; background: var(--header-bg);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2); border-radius: 12px;
+            display: none; flex-direction: column; width: 220px; z-index: 1000; padding: 8px 0;
             border: 1px solid var(--card-border);
         }
 
-        /* Style existant conservé */
-        .search-container { padding: 12px; }
-        .search-bar {
-            width: 100%; box-sizing: border-box; padding: 10px 15px;
-            border-radius: var(--app-radius); border: none;
-            background: var(--hover-bg); color: var(--text); outline: none;
+        .menu-item { padding: 12px 15px; cursor: pointer; color: var(--text); display: flex; justify-content: space-between; align-items: center; }
+        .menu-item:hover { background: var(--hover-bg); }
+
+        .add-btn {
+            background: var(--myme-blue); border: none; border-radius: 10px;
+            width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; 
+            cursor: pointer; margin-top: 20px;
         }
-        .chat-item {
-            display: flex; padding: 12px 15px; align-items: center; cursor: pointer;
-            border-bottom: 0.5px solid var(--card-border); transition: 0.2s;
-        }
-        .chat-item:hover { background: var(--hover-bg); }
+
         .online-indicator {
             position: absolute; bottom: 2px; right: 2px;
             width: 12px; height: 12px; background: #31a24c;
             border: 2px solid var(--bg); border-radius: 50%; display: none;
         }
         .is-online .online-indicator { display: block; }
-        .self-badge-container {
-            position: absolute; top: -2px; left: 28px; background: #29bd49;
-            color: white; font-size: 10px; font-weight: bold; min-width: 16px;
-            height: 16px; border-radius: 8px; display: none; align-items: center;
-            justify-content: center; border: 2px solid var(--bg); padding: 0 4px;
-        }
-        .menu-item { padding: 10px 15px; cursor: pointer; color: var(--text); text-decoration: none; display: flex; justify-content: space-between; }
-        .menu-item:hover { background: var(--hover-bg); }
+        
         .switch { position: relative; display: inline-block; width: 34px; height: 18px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
@@ -150,26 +146,34 @@
 <body onclick="closeMenu()">
 
 <div class="app-container">
-    <aside class="sidebar">
-        <div class="sidebar-nav-top">
-            <div class="nav-icons-group">
-                <a href="ACCEUIL.html" class="active">
-                    <svg viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.14 2 11.25c0 2.913 1.45 5.503 3.71 7.218.158.119.24.32.21.516l-.37 2.417a.75.75 0 0 0 1.056.79l2.766-1.303a.75.75 0 0 1 .458-.063c.633.14 1.294.215 1.97.215 5.523 0 10-4.14 10-9.25S17.523 2 12 2Z"/></svg>
-                </a>
-
-                <a href="javascript:void(0)" onclick="openSettingsInChat('appel.html')" style="cursor: pointer;">
-                    <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
-                </a>
-
-                <a href="javascript:void(0)" onclick="openSettingsInChat('note.html')" style="cursor: pointer;">
-                    <svg viewBox="0 0 24 24"><path d="M20,2H4C2.9,2,2,2.9,2,4v12c0,1.1,0.9,2,2,2h4l4,4l4-4h4c1.1,0,2-0.9,2-2V4C22,2.9,21.1,2,20,2z" fill="none" stroke="currentColor" stroke-width="2"/></svg>
-                </a>
-            </div>
+    <nav class="sidebar-mini">
+        <div class="mini-nav-vertical">
+            <a href="ACCEUIL.html" class="active" title="Messages">
+                <svg viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.14 2 11.25c0 2.913 1.45 5.503 3.71 7.218.158.119.24.32.21.516l-.37 2.417a.75.75 0 0 0 1.056.79l2.766-1.303a.75.75 0 0 1 .458-.063c.633.14 1.294.215 1.97.215 5.523 0 10-4.14 10-9.25S17.523 2 12 2Z"/></svg>
+            </a>
+            <a href="javascript:void(0)" onclick="openSettingsInChat('appel.html')" title="Appels">
+                <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+            </a>
+            <a href="javascript:void(0)" onclick="openSettingsInChat('note.html')" title="Notes">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20,2H4C2.9,2,2,2.9,2,4v12c0,1.1,0.9,2,2,2h4l4,4l4-4h4c1.1,0,2-0.9,2-2V4C22,2.9,21.1,2,20,2z"/></svg>
+            </a>
             <button class="add-btn" onclick="location.href='contacts.html'">
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="white"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
             </button>
         </div>
 
+        <div class="profile-section-bottom">
+            <img id="headerUserImg" class="user-avatar-header" src="https://ui-avatars.com/api/?name=?" onclick="toggleMenu(event)">
+            <div id="self-online-dot"></div>
+            <div id="global-unread-badge" style="position:absolute; top:-5px; right:-5px; background:red; color:white; border-radius:50%; font-size:10px; width:18px; height:18px; display:none; align-items:center; justify-content:center;">0</div>
+        </div>
+    </nav>
+
+    <aside class="sidebar-main">
+        <div class="sidebar-header">
+            <h1>Myme</h1>
+        </div>
+        
         <div class="search-container">
             <input type="text" class="search-bar" id="search-input" placeholder="Rechercher..." data-lang="search_placeholder">
         </div>
@@ -180,30 +184,6 @@
                 <p id="empty-text" data-lang="no-chat" style="text-align:center; padding:20px; color:var(--gray);">Aucune discussion</p>
             </div>
         </div>
-
-        <div class="sidebar-bottom">
-            <div style="position: relative; display: flex;">
-                <img id="headerUserImg" class="user-avatar-header" src="https://ui-avatars.com/api/?name=?" onclick="toggleMenu(event)">
-                <div id="self-online-dot"></div>
-                <div id="global-unread-badge" class="self-badge-container">0</div>
-            </div>
-            <span style="margin-left: 10px; font-weight: bold; font-size: 14px;">Myme</span>
-
-            <div id="dropdown-menu">
-                <div class="menu-item" onclick="openSettingsInChat('fond_ecran.html')" data-lang="font">Fond & Style</div>
-                <div class="menu-item" onclick="openSettingsInChat('parametres.html')" data-lang="parameter">Paramètres</div>
-    
-                <div class="menu-item" onclick="event.stopPropagation()">
-                    <span data-lang="dark_mode">Mode Sombre</span>
-                    <label class="switch">
-                        <input type="checkbox" id="theme-switch" onchange="toggleTheme()">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-                <hr style="border: 0; border-top: 1px solid var(--card-border); margin: 4px 0;">
-                <div class="menu-item" style="color: #ff4d4d;" onclick="logout()" data-lang="logout">Déconnexion</div>
-            </div>
-        </div>
     </aside>
 
     <main class="main-chat-view">
@@ -212,10 +192,22 @@
             <p>Sélectionnez une discussion pour commencer</p>
         </div>
         <iframe id="chat-iframe" name="chat-frame"></iframe>
+
+        <div id="dropdown-menu">
+            <div class="menu-item" onclick="openSettingsInChat('fond_ecran.html')" data-lang="font">Fond & Style</div>
+            <div class="menu-item" onclick="openSettingsInChat('parametres.html')" data-lang="parameter">Paramètres</div>
+            <div class="menu-item" onclick="event.stopPropagation()">
+                <span data-lang="dark_mode">Mode Sombre</span>
+                <label class="switch">
+                    <input type="checkbox" id="theme-switch" onchange="toggleTheme()">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <hr style="border: 0; border-top: 1px solid var(--card-border); margin: 4px 0;">
+            <div class="menu-item" style="color: #ff4d4d;" onclick="logout()" data-lang="logout">Déconnexion</div>
+        </div>
     </main>
 </div>
-
-<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignal.js" async></script>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -639,6 +631,7 @@
 </body>
 
 </html>
+
 
 
 
