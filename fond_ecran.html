@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Style & Font - Myme</title>
-        <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Zeyada&family=Caveat:wght@400;700&family=Shadows+Into+Light&family=Gochi+Hand&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Zeyada&family=Caveat:wght@400;700&family=Shadows+Into+Light&family=Gochi+Hand&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg: #ffffff;
@@ -14,6 +14,7 @@
             --hover-bg: #f2f2f2;
             --header-bg: #ffffff;
             --card-border: #f0f2f5;
+            /* Variables dynamiques */
             --app-font-size: 16px;
             --app-font-family: 'Segoe UI';
             --app-radius: 20px;
@@ -29,6 +30,7 @@
             --card-border: #3e4042;
         }
 
+        /* --- SYSTÈME DE TAILLE DYNAMIQUE GLOBAL --- */
         body {
             background-color: var(--bg);
             color: var(--text);
@@ -37,7 +39,7 @@
             letter-spacing: var(--app-spacing);
             transition: background 0.3s ease;
             margin: 0;
-            padding: 15px;
+            padding: 0;
             padding-top: 70px;
             display: flex;
             flex-direction: column;
@@ -46,82 +48,103 @@
             box-sizing: border-box;
         }
 
-        /* --- FLÈCHE RETOUR --- */
+        h1 { font-size: calc(var(--app-font-size) * 1.8); }
+        h2 { font-size: calc(var(--app-font-size) * 1.5); color: var(--myme-blue); text-align: center; margin-bottom: 30px; }
+        h3 { font-size: calc(var(--app-font-size) * 1.2); margin: 0 0 10px 0; }
+        p, span, div, label, select, input { font-size: var(--app-font-size); }
+        small { font-size: calc(var(--app-font-size) * 0.85); color: var(--gray); display: block; }
+
+        /* --- LOOK PRO : SANS BORDURES --- */
+        .container { width: 100%; max-width: 600px; }
+
+        .card {
+            background: var(--header-bg);
+            border: none; /* Suppression bordure */
+            border-bottom: 1px solid var(--card-border); /* Séparateur discret */
+            padding: 25px 20px;
+            margin-bottom: 0; /* Blocs collés pour look pro */
+            transition: all 0.2s;
+        }
+
+        .row { 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            margin: 15px 0; 
+            gap: 15px; 
+        }
+
+        /* --- ÉLÉMENTS DE FORMULAIRE --- */
+        input[type="range"] {
+            accent-color: var(--myme-blue);
+            flex: 1;
+            max-width: 150px;
+        }
+
+        select {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--card-border);
+            background: var(--bg);
+            color: var(--text);
+            cursor: pointer;
+        }
+
+        /* --- BOUTON IMAGE STYLE PRO --- */
+        .btn-choose {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: var(--hover-bg);
+            color: var(--text);
+            text-align: center;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 10px;
+            border: 1px solid var(--card-border);
+        }
+
+        .wallpaper-preview {
+            width: 100%;
+            height: 120px;
+            border-radius: 12px;
+            border: 2px dashed var(--card-border);
+            margin-top: 15px;
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gray);
+        }
+
+        .btn-action {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            background: var(--myme-blue);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
         .fleche-retour {
             position: absolute; top: 15px; left: 15px; width: 40px; height: 40px;
             background: none; border: none; border-radius: 50%; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;
-            z-index: 100;
+            display: flex; align-items: center; justify-content: center; transition: 0.3s;
         }
         .fleche-retour::before { content: ''; position: absolute; width: 18px; height: 3px; background-color: var(--text); }
         .fleche-retour::after { content: ''; position: absolute; left: 11px; width: 8px; height: 8px; border-left: 3px solid var(--text); border-bottom: 3px solid var(--text); transform: rotate(45deg); }
         .fleche-retour:hover { background-color: var(--hover-bg); }
 
-        .container { width: 100%; max-width: 450px; }
-        h2 { color: var(--myme-blue); text-align: center; margin-bottom: 20px; font-size: 1.5rem; }
-
-        .card {
-            background: var(--header-bg);
-            border: 1px solid var(--card-border);
-            border-radius: var(--app-radius);
-            padding: 15px;
-            margin-bottom: 15px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            transition: border-width 0.2s;
-        }
-
-        .row { display: flex; align-items: center; justify-content: space-between; margin: 12px 0; gap: 10px; }
-        .row span, .row div { font-size: 0.95rem; }
-
-        input[type="range"], select {
-            accent-color: var(--myme-blue);
-            padding: 6px; border-radius: 10px; border: 1px solid var(--card-border);
-            background: var(--bg); color: var(--text);
-            max-width: 160px;
-        }
-
-        .wallpaper-preview {
-            width: 100%; height: 100px; border-radius: 15px;
-            border: 2px dashed var(--gray); margin-top: 10px;
-            background-size: cover; background-position: center;
-            display: flex; align-items: center; justify-content: center;
-            color: var(--gray); font-size: 13px; text-align: center;
-        }
-
-        .btn-action {
-            width: 100%; padding: 12px; border: none; border-radius: 12px;
-            background: var(--myme-blue); color: white; font-weight: bold;
-            cursor: pointer; margin-top: 10px; font-size: 0.9rem;
-        }
-
-        small { color: var(--gray); display: block; margin-top: 2px; font-size: 0.75rem; }
-
-        /* Adaptations petits écrans */
-        @media (max-width: 380px) {
+        @media (max-width: 480px) {
             .row { flex-direction: column; align-items: flex-start; }
             input[type="range"], select { max-width: 100%; width: 100%; }
         }
     </style>
-    <link rel="apple-touch-icon" sizes="57x57" href="apple-icon-57x57.png">
-<link rel="apple-touch-icon" sizes="60x60" href="apple-icon-60x60.png">
-<link rel="apple-touch-icon" sizes="72x72" href="apple-icon-72x72.png">
-<link rel="apple-touch-icon" sizes="76x76" href="apple-icon-76x76.png">
-<link rel="apple-touch-icon" sizes="114x114" href="apple-icon-114x114.png">
-<link rel="apple-touch-icon" sizes="120x120" href="apple-icon-120x120.png">
-<link rel="apple-touch-icon" sizes="144x144" href="apple-icon-144x144.png">
-<link rel="apple-touch-icon" sizes="152x152" href="apple-icon-152x152.png">
-<link rel="apple-touch-icon" sizes="180x180" href="apple-icon-180x180.png">
-
-<link rel="icon" type="image/png" sizes="192x192" href="android-icon-192x192.png">
-
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
-<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
-
-<link rel="manifest" href="manifest.json">
-<meta name="msapplication-TileColor" content="#ffffff">
-<meta name="msapplication-TileImage" content="ms-icon-144x144.png">
-<meta name="theme-color" content="#ffffff">
 </head>
 <body>
 
@@ -131,55 +154,47 @@
         <h2 data-lang="style-app">Style & Apparence</h2>
 
         <div class="card">
-            <h3 style="margin-top:0; font-size: 1.1rem;">🔤 Typographie</h3>
+            <h3 data-lang="typo-title">🔤 Typographie</h3>
             <div class="row">
                 <span data-lang="text-size">Taille du texte</span>
-                <input type="range" id="fontRange" min="12" max="38" value="16">
+                <input type="range" id="fontRange" min="12" max="30" value="16">
             </div>
             <div class="row">
                 <span data-lang="font-style">Style de police</span>
                 <select id="fontSelect">
-                    <optgroup label="Classique">
-                        <option value="'Segoe UI'">Segoe UI (Défaut)</option>
-                        <option value="sans-serif">Sans Serif</option>
-                    </optgroup>
-                    <optgroup label="Manuscrit & Bizz">
-                        <option value="cursive">Manuscrit (Système)</option>
-                        <option value="'Caveat'">Caveat (Stylo)</option>
-                        <option value="'Permanent Marker'">Marker (Feutre)</option>
-                        <option value="'Zeyada'">Zeyada</option>
-                        <option value="'Gochi Hand'">Gochi (Cahier)</option>
-                    </optgroup>
+                    <option value="'Segoe UI'">Segoe UI (Défaut)</option>
+                    <option value="'Caveat'">Caveat (Stylo)</option>
+                    <option value="'Permanent Marker'">Marker (Feutre)</option>
+                    <option value="'Gochi Hand'">Gochi (Cahier)</option>
                 </select>
             </div>
             <div class="row">
                 <div><strong data-lang="spacing">Espacement</strong><small data-lang="spaced">Lettres serrées ou aérées</small></div>
-                <input type="range" id="spacingRange" min="-1" max="6" value="0">
+                <input type="range" id="spacingRange" min="-1" max="5" value="0">
             </div>
         </div>
 
         <div class="card">
-            <h3 style="margin-top:0; font-size: 1.1rem;">📐 Formes</h3>
+            <h3 data-lang="shapes-title">📐 Formes</h3>
             <div class="row">
                 <div><strong data-lang="bubble-rounding">Arrondi bulles</strong><small data-lang="square-or">Style carré ou rond</small></div>
                 <input type="range" id="radiusRange" min="0" max="35" value="20">
             </div>
-            <div class="row">
-                <div><strong data-lang="border-thik">Épaisseur Bordure</strong><small data-lang="element-outline">Contour des éléments</small></div>
-                <input type="range" id="borderWidthRange" min="0" max="5" value="1">
-            </div>
-        </div>
-        <div class="card">
-            <h3 style="margin-top:0; font-size: 1.1rem;" data-lang="font">Fond d'écran</h3>
-            <input type="file" id="bgInput" accept="image/*" style="width: 100%; font-size: 12px;">
-            <div class="wallpaper-preview" id="bgPreview" data-lang="back-preview">Aperçu du fond</div>
-            <button class="btn-action" onclick="resetBg()" style="background: var(--gray);" data-lang="reset">Réinitialiser</button>
         </div>
 
         <div class="card">
-            <h3 style="margin-top:0; font-size: 1.1rem;">✨ Effet Visuel</h3>
+            <h3 data-lang="wallpaper-title">🖼️ Fond d'écran</h3>
+            <input type="file" id="bgInput" accept="image/*" style="display: none;">
+            <label for="bgInput" class="btn-choose" data-lang="choose-image">Choisir une image</label>
+            
+            <div class="wallpaper-preview" id="bgPreview" data-lang="back-preview">Aucun fond sélectionné</div>
+            <button class="btn-action" onclick="resetBg()" style="background: var(--gray); opacity: 0.7;" data-lang="reset">Réinitialiser</button>
+        </div>
+
+        <div class="card" style="border-bottom: none;">
+            <h3 data-lang="effects-title">✨ Effets Visuels</h3>
             <div class="row">
-                <div><strong>Opacité (Ghost)</strong><small>Transparence</small></div>
+                <div><strong data-lang="ghost-mode">Opacité (Ghost)</strong><small data-lang="transparency">Transparence de l'interface</small></div>
                 <input type="range" id="ghostRange" min="3" max="10" value="10">
             </div>
             <div class="row">
@@ -188,10 +203,9 @@
                     <option value="none" data-lang="none">Aucun</option>
                     <option value="sepia(0.5)">Vintage</option>
                     <option value="grayscale(1)">Noir & Blanc</option>
-                    <option value="hue-rotate(90deg)">Psychédélique</option>
                 </select>
             </div>
-            <button class="btn-action" onclick="fullReset()" style="background:#ff4d4d; margin-top:20px;" data-lang="clear-all">Tout effacer</button>
+            <button class="btn-action" onclick="fullReset()" style="background:#ff4d4d;" data-lang="clear-all">Tout réinitialiser</button>
         </div>
     </div>
 
@@ -208,9 +222,9 @@
             const fi = localStorage.getItem('myme-filter') || 'none';
             const rad = localStorage.getItem('myme-radius') || '20px';
             const spc = localStorage.getItem('myme-spacing') || 'normal';
-            const brw = localStorage.getItem('myme-border') || '1px';
             const wall = localStorage.getItem('myme-bg');
 
+            // Application des variables racine
             document.documentElement.style.setProperty('--app-font-size', fs);
             document.documentElement.style.setProperty('--app-font-family', ff);
             document.documentElement.style.setProperty('--app-radius', rad);
@@ -218,11 +232,6 @@
 
             document.body.style.opacity = gh;
             document.body.style.filter = fi;
-
-            // Appliquer l'épaisseur de bordure aux cartes
-            document.querySelectorAll('.card').forEach(c => {
-                c.style.borderWidth = brw;
-            });
 
             if(wall) {
                 const preview = document.getElementById('bgPreview');
@@ -233,12 +242,11 @@
             if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode');
         }
 
-        // --- ECOUTEURS ---
+        // Écouteurs d'événements
         document.getElementById('fontRange').oninput = (e) => save('myme-fsize', e.target.value + 'px');
         document.getElementById('fontSelect').onchange = (e) => save('myme-ffam', e.target.value);
         document.getElementById('spacingRange').oninput = (e) => save('myme-spacing', e.target.value + 'px');
         document.getElementById('radiusRange').oninput = (e) => save('myme-radius', e.target.value + 'px');
-        document.getElementById('borderWidthRange').oninput = (e) => save('myme-border', e.target.value + 'px');
         document.getElementById('ghostRange').oninput = (e) => save('myme-ghost', e.target.value / 10);
         document.getElementById('filterSelect').onchange = (e) => save('myme-filter', e.target.value);
 
@@ -247,20 +255,20 @@
             reader.onload = (e) => save('myme-bg', e.target.result);
             reader.readAsDataURL(this.files[0]);
         };
-          const lang = localStorage.getItem("lang") || "en";
 
-          async function applyTranslations() {
+        async function applyTranslations() {
+            const lang = localStorage.getItem("lang") || "fr";
             try {
                 const res = await fetch("lang.json");
                 const data = await res.json();
                 document.querySelectorAll("[data-lang]").forEach(el => {
                     const key = el.getAttribute("data-lang");
-                    if (!data[lang] || !data[lang][key]) return;
-                    if (el.tagName === "INPUT") { el.placeholder = data[lang][key]; }
-                    else { el.textContent = data[lang][key]; }
+                    if (data[lang] && data[lang][key]) {
+                        el.textContent = data[lang][key];
+                    }
                 });
-            } catch (error) { console.error("Erreur de chargement des langues:", error); }
-          }
+            } catch (e) { console.log("Traduction non chargée"); }
+        }
 
         function resetBg() {
             localStorage.removeItem('myme-bg');
@@ -268,40 +276,21 @@
         }
 
         function fullReset() {
-            if(confirm("Réinitialiser tous les styles ? Vos messages et contacts resteront intacts.")) {
-                // Liste précise des clés de style uniquement
-                const styleKeys = [
-                    'myme-fsize',
-                    'myme-ffam',
-                    'myme-ghost',
-                    'myme-filter',
-                    'myme-radius',
-                    'myme-spacing',
-                    'myme-border',
-                    'myme-bg',
-                    'theme'
-                ];
-
-                // On ne supprime que ces clés une par une
-                styleKeys.forEach(key => localStorage.removeItem(key));
-
-                // On recharge la page pour revenir au style par défaut
+            if(confirm("Réinitialiser tous les styles ?")) {
+                ['myme-fsize','myme-ffam','myme-ghost','myme-filter','myme-radius','myme-spacing','myme-bg','theme'].forEach(k => localStorage.removeItem(k));
                 location.reload();
             }
         }
 
-        // Init
         window.onload = () => {
             applyLocalPreview();
+            applyTranslations();
+            // Synchro des sliders avec le storage
             document.getElementById('fontRange').value = parseInt(localStorage.getItem('myme-fsize')) || 16;
             document.getElementById('fontSelect').value = localStorage.getItem('myme-ffam') || "'Segoe UI'";
             document.getElementById('radiusRange').value = parseInt(localStorage.getItem('myme-radius')) || 20;
-            document.getElementById('spacingRange').value = parseInt(localStorage.getItem('myme-spacing')) || 0;
-            document.getElementById('borderWidthRange').value = parseInt(localStorage.getItem('myme-border')) || 1;
             document.getElementById('ghostRange').value = (localStorage.getItem('myme-ghost') || 1) * 10;
         };
-        applyTranslations();
     </script>
 </body>
-
 </html>
