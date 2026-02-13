@@ -45,7 +45,13 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        .container { width: 100%; max-width: 600px; margin: 0 auto; padding: 20px; box-sizing: border-box; }
+        .container { 
+            width: 100%; 
+            max-width: 800px; /* On peut élargir un peu pour le PC */
+            margin: 0 auto; 
+            padding: 20px 0; /* On enlève le padding latéral pour que les lignes touchent les bords */
+            box-sizing: border-box; 
+        }
 
         .top-bar {
             display: flex; align-items: center; justify-content: space-between;
@@ -58,12 +64,15 @@
             border: 1px solid var(--border); backdrop-filter: blur(10px);
         }
 
-        .profile-card {
-            background: var(--card); border-radius: var(--app-radius); /* MODIFIÉ PAR VAR */
-            padding: 30px;
-            display: flex; flex-direction: column; align-items: center;
-            text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.03);
-            margin-bottom: 25px; border: 1px solid var(--border);
+        .profile-card, .settings-group {
+            background: var(--card);
+            border-radius: 0; /* On enlève l'arrondi pour le look ligne pleine */
+            padding: 20px;
+            margin-bottom: 30px;
+            border: none; /* On supprime la bordure tout autour */
+            border-top: 1px solid var(--border); /* Optionnel : juste une ligne au dessus */
+            border-bottom: 1px solid var(--border); /* Et une ligne en dessous */
+            box-shadow: none; /* Look plus plat et moderne sur PC */
         }
 
         .avatar-container {
@@ -78,16 +87,13 @@
         .avatar-initials { color: white; font-size: 2.5rem; font-weight: 800; text-transform: uppercase; }
 
         .section-label {
-            font-size: 13px; font-weight: 600; color: var(--muted);
-            text-transform: uppercase; margin: 0 0 10px 15px; letter-spacing: 0.5px;
+            margin: 0 0 10px 20px;
         }
 
-        .settings-group {
-            background: var(--card);
-            border-radius: var(--app-radius); /* MODIFIÉ PAR VAR */
-            overflow: hidden; margin-bottom: 25px; border: 1px solid var(--border);
+        .setting-item {
+            padding: 16px 15px;
+            max-width: 100%;
         }
-        .setting-item { display: flex; align-items: center; padding: 16px 20px; gap: 15px; border-bottom: 1px solid var(--border); transition: 0.2s; }
         .setting-item:last-child { border-bottom: none; }
 
         .icon-wrap { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; }
@@ -673,5 +679,6 @@
 </body>
 
 </html>
+
 
 
