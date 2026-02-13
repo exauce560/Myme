@@ -52,6 +52,8 @@
         "Message-deleted": "Message supprimé pour tous",
         "suppression": "Erreur de suppression",
         "error-phone-taken": "❌ Ce numéro est déjà utilisé."
+        "choose-image": "Choisir une image",
+        "wallpaper-title": "Fond d'écran"
  },
    "en": {
      "welcome": "Welcome",
@@ -216,5 +218,8 @@
      "about": "About app",
      "birthday": "Birthday",
      "error-phone-taken": "❌ This number is already in use."
+     "choose-image": "Choose an image",
+     "wallpaper-title": "Wallpaper"
    }
  }
+
