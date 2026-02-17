@@ -6,143 +6,192 @@
     <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Rock+Salt&family=Caveat:wght@400;700&family=Shadows+Into+Light&family=Gochi+Hand&display=swap" rel="stylesheet">
     <title>Myme - Accueil</title>
     <style>
-        :root {
-            --bg: #ffffff; --text: #1c1e21; --gray: #65676b;
-            --myme-blue: #0866ff; --myme-gray: #9e9e9e; --hover-bg: #f2f2f2;
-            --header-bg: #ffffff; --card-border: #f0f2f5;
-            --sidebar-mini: #f7f8fa;
-            --app-font-size: 16px;
-            --app-font-family: 'Segoe UI';
-            --app-radius: 25px;
-        }
+/* --- VARIABLES UNIFIÉES (Look WhatsApp + Tes Fonctions) --- */
+:root {
+    /* Couleurs Light (par défaut) */
+    --bg: #ffffff; 
+    --text: #1c1e21; 
+    --gray: #65676b;
+    --myme-blue: #0866ff; 
+    --hover-bg: #f2f2f2;
+    --header-bg: #ffffff; 
+    --card-border: #f0f2f5;
+    --sidebar-mini: #f7f8fa;
+    --app-font-family: 'Segoe UI', system-ui, sans-serif;
+    --app-font-size: 16px;
+    
+    /* Spécifiques WhatsApp Dark (utilisées en Dark Mode) */
+    --wa-bg-mini: #202c33;
+    --wa-bg-main: #111b21;
+    --wa-bg-chat: #0b141a;
+    --wa-text-primary: #e9edef;
+    --wa-text-secondary: #8696a0;
+    --wa-green: #00a884;
+    --wa-border: #222d34;
+}
 
-        body.dark-mode {
-            --bg: #0a1014; --text: #e4e6eb; --gray: #b0b3b8;
-            --hover-bg: #202c33; --header-bg: #111b21; --card-border: #222d34;
-            --sidebar-mini: #111b21;
-        }
+/* --- MODE SOMBRE (Le look WhatsApp pur) --- */
+body.dark-mode {
+    --bg: var(--wa-bg-main);
+    --text: var(--wa-text-primary);
+    --gray: var(--wa-text-secondary);
+    --hover-bg: #2b3943;
+    --header-bg: var(--wa-bg-main);
+    --card-border: var(--wa-border);
+    --sidebar-mini: var(--wa-bg-mini);
+    --myme-blue: var(--wa-green); /* Le bleu devient le vert WhatsApp */
+}
 
-        body {
-            font-family: var(--app-font-family), system-ui, sans-serif;
-            font-size: var(--app-font-size);
-            background: var(--bg); color: var(--text); margin: 0;
-            height: 100vh; overflow: hidden;
-        }
+body {
+    font-family: var(--app-font-family);
+    font-size: var(--app-font-size);
+    background: var(--bg); 
+    color: var(--text); 
+    margin: 0;
+    height: 100vh; 
+    overflow: hidden;
+}
 
-        .app-container { display: flex; height: 100vh; width: 100vw; }
+.app-container { display: flex; height: 100vh; width: 100vw; }
 
-        /* --- 1. BARRE MINI (EXTRÊME GAUCHE) --- */
-        .sidebar-mini {
-            width: 65px;
-            background: var(--sidebar-mini);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px 0;
-            border-right: 1px solid var(--card-border);
-            justify-content: space-between;
-        }
+/* --- 1. BARRE MINI (EXTRÊME GAUCHE) --- */
+.sidebar-mini {
+    width: 65px;
+    background: var(--sidebar-mini);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 0;
+    border-right: 1px solid var(--card-border);
+    justify-content: space-between;
+}
 
-        .mini-nav-vertical { display: flex; flex-direction: column; gap: 25px; }
-        .mini-nav-vertical svg { width: 26px; height: 26px; fill: var(--gray); cursor: pointer; transition: 0.2s; }
-        .mini-nav-vertical .active svg { fill: var(--myme-gray); }
-        .mini-nav-vertical a:hover svg { transform: scale(1.1); fill: var(--myme-gray); }
+.mini-nav-vertical { display: flex; flex-direction: column; gap: 25px; }
+.mini-nav-vertical svg { width: 26px; height: 26px; fill: var(--gray); cursor: pointer; transition: 0.2s; }
+.mini-nav-vertical .active svg { fill: var(--text); }
+.mini-nav-vertical a:hover svg { transform: scale(1.1); fill: var(--myme-blue); }
 
-        .profile-section-bottom { 
-            position: relative; 
-            padding-bottom: 10px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+.profile-section-bottom { 
+    position: relative; 
+    padding-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
 
-        .user-avatar-header {
-            width: 42px; height: 42px; border-radius: 14px;
-            object-fit: cover; cursor: pointer; border: 2px solid transparent;
-            transition: 0.2s;
-        }
-        .user-avatar-header:hover { border-color: var(--myme-blue); }
+.user-avatar-header {
+    width: 42px; height: 42px; border-radius: 50%; /* WhatsApp look */
+    object-fit: cover; cursor: pointer; border: 2px solid transparent;
+    transition: 0.2s;
+}
+.user-avatar-header:hover { border-color: var(--myme-blue); }
 
-        #self-online-dot {
-            position: absolute; bottom: 12px; right: 2px;
-            width: 12px; height: 12px; background: #31a24c;
-            border: 2px solid var(--sidebar-mini); border-radius: 50%;
-        }
+#self-online-dot {
+    position: absolute; bottom: 12px; right: 2px;
+    width: 12px; height: 12px; background: #00a884;
+    border: 2px solid var(--sidebar-mini); border-radius: 50%;
+}
 
-        /* --- 2. COLONNE DISCUSSIONS --- */
-        .sidebar-main {
-            width: 350px;
-            display: flex;
-            flex-direction: column;
-            background: var(--bg);
-            border-right: 1px solid var(--card-border);
-        }
+/* --- 2. COLONNE DISCUSSIONS --- */
+.sidebar-main {
+    width: 350px;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg);
+    border-right: 1px solid var(--card-border);
+}
 
-        .sidebar-header {
-            padding: 20px 15px 10px 15px;
-        }
-        .sidebar-header h1 { 
-            margin: 0; font-size: 22px; font-weight: 800; color: var(--myme-blue);
-            font-family: 'Segoe UI', sans-serif;
-        }
+.sidebar-header { padding: 20px 15px 10px 15px; }
+.sidebar-header h1 { 
+    margin: 0; font-size: 22px; font-weight: 700; color: var(--text);
+}
 
-        .search-container { padding: 10px 15px; }
-        .search-bar {
-            width: 100%; box-sizing: border-box; padding: 10px 15px;
-            border-radius: 12px; border: none;
-            background: var(--hover-bg); color: var(--text); outline: none;
-        }
+.search-container { padding: 10px 15px; }
+.search-bar {
+    width: 100%; box-sizing: border-box; padding: 10px 15px;
+    border-radius: 8px; border: none;
+    background: var(--hover-bg); color: var(--text); outline: none;
+}
 
-        .sidebar-content { flex: 1; overflow-y: auto; }
+.sidebar-content { flex: 1; overflow-y: auto; }
 
-        /* Suppression de la couleur grise entre discussions */
-        .chat-item {
-            display: flex; padding: 12px 15px; align-items: center; cursor: pointer;
-            border-bottom: none; transition: 0.2s;
-        }
-        .chat-item:hover { background: var(--hover-bg); }
+.chat-item {
+    display: flex; height: 72px; padding: 0 15px; align-items: center; cursor: pointer;
+    border-bottom: 1px solid var(--card-border); transition: 0.2s;
+}
+.chat-item:hover { background: var(--hover-bg); }
 
-        /* --- 3. VUE CHAT (DROITE) --- */
-        .main-chat-view { flex: 1; background: var(--hover-bg); position: relative; }
-        #chat-iframe { width: 100%; height: 100%; border: none; display: none; }
+/* --- 3. VUE CHAT (DROITE) --- */
+.main-chat-view { 
+    flex: 1; 
+    background-color: var(--bg); /* Fond dynamique */
+    position: relative; 
+}
 
-        .no-chat-selected {
-            display: flex; flex-direction: column; align-items: center;
-            justify-content: center; height: 100%; color: var(--gray);
-        }
+/* Application du Doodle uniquement en Dark Mode */
+body.dark-mode .main-chat-view {
+    background-color: var(--wa-bg-chat);
+}
 
-        /* Dropdown style */
-        #dropdown-menu {
-            position: absolute; bottom: 70px; left: 70px; background: var(--header-bg);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2); border-radius: 12px;
-            display: none; flex-direction: column; width: 220px; z-index: 1000; padding: 8px 0;
-            border: 1px solid var(--card-border);
-        }
+body.dark-mode .main-chat-view::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
+    background-repeat: repeat;
+    background-size: 400px;
+    opacity: 0.06;
+    z-index: 0;
+}
 
-        .menu-item { padding: 12px 15px; cursor: pointer; color: var(--text); display: flex; justify-content: space-between; align-items: center; }
-        .menu-item:hover { background: var(--hover-bg); }
+#chat-iframe { width: 100%; height: 100%; border: none; position: relative; z-index: 1; }
 
-        .add-btn {
-            background: var(--myme-blue); border: none; border-radius: 10px;
-            width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; 
-            cursor: pointer; margin-top: 20px;
-        }
+.no-chat-selected {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; height: 100%; color: var(--gray);
+    position: relative; z-index: 1;
+}
 
-        .online-indicator {
-            position: absolute; bottom: 2px; right: 2px;
-            width: 12px; height: 12px; background: #31a24c;
-            border: 2px solid var(--bg); border-radius: 50%; display: none;
-        }
-        .is-online .online-indicator { display: block; }
-        
-        .switch { position: relative; display: inline-block; width: 34px; height: 18px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
-        .slider:before { position: absolute; content: ""; height: 12px; width: 12px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
-        input:checked + .slider { background-color: var(--myme-blue); }
-        input:checked + .slider:before { transform: translateX(16px); }
+/* --- ÉLÉMENTS UI (Dropdown, Badges, Switch) --- */
+#dropdown-menu {
+    position: absolute; bottom: 70px; left: 70px; background: var(--header-bg);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2); border-radius: 12px;
+    display: none; flex-direction: column; width: 220px; z-index: 1000; padding: 8px 0;
+    border: 1px solid var(--card-border);
+}
 
-    </style>
+.menu-item { padding: 12px 15px; cursor: pointer; color: var(--text); display: flex; justify-content: space-between; align-items: center; }
+.menu-item:hover { background: var(--hover-bg); }
+
+.add-btn {
+    background: var(--myme-blue); border: none; border-radius: 50%;
+    width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; 
+    cursor: pointer; margin-top: 20px; color: white;
+}
+
+/* Badge de notification */
+[id^='badge-'] {
+    background-color: var(--myme-blue) !important;
+    color: white !important;
+    font-weight: bold;
+}
+
+.online-indicator {
+    position: absolute; bottom: 2px; right: 2px;
+    width: 12px; height: 12px; background: #31a24c;
+    border: 2px solid var(--bg); border-radius: 50%; display: none;
+}
+.is-online .online-indicator { display: block; }
+
+/* Switch design */
+.switch { position: relative; display: inline-block; width: 34px; height: 18px; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
+.slider:before { position: absolute; content: ""; height: 12px; width: 12px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+input:checked + .slider { background-color: var(--myme-blue); }
+input:checked + .slider:before { transform: translateX(16px); }
+
+</style>
 </head>
 <body onclick="closeMenu()">
 
@@ -632,6 +681,7 @@
 </body>
 
 </html>
+
 
 
 
