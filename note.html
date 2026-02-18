@@ -20,6 +20,40 @@
             --header-bg: #020c15; --border: #1a242d;
         }
 
+        /* --- STYLE DU BOUTON LIKE --- */
+        .like-btn {
+            position: absolute;
+            bottom: 80px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10003;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            backdrop-filter: blur(5px);
+        }
+
+        .like-btn:hover {
+            transform: scale(1.15);
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .like-btn svg {
+            fill: white;
+            transition: fill 0.3s, transform 0.2s;
+        }
+
+        .like-btn.liked svg {
+            fill: #ff4b4b;
+            transform: scale(1.2);
+        }
+
         body { 
             font-family: var(--app-font-family); 
             font-size: var(--app-font-size);
@@ -76,7 +110,6 @@
         .avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent); }
         .name { font-weight: 600; font-size: 0.9em; color: var(--text); }
 
-        /* Viewer */
         .story-bg-blur {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background-size: cover; background-position: center;
@@ -152,6 +185,13 @@
             </div>
             <div id="story-content" class="story-container-inner" style="display: none;">
                 <button id="delete-story-btn" class="delete-btn" onclick="deleteCurrentStory()">🗑️</button>
+                
+                <button id="like-btn" class="like-btn" onclick="sendLike()" title="Aimer ce statut">
+                    <svg width="24" height="24" viewBox="0 0 24 24">
+                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                    </svg>
+                </button>
+
                 <div class="story-top"><div class="progress-container" id="prog-container"></div></div>
                 <div class="story-main" id="story-main-zone"></div>
                 <div class="reply-bar" id="story-reply-bar">
@@ -249,6 +289,29 @@
         });
     }
 
+    window.sendLike = async () => {
+        const story = currentStories[storyIdx];
+        if (story.authorId === currentUser.uid) return;
+
+        // Feedback visuel immédiat
+        const btn = document.getElementById('like-btn');
+        btn.classList.add('liked');
+
+        try {
+            await addDoc(collection(db, "messages"), {
+                senderId: currentUser.uid,
+                receiverId: story.authorId,
+                text: "❤️ a aimé votre statut",
+                timestamp: serverTimestamp(),
+                read: false,
+                type: "text"
+            });
+            setTimeout(() => btn.classList.remove('liked'), 1000);
+        } catch (e) {
+            console.error("Erreur lors du like:", e);
+        }
+    };
+
     async function openUserStories(userId) {
         const q = query(collection(db, "notes"), where("authorId", "==", userId));
         const snap = await getDocs(q);
@@ -268,8 +331,10 @@
         const mainZone = document.getElementById('story-main-zone');
         const blurBg = document.getElementById('story-blur-bg');
         
+        // Cacher le bouton like si c'est notre propre statut
         const isMine = story.authorId === currentUser.uid;
         document.getElementById('delete-story-btn').style.display = isMine ? 'block' : 'none';
+        document.getElementById('like-btn').style.display = isMine ? 'none' : 'flex';
 
         if (story.photoBase64) {
             blurBg.style.backgroundImage = `url(${story.photoBase64})`;
