@@ -92,7 +92,8 @@ body {
 .add-btn {
     background: var(--myme-blue);
     border: none;
-    border-radius: 45%;
+    /* Arrondi moderne (style application) mais pas rond */
+    border-radius: 12px; 
     width: 38px;
     height: 38px;
     display: flex;
@@ -100,8 +101,22 @@ body {
     justify-content: center;
     cursor: pointer;
     transition: 0.2s;
+    padding: 0; /* Évite les décalages */
 }
 
+.add-btn svg {
+    width: 20px;
+    height: 20px;
+    /* Force le plus en blanc pur */
+    stroke: #ffffff !important; 
+    stroke-width: 3px;
+    fill: none;
+}
+
+.add-btn:hover {
+    background: #0077e6; /* Un bleu un peu plus sombre au survol */
+    transform: scale(1.05);
+}
 /* Section Profil et Paramètres en bas */
 .profile-section-bottom {
     display: flex;
@@ -672,6 +687,7 @@ body.dark-mode .main-chat-view::before {
 </body>
 
 </html>
+
 
 
 
