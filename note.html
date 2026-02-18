@@ -27,70 +27,108 @@
         .header { 
             padding: 15px 20px; background: var(--header-bg); 
             border-bottom: 1px solid var(--border); display: flex; 
-            align-items: center; gap: 20px; position: sticky; top: 0; z-index: 100;
+            align-items: center; gap: 15px; position: sticky; top: 0; z-index: 100;
         }
-        .back-btn { background: none; border: none; color: var(--text); font-size: 24px; cursor: pointer; }
+        
+        .back-btn { 
+            background: none; border: none; padding: 5px; cursor: pointer; 
+            display: flex; align-items: center; justify-content: center;
+            color: var(--text);
+        }
 
-        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; padding: 15px; }
 
         .post-box { 
-            background: var(--border); padding: 20px; 
-            border-radius: var(--app-radius); margin-bottom: 30px; 
+            background: var(--border); padding: 15px; 
+            border-radius: var(--app-radius); margin-bottom: 25px; 
         }
         .post-input { 
             width: 100%; border: none; background: transparent; 
-            font-size: 16px; color: var(--text); outline: none; margin-bottom: 10px;
-            font-family: inherit;
+            font-size: 16px; color: var(--text); outline: none; 
+            font-family: inherit; resize: none;
         }
 
-        .notes-list { display: flex; flex-direction: column; gap: 10px; }
-        .note-item { 
-            display: flex; align-items: center; padding: 15px; 
-            background: var(--header-bg); border-radius: 15px;
-            border: 1px solid var(--border); cursor: pointer; transition: 0.2s;
+        .notes-list { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 12px; 
         }
-        .note-item:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .avatar { width: 55px; height: 55px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent); margin-right: 15px; }
-        .name { font-weight: 600; font-size: 17px; }
+        .note-item { 
+            display: flex; flex-direction: column; align-items: center; 
+            padding: 20px 10px; background: var(--header-bg); 
+            border-radius: 20px; border: 1px solid var(--border); 
+            cursor: pointer; transition: 0.2s; text-align: center;
+        }
+        .note-item:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.08); }
+        .avatar { width: 65px; height: 65px; border-radius: 50%; object-fit: cover; border: 3px solid var(--accent); margin-bottom: 10px; }
+        .name { font-weight: 600; font-size: 15px; color: var(--text); }
 
         #story-viewer {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #000; z-index: 9999; flex-direction: column;
         }
-        .story-top { position: absolute; top: 0; width: 100%; padding: 10px; z-index: 10001; }
-        .progress-container { display: flex; gap: 5px; height: 3px; margin-bottom: 15px; }
+        
+        .story-bg-blur {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-size: cover; background-position: center;
+            filter: blur(25px) brightness(0.6); z-index: 1;
+        }
+
+        .story-top { position: absolute; top: 0; width: 100%; padding: 10px; z-index: 10001; box-sizing: border-box; }
+        .progress-container { display: flex; gap: 5px; height: 3px; margin-bottom: 10px; }
         .prog-bar { flex: 1; background: rgba(255,255,255,0.3); border-radius: 2px; overflow: hidden; }
         .prog-fill { width: 0%; height: 100%; background: #fff; }
 
-        .story-main { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; }
-        .story-img { max-width: 100%; max-height: 85vh; object-fit: contain; }
-        .story-text-overlay { color: white; font-size: 22px; margin-top: 20px; text-align: center; padding: 0 20px; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
-
-        .close-story { position: absolute; top: 30px; right: 20px; color: white; font-size: 35px; cursor: pointer; z-index: 10002; }
-        .pause-btn { background: rgba(255,255,255,0.2); border: none; color: white; padding: 5px 15px; border-radius: 20px; cursor: pointer; font-size: 12px; }
-
-        .reply-bar { padding: 20px; display: flex; gap: 10px; background: rgba(0,0,0,0.8); }
-        .reply-input { flex: 1; border-radius: 25px; border: none; padding: 12px 20px; background: rgba(255,255,255,0.15); color: white; outline: none; }
+        .story-main { 
+            flex: 1; display: flex; flex-direction: column; 
+            justify-content: center; align-items: center; 
+            position: relative; z-index: 2; padding: 20px;
+        }
+        .story-img { max-width: 100%; max-height: 80vh; object-fit: contain; border-radius: 10px; }
         
-        /* Petit indicateur de fichier sélectionné */
-        #file-status { font-size: 12px; color: var(--accent); margin-top: 5px; display: none; }
+        .story-text-content {
+            width: 100%; height: 100%; display: flex; align-items: center; 
+            justify-content: center; font-size: 28px; font-weight: bold;
+            color: white; text-align: center; padding: 40px; box-sizing: border-box; border-radius: 15px;
+        }
+
+        .story-text-overlay { 
+            color: white; font-size: 18px; margin-top: 15px; 
+            text-align: left; width: 100%; max-width: 500px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5); 
+        }
+
+        .close-story { position: absolute; top: 25px; right: 20px; color: white; font-size: 35px; cursor: pointer; z-index: 10002; }
+        
+        .delete-btn {
+            position: absolute; top: 70px; right: 20px; background: rgba(255,0,0,0.3);
+            border: none; color: white; padding: 8px; border-radius: 50%;
+            cursor: pointer; z-index: 10002; display: none; align-items: center; justify-content: center;
+        }
+
+        .reply-bar { padding: 15px; display: flex; gap: 10px; background: rgba(0,0,0,0.6); z-index: 10; }
+        .reply-input { flex: 1; border-radius: 25px; border: none; padding: 12px 20px; background: rgba(255,255,255,0.2); color: white; outline: none; }
+        
+        #file-status { font-size: 12px; color: var(--accent); margin: 5px 0; display: none; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <button class="back-btn" onclick="window.history.back()">←</button>
-        <h2 style="margin:0" data-i18n="status_title">Statuts</h2>
+        <button class="back-btn" onclick="window.history.back()">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        </button>
+        <h2 style="margin:0">Statuts</h2>
     </div>
 
     <div class="container">
         <div class="post-box">
-            <input type="text" id="note-text" class="post-input" placeholder="Partagez un statut..." data-i18n-placeholder="post_placeholder">
-            <div id="file-status">📷 Image sélectionnée</div>
+            <textarea id="note-text" class="post-input" rows="2" placeholder="Partagez un statut..."></textarea>
+            <div id="file-status">📷 Image prête</div>
             <div style="display:flex; justify-content: space-between; align-items: center; margin-top: 10px;">
                 <input type="file" id="note-file" hidden onchange="handleFileSelect(this)">
                 <button onclick="document.getElementById('note-file').click()" style="background:none; border:none; color:var(--accent); cursor:pointer; font-weight:bold;">+ Image</button>
-                <button onclick="publishNote()" style="background:var(--accent); color:white; border:none; padding:8px 20px; border-radius:20px; cursor:pointer;" data-i18n="btn_publish">Publier</button>
+                <button onclick="publishNote()" style="background:var(--accent); color:white; border:none; padding:8px 22px; border-radius:20px; cursor:pointer; font-weight:600;">Publier</button>
             </div>
         </div>
 
@@ -98,27 +136,28 @@
     </div>
 
     <div id="story-viewer">
+        <div id="story-blur-bg" class="story-bg-blur"></div>
         <span class="close-story" onclick="closeStory()">&times;</span>
+        
+        <button id="delete-story-btn" class="delete-btn" onclick="deleteCurrentStory()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+        </button>
         
         <div class="story-top">
             <div class="progress-container" id="prog-container"></div>
-            <button class="pause-btn" onclick="togglePause()" id="btn-pause">Pause</button>
         </div>
 
-        <div class="story-main">
-            <img id="story-img" class="story-img">
-            <div id="story-text" class="story-text-overlay"></div>
-        </div>
+        <div class="story-main" id="story-container"></div>
 
-        <div class="reply-bar">
-            <input type="text" id="reply-text" class="reply-input" placeholder="Répondre..." data-i18n-placeholder="reply_placeholder">
+        <div class="reply-bar" id="story-reply-bar">
+            <input type="text" id="reply-text" class="reply-input" placeholder="Répondre...">
             <button onclick="sendReply()" style="background:var(--accent); border:none; color:white; border-radius:50%; width:45px; height:45px; cursor:pointer;">➔</button>
         </div>
     </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, getDoc, doc, where, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, getDoc, doc, where, getDocs, serverTimestamp, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
     const firebaseConfig = {
@@ -140,55 +179,29 @@
     let isPaused = false;
     let timer;
 
-    // --- TRADUCTIONS ---
-    const translations = {
-        fr: {
-            status_title: "Statuts",
-            post_placeholder: "Partagez un statut...",
-            btn_publish: "Publier",
-            reply_placeholder: "Répondre...",
-            pub_ok: "Statut publié !",
-            rep_ok: "Réponse envoyée !"
-        },
-        en: {
-            status_title: "Status",
-            post_placeholder: "Share a status...",
-            btn_publish: "Post",
-            reply_placeholder: "Reply...",
-            pub_ok: "Status posted!",
-            rep_ok: "Reply sent!"
-        }
-    };
+    const bgColors = ["#e91e63", "#9c27b0", "#673ab7", "#3f51b5", "#00bcd4", "#4caf50", "#ff9800", "#795548"];
 
-    function applyTranslations() {
-        const lang = localStorage.getItem('myme-lang') || 'fr';
-        const t = translations[lang] || translations.fr;
-        document.querySelectorAll('[data-i18n]').forEach(el => {
-            el.textContent = t[el.getAttribute('data-i18n')];
-        });
-        document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-            el.placeholder = t[el.getAttribute('data-i18n-placeholder')];
-        });
-    }
-
-    // --- SYNCHRO STYLE ---
-    function syncStyle() {
-        const theme = localStorage.getItem('theme') || 'light';
+    function syncMymeStyle() {
         const fs = localStorage.getItem('myme-fsize') || '16px';
         const ff = localStorage.getItem('myme-ffam') || "'Segoe UI'";
         const rad = localStorage.getItem('myme-radius') || '25px';
+        const theme = localStorage.getItem('theme');
 
-        if (theme === 'dark') document.body.classList.add('dark-mode');
-        document.documentElement.style.setProperty('--app-radius', rad);
+        document.documentElement.style.setProperty('--app-font-size', fs);
         document.documentElement.style.setProperty('--app-font-family', ff);
-        document.body.style.fontSize = fs;
+        document.documentElement.style.setProperty('--app-radius', rad);
+
+        if (theme === 'dark') {
+            document.body.classList.add('dark-mode');
+        } else {
+            document.body.classList.remove('dark-mode');
+        }
     }
 
     onAuthStateChanged(auth, (user) => {
         if (!user) return;
         currentUser = user;
-        syncStyle();
-        applyTranslations();
+        syncMymeStyle();
         loadProfiles();
     });
 
@@ -205,13 +218,14 @@
                 usersSeen.add(data.authorId);
 
                 const uSnap = await getDoc(doc(db, "users", data.authorId));
-                const uData = uSnap.data() || {};
+                if (!uSnap.exists()) continue;
+                const uData = uSnap.data();
 
                 const item = document.createElement('div');
                 item.className = "note-item";
                 item.onclick = () => openUserStories(data.authorId);
                 item.innerHTML = `
-                    <img src="${uData.photoURL || 'https://ui-avatars.com/api/?name=?'}" class="avatar">
+                    <img src="${uData.photoURL || 'https://ui-avatars.com/api/?name=' + uData.prenom}" class="avatar">
                     <div class="name">${uData.prenom || 'Utilisateur'}</div>
                 `;
                 list.appendChild(item);
@@ -222,7 +236,7 @@
     async function openUserStories(userId) {
         const q = query(collection(db, "notes"), where("authorId", "==", userId));
         const snap = await getDocs(q);
-        currentStories = snap.docs.map(d => d.data());
+        currentStories = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         currentStories.sort((a, b) => (a.createdAt?.toMillis() || 0) - (b.createdAt?.toMillis() || 0));
         
         if(currentStories.length === 0) return;
@@ -233,14 +247,31 @@
 
     function showStory() {
         if (storyIdx >= currentStories.length) return window.closeStory();
-
         const story = currentStories[storyIdx];
-        const img = document.getElementById('story-img');
-        const txt = document.getElementById('story-text');
+        const container = document.getElementById('story-container');
+        const blurBg = document.getElementById('story-blur-bg');
+        const delBtn = document.getElementById('delete-story-btn');
+        const replyBar = document.getElementById('story-reply-bar');
+        
+        container.innerHTML = "";
+        
+        // Afficher/Masquer outils selon l'auteur
+        const isMine = story.authorId === currentUser.uid;
+        delBtn.style.display = isMine ? 'flex' : 'none';
+        replyBar.style.display = isMine ? 'none' : 'flex';
 
-        img.src = story.photoBase64 || "";
-        img.style.display = story.photoBase64 ? "block" : "none";
-        txt.innerText = story.texte || "";
+        if (story.photoBase64) {
+            blurBg.style.backgroundImage = `url(${story.photoBase64})`;
+            container.innerHTML = `
+                <img src="${story.photoBase64}" class="story-img">
+                ${story.texte ? `<div class="story-text-overlay">${story.texte}</div>` : ''}
+            `;
+        } else {
+            const randColor = bgColors[Math.floor(Math.random() * bgColors.length)];
+            blurBg.style.backgroundImage = "none";
+            blurBg.style.backgroundColor = "#000";
+            container.innerHTML = `<div class="story-text-content" style="background:${randColor}">${story.texte}</div>`;
+        }
 
         setupProgressBars();
         startTimer();
@@ -277,23 +308,27 @@
                     showStory();
                 }
             }
-        }, 50); 
+        }, 40); 
     }
 
-    // --- FONCTIONS GLOBALES (ATTACHÉES À WINDOW) ---
-    
-    window.handleFileSelect = (input) => {
-        const status = document.getElementById('file-status');
-        if (input.files && input.files[0]) {
-            status.style.display = 'block';
+    window.deleteCurrentStory = async () => {
+        const story = currentStories[storyIdx];
+        if (!confirm("Supprimer ce statut ?")) return;
+        
+        isPaused = true;
+        await deleteDoc(doc(db, "notes", story.id));
+        
+        currentStories.splice(storyIdx, 1);
+        if (currentStories.length === 0) {
+            window.closeStory();
         } else {
-            status.style.display = 'none';
+            if (storyIdx >= currentStories.length) storyIdx = currentStories.length - 1;
+            showStory();
         }
     };
 
-    window.togglePause = () => {
-        isPaused = !isPaused;
-        document.getElementById('btn-pause').innerText = isPaused ? "Continuer" : "Pause";
+    window.handleFileSelect = (input) => {
+        document.getElementById('file-status').style.display = (input.files.length > 0) ? 'block' : 'none';
     };
 
     window.closeStory = () => {
@@ -304,8 +339,6 @@
     window.publishNote = async () => {
         const text = document.getElementById('note-text').value;
         const file = document.getElementById('note-file').files[0];
-        const lang = localStorage.getItem('myme-lang') || 'fr';
-        
         if (!text && !file) return;
 
         if (file) {
@@ -320,7 +353,6 @@
     };
 
     async function saveToDB(t, img) {
-        const lang = localStorage.getItem('myme-lang') || 'fr';
         await addDoc(collection(db, "notes"), {
             authorId: currentUser.uid,
             texte: t,
@@ -330,26 +362,21 @@
         document.getElementById('note-text').value = "";
         document.getElementById('note-file').value = "";
         document.getElementById('file-status').style.display = 'none';
-        alert(translations[lang].pub_ok);
     }
 
     window.sendReply = async () => {
         const reply = document.getElementById('reply-text').value;
-        const lang = localStorage.getItem('myme-lang') || 'fr';
         if (!reply || !currentStories[storyIdx]) return;
-
         await addDoc(collection(db, "messages"), {
             senderId: currentUser.uid,
             receiverId: currentStories[storyIdx].authorId,
             text: "💬 Statut : " + reply,
             timestamp: serverTimestamp(),
-            read: false,
-            type: "text"
+            read: false, type: "text"
         });
         document.getElementById('reply-text').value = "";
-        alert(translations[lang].rep_ok);
+        window.closeStory();
     };
-
 </script>
 </body>
 </html>
