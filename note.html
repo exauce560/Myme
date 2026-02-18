@@ -3,14 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Rock+Salt&family=Caveat:wght@400;700&family=Shadows+Into+Light&family=Gochi+Hand&display=swap" rel="stylesheet">
     <title>Myme - Statuts</title>
     
     <style>
         :root {
             --bg: #ffffff; --text: #020c15; --gray: #667781;
             --accent: #ff8c1a; --header-bg: #ffffff; --border: #f0f2f5;
-            --app-radius: 25px;
+            --app-radius: 15px;
             --app-font-family: 'Segoe UI', system-ui, sans-serif;
+            --app-font-size: 14px;
+            --sidebar-width: 320px;
         }
         body.dark-mode {
             --bg: #020c15; --text: #e9edef; --gray: #8696a0;
@@ -19,139 +22,135 @@
 
         body { 
             font-family: var(--app-font-family); 
+            font-size: var(--app-font-size);
             background: var(--bg); color: var(--text); margin: 0; 
-            height: 100vh; overflow-x: hidden;
+            height: 100vh; overflow: hidden;
             transition: background 0.3s;
         }
 
+        .main-wrapper { display: flex; height: calc(100vh - 65px); width: 100%; }
+
+        .sidebar {
+            width: var(--sidebar-width);
+            border-right: 1px solid var(--border);
+            overflow-y: auto; background: var(--bg);
+            padding: 15px; flex-shrink: 0;
+        }
+
+        .content-view {
+            flex: 1; position: relative; background: #000;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+        }
+
         .header { 
-            padding: 15px 20px; background: var(--header-bg); 
+            padding: 10px 20px; background: var(--header-bg); 
             border-bottom: 1px solid var(--border); display: flex; 
-            align-items: center; gap: 15px; position: sticky; top: 0; z-index: 100;
+            align-items: center; gap: 15px; height: 45px;
         }
         
-        .back-btn { 
-            background: none; border: none; padding: 5px; cursor: pointer; 
-            display: flex; align-items: center; justify-content: center;
-            color: var(--text);
-        }
-
-        .container { max-width: 800px; margin: 0 auto; padding: 15px; }
+        .back-btn { background: none; border: none; padding: 5px; cursor: pointer; color: var(--text); }
 
         .post-box { 
-            background: var(--border); padding: 15px; 
-            border-radius: var(--app-radius); margin-bottom: 25px; 
+            background: var(--border); padding: 12px; 
+            border-radius: var(--app-radius); margin-bottom: 20px; 
+            border: 1px solid transparent;
         }
         .post-input { 
             width: 100%; border: none; background: transparent; 
-            font-size: 16px; color: var(--text); outline: none; 
+            font-size: inherit; color: var(--text); outline: none; 
             font-family: inherit; resize: none;
         }
 
-        .notes-list { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 12px; 
-        }
+        .notes-list { display: flex; flex-direction: column; gap: 10px; }
         .note-item { 
-            display: flex; flex-direction: column; align-items: center; 
-            padding: 20px 10px; background: var(--header-bg); 
-            border-radius: 20px; border: 1px solid var(--border); 
-            cursor: pointer; transition: 0.2s; text-align: center;
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px; background: var(--header-bg); 
+            border-radius: var(--app-radius); border: 1px solid var(--border); 
+            cursor: pointer; transition: 0.2s;
         }
-        .note-item:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.08); }
-        .avatar { width: 65px; height: 65px; border-radius: 50%; object-fit: cover; border: 3px solid var(--accent); margin-bottom: 10px; }
-        .name { font-weight: 600; font-size: 15px; color: var(--text); }
-
-        #story-viewer {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; z-index: 9999; flex-direction: column;
-        }
+        .note-item:hover { background: var(--border); }
+        .note-item.active { border-color: var(--accent); background: var(--border); }
         
+        .avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent); }
+        .name { font-weight: 600; font-size: 0.9em; color: var(--text); }
+
+        /* Viewer */
         .story-bg-blur {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background-size: cover; background-position: center;
-            filter: blur(25px) brightness(0.6); z-index: 1;
+            filter: blur(40px) brightness(0.4); z-index: 1;
         }
-
-        .story-top { position: absolute; top: 0; width: 100%; padding: 10px; z-index: 10001; box-sizing: border-box; }
-        .progress-container { display: flex; gap: 5px; height: 3px; margin-bottom: 10px; }
-        .prog-bar { flex: 1; background: rgba(255,255,255,0.3); border-radius: 2px; overflow: hidden; }
+        .story-container-inner { position: relative; z-index: 2; width: 100%; height: 100%; display: flex; flex-direction: column; }
+        .story-top { padding: 15px; width: 100%; box-sizing: border-box; }
+        .progress-container { display: flex; gap: 4px; height: 3px; }
+        .prog-bar { flex: 1; background: rgba(255,255,255,0.2); border-radius: 2px; overflow: hidden; }
         .prog-fill { width: 0%; height: 100%; background: #fff; }
 
-        .story-main { 
-            flex: 1; display: flex; flex-direction: column; 
-            justify-content: center; align-items: center; 
-            position: relative; z-index: 2; padding: 20px;
-        }
-        .story-img { max-width: 100%; max-height: 80vh; object-fit: contain; border-radius: 10px; }
-        
+        .story-main { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; }
+        .story-img { max-width: 90%; max-height: 70vh; object-fit: contain; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .story-text-content {
-            width: 100%; height: 100%; display: flex; align-items: center; 
-            justify-content: center; font-size: 28px; font-weight: bold;
-            color: white; text-align: center; padding: 40px; box-sizing: border-box; border-radius: 15px;
+            width: 80%; aspect-ratio: 9/16; max-height: 70vh; display: flex; align-items: center; 
+            justify-content: center; font-size: 24px; font-weight: bold;
+            color: white; text-align: center; padding: 30px; box-sizing: border-box; border-radius: 15px;
         }
 
-        .story-text-overlay { 
-            color: white; font-size: 18px; margin-top: 15px; 
-            text-align: left; width: 100%; max-width: 500px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5); 
-        }
-
-        .close-story { position: absolute; top: 25px; right: 20px; color: white; font-size: 35px; cursor: pointer; z-index: 10002; }
-        
         .delete-btn {
-            position: absolute; top: 70px; right: 20px; background: rgba(255,0,0,0.3);
-            border: none; color: white; padding: 8px; border-radius: 50%;
-            cursor: pointer; z-index: 10002; display: none; align-items: center; justify-content: center;
+            position: absolute; top: 40px; right: 20px; background: rgba(255,50,50,0.7);
+            border: none; color: white; padding: 10px; border-radius: 50%; cursor: pointer; z-index: 10002; display: none;
         }
 
-        .reply-bar { padding: 15px; display: flex; gap: 10px; background: rgba(0,0,0,0.6); z-index: 10; }
-        .reply-input { flex: 1; border-radius: 25px; border: none; padding: 12px 20px; background: rgba(255,255,255,0.2); color: white; outline: none; }
+        .reply-bar { padding: 15px; display: flex; gap: 10px; width: 100%; box-sizing: border-box; }
+        .reply-input { flex: 1; border-radius: 25px; border: none; padding: 12px 20px; background: rgba(255,255,255,0.1); color: white; outline: none; }
         
-        #file-status { font-size: 12px; color: var(--accent); margin: 5px 0; display: none; }
+        #file-status { font-size: 11px; color: var(--accent); margin: 5px 0; display: none; }
+
+        @media (max-width: 768px) {
+            .sidebar { width: 100%; border-right: none; }
+            .content-view { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1000; }
+            .content-view.active { display: flex; }
+            .close-story-mobile { display: block; position: absolute; top: 35px; right: 20px; z-index: 10005; color: white; font-size: 30px; cursor: pointer; }
+        }
     </style>
 </head>
 <body>
 
     <div class="header">
         <button class="back-btn" onclick="window.history.back()">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
         </button>
-        <h2 style="margin:0">Statuts</h2>
+        <h2 style="margin:0; font-size: 18px;">Statuts</h2>
     </div>
 
-    <div class="container">
-        <div class="post-box">
-            <textarea id="note-text" class="post-input" rows="2" placeholder="Partagez un statut..."></textarea>
-            <div id="file-status">📷 Image prête</div>
-            <div style="display:flex; justify-content: space-between; align-items: center; margin-top: 10px;">
-                <input type="file" id="note-file" hidden onchange="handleFileSelect(this)">
-                <button onclick="document.getElementById('note-file').click()" style="background:none; border:none; color:var(--accent); cursor:pointer; font-weight:bold;">+ Image</button>
-                <button onclick="publishNote()" style="background:var(--accent); color:white; border:none; padding:8px 22px; border-radius:20px; cursor:pointer; font-weight:600;">Publier</button>
+    <div class="main-wrapper">
+        <div class="sidebar">
+            <div class="post-box" id="post-box">
+                <textarea id="note-text" class="post-input" rows="2" placeholder="Quoi de neuf ?"></textarea>
+                <div id="file-status">📷 Photo prête</div>
+                <div style="display:flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                    <input type="file" id="note-file" hidden onchange="handleFileSelect(this)">
+                    <button onclick="document.getElementById('note-file').click()" style="background:none; border:none; color:var(--accent); cursor:pointer; font-size:12px; font-weight:bold;">+ IMAGE</button>
+                    <button onclick="publishNote()" style="background:var(--accent); color:white; border:none; padding:6px 15px; border-radius:15px; cursor:pointer; font-size:12px; font-weight:600;">PUBLIER</button>
+                </div>
             </div>
+            <div id="notes-list" class="notes-list"></div>
         </div>
 
-        <div id="notes-list" class="notes-list"></div>
-    </div>
-
-    <div id="story-viewer">
-        <div id="story-blur-bg" class="story-bg-blur"></div>
-        <span class="close-story" onclick="closeStory()">&times;</span>
-        
-        <button id="delete-story-btn" class="delete-btn" onclick="deleteCurrentStory()">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-        </button>
-        
-        <div class="story-top">
-            <div class="progress-container" id="prog-container"></div>
-        </div>
-
-        <div class="story-main" id="story-container"></div>
-
-        <div class="reply-bar" id="story-reply-bar">
-            <input type="text" id="reply-text" class="reply-input" placeholder="Répondre...">
-            <button onclick="sendReply()" style="background:var(--accent); border:none; color:white; border-radius:50%; width:45px; height:45px; cursor:pointer;">➔</button>
+        <div id="post-viewer" class="content-view">
+            <div id="story-blur-bg" class="story-bg-blur"></div>
+            <span class="close-story-mobile" onclick="closeStory()">&times;</span>
+            <div id="empty-msg" class="empty-state">
+                <p>Sélectionnez un contact pour voir son statut</p>
+            </div>
+            <div id="story-content" class="story-container-inner" style="display: none;">
+                <button id="delete-story-btn" class="delete-btn" onclick="deleteCurrentStory()">🗑️</button>
+                <div class="story-top"><div class="progress-container" id="prog-container"></div></div>
+                <div class="story-main" id="story-main-zone"></div>
+                <div class="reply-bar" id="story-reply-bar">
+                    <input type="text" id="reply-text" class="reply-input" placeholder="Répondre...">
+                    <button onclick="sendReply()" style="background:var(--accent); border:none; color:white; border-radius:50%; width:40px; height:40px;">➔</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -176,33 +175,46 @@
     let currentUser = null;
     let currentStories = [];
     let storyIdx = 0;
-    let isPaused = false;
     let timer;
 
-    const bgColors = ["#e91e63", "#9c27b0", "#673ab7", "#3f51b5", "#00bcd4", "#4caf50", "#ff9800", "#795548"];
-
-    function syncMymeStyle() {
+    // --- FONCTION DE SYNCHRO MYME ---
+    window.syncMymeStyle = function() {
         const fs = localStorage.getItem('myme-fsize') || '16px';
         const ff = localStorage.getItem('myme-ffam') || "'Segoe UI'";
-        const rad = localStorage.getItem('myme-radius') || '25px';
+        const gh = localStorage.getItem('myme-ghost') || '1';
+        const fi = localStorage.getItem('myme-filter') || 'none';
+        const rad = localStorage.getItem('myme-radius') || '20px';
+        const spc = localStorage.getItem('myme-spacing') || 'normal';
+        const brw = localStorage.getItem('myme-border') || '1px';
         const theme = localStorage.getItem('theme');
 
+        // Application des variables root
         document.documentElement.style.setProperty('--app-font-size', fs);
         document.documentElement.style.setProperty('--app-font-family', ff);
         document.documentElement.style.setProperty('--app-radius', rad);
+        document.documentElement.style.setProperty('--app-spacing', spc);
 
-        if (theme === 'dark') {
-            document.body.classList.add('dark-mode');
-        } else {
-            document.body.classList.remove('dark-mode');
-        }
+        // Application au body
+        document.body.style.opacity = gh;
+        document.body.style.filter = fi;
+        document.body.style.fontFamily = ff;
+        document.body.style.letterSpacing = spc;
+        
+        if (theme === 'dark') document.body.classList.add('dark-mode');
+        else document.body.classList.remove('dark-mode');
+
+        // Application aux éléments spécifiques (post-box et note-items)
+        document.querySelectorAll('.note-item, .post-box').forEach(el => {
+            el.style.borderRadius = rad;
+            el.style.borderWidth = brw;
+        });
     }
 
     onAuthStateChanged(auth, (user) => {
         if (!user) return;
         currentUser = user;
-        syncMymeStyle();
         loadProfiles();
+        window.syncMymeStyle();
     });
 
     function loadProfiles() {
@@ -211,68 +223,62 @@
             const list = document.getElementById('notes-list');
             list.innerHTML = "";
             const usersSeen = new Set();
-
             for (const d of snap.docs) {
                 const data = d.data();
                 if (usersSeen.has(data.authorId)) continue;
                 usersSeen.add(data.authorId);
-
                 const uSnap = await getDoc(doc(db, "users", data.authorId));
                 if (!uSnap.exists()) continue;
                 const uData = uSnap.data();
-
                 const item = document.createElement('div');
                 item.className = "note-item";
-                item.onclick = () => openUserStories(data.authorId);
+                item.onclick = () => {
+                    document.querySelectorAll('.note-item').forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+                    openUserStories(data.authorId);
+                };
                 item.innerHTML = `
                     <img src="${uData.photoURL || 'https://ui-avatars.com/api/?name=' + uData.prenom}" class="avatar">
                     <div class="name">${uData.prenom || 'Utilisateur'}</div>
                 `;
                 list.appendChild(item);
             }
+            window.syncMymeStyle(); // Re-sync après chargement
         });
     }
 
     async function openUserStories(userId) {
         const q = query(collection(db, "notes"), where("authorId", "==", userId));
         const snap = await getDocs(q);
-        currentStories = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        currentStories.sort((a, b) => (a.createdAt?.toMillis() || 0) - (b.createdAt?.toMillis() || 0));
-        
+        currentStories = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+            .sort((a, b) => (a.createdAt?.toMillis() || 0) - (b.createdAt?.toMillis() || 0));
         if(currentStories.length === 0) return;
         storyIdx = 0;
-        document.getElementById('story-viewer').style.display = 'flex';
+        document.getElementById('empty-msg').style.display = 'none';
+        document.getElementById('story-content').style.display = 'flex';
+        document.getElementById('post-viewer').classList.add('active');
         showStory();
     }
 
     function showStory() {
         if (storyIdx >= currentStories.length) return window.closeStory();
         const story = currentStories[storyIdx];
-        const container = document.getElementById('story-container');
+        const mainZone = document.getElementById('story-main-zone');
         const blurBg = document.getElementById('story-blur-bg');
-        const delBtn = document.getElementById('delete-story-btn');
-        const replyBar = document.getElementById('story-reply-bar');
-        
-        container.innerHTML = "";
-        
-        // Afficher/Masquer outils selon l'auteur
+        mainZone.innerHTML = "";
         const isMine = story.authorId === currentUser.uid;
-        delBtn.style.display = isMine ? 'flex' : 'none';
-        replyBar.style.display = isMine ? 'none' : 'flex';
+        document.getElementById('delete-story-btn').style.display = isMine ? 'block' : 'none';
+        document.getElementById('story-reply-bar').style.display = isMine ? 'none' : 'flex';
 
         if (story.photoBase64) {
             blurBg.style.backgroundImage = `url(${story.photoBase64})`;
-            container.innerHTML = `
-                <img src="${story.photoBase64}" class="story-img">
-                ${story.texte ? `<div class="story-text-overlay">${story.texte}</div>` : ''}
-            `;
+            mainZone.innerHTML = `<img src="${story.photoBase64}" class="story-img">${story.texte ? `<div class="story-text-overlay">${story.texte}</div>` : ''}`;
         } else {
-            const randColor = bgColors[Math.floor(Math.random() * bgColors.length)];
+            const colors = ["#e91e63", "#9c27b0", "#673ab7", "#3f51b5"];
             blurBg.style.backgroundImage = "none";
             blurBg.style.backgroundColor = "#000";
-            container.innerHTML = `<div class="story-text-content" style="background:${randColor}">${story.texte}</div>`;
+            mainZone.innerHTML = `<div class="story-text-content" style="background:${colors[storyIdx % colors.length]}">${story.texte}</div>`;
         }
-
         setupProgressBars();
         startTimer();
     }
@@ -293,80 +299,49 @@
 
     function startTimer() {
         clearInterval(timer);
-        isPaused = false;
         let width = 0;
         const fills = document.querySelectorAll('.prog-fill');
-        const fill = fills[storyIdx];
-
         timer = setInterval(() => {
-            if (!isPaused && fill) {
-                width += 1;
-                fill.style.width = width + "%";
-                if (width >= 100) {
-                    clearInterval(timer);
-                    storyIdx++;
-                    showStory();
-                }
+            if (fills[storyIdx]) {
+                width++;
+                fills[storyIdx].style.width = width + "%";
+                if (width >= 100) { clearInterval(timer); storyIdx++; showStory(); }
             }
-        }, 40); 
+        }, 50);
     }
-
-    window.deleteCurrentStory = async () => {
-        const story = currentStories[storyIdx];
-        if (!confirm("Supprimer ce statut ?")) return;
-        
-        isPaused = true;
-        await deleteDoc(doc(db, "notes", story.id));
-        
-        currentStories.splice(storyIdx, 1);
-        if (currentStories.length === 0) {
-            window.closeStory();
-        } else {
-            if (storyIdx >= currentStories.length) storyIdx = currentStories.length - 1;
-            showStory();
-        }
-    };
-
-    window.handleFileSelect = (input) => {
-        document.getElementById('file-status').style.display = (input.files.length > 0) ? 'block' : 'none';
-    };
 
     window.closeStory = () => {
         clearInterval(timer);
-        document.getElementById('story-viewer').style.display = 'none';
+        document.getElementById('story-content').style.display = 'none';
+        document.getElementById('empty-msg').style.display = 'block';
+        document.getElementById('post-viewer').classList.remove('active');
     };
 
     window.publishNote = async () => {
         const text = document.getElementById('note-text').value;
         const file = document.getElementById('note-file').files[0];
         if (!text && !file) return;
-
         if (file) {
             const reader = new FileReader();
             reader.readAsDataURL(file);
-            reader.onload = async () => {
-                await saveToDB(text, reader.result);
-            };
+            reader.onload = async () => saveToDB(text, reader.result);
         } else {
-            await saveToDB(text, "");
+            saveToDB(text, "");
         }
     };
 
     async function saveToDB(t, img) {
-        await addDoc(collection(db, "notes"), {
-            authorId: currentUser.uid,
-            texte: t,
-            photoBase64: img,
-            createdAt: serverTimestamp()
-        });
+        await addDoc(collection(db, "notes"), { authorId: currentUser.uid, texte: t, photoBase64: img, createdAt: serverTimestamp() });
         document.getElementById('note-text').value = "";
         document.getElementById('note-file').value = "";
         document.getElementById('file-status').style.display = 'none';
     }
 
+    window.handleFileSelect = (i) => document.getElementById('file-status').style.display = i.files[0] ? 'block' : 'none';
+
     window.sendReply = async () => {
         const reply = document.getElementById('reply-text').value;
-        if (!reply || !currentStories[storyIdx]) return;
+        if (!reply) return;
         await addDoc(collection(db, "messages"), {
             senderId: currentUser.uid,
             receiverId: currentStories[storyIdx].authorId,
@@ -375,8 +350,16 @@
             read: false, type: "text"
         });
         document.getElementById('reply-text').value = "";
-        window.closeStory();
+        alert("Réponse envoyée !");
     };
+
+    window.deleteCurrentStory = async () => {
+        if (!confirm("Supprimer ce statut ?")) return;
+        await deleteDoc(doc(db, "notes", currentStories[storyIdx].id));
+        currentStories.splice(storyIdx, 1);
+        if (currentStories.length === 0) window.closeStory(); else showStory();
+    };
+
 </script>
 </body>
 </html>
