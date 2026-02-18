@@ -3,30 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ajouter un Contact</title>
+    <title>Myme - Contacts</title>
     <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Rock+Salt&family=Caveat:wght@400;700&family=Shadows+Into+Light&family=Gochi+Hand&display=swap" rel="stylesheet">
     <style>
         /* --- BLOC VARIABLES & THÈME --- */
         :root {
             --bg: #ffffff;
+            --sidebar-bg: #f7f8fa;
             --text: #1c1e21;
             --gray: #65676b;
             --myme-blue: #0866ff;
             --hover-bg: #f2f2f2;
             --card-border: #f0f2f5;
-            /* Variables dynamiques initiales */
             --app-font-size: 16px;
             --app-font-family: 'Segoe UI', system-ui, sans-serif;
             --app-radius: 12px;
-            --app-spacing: normal;
         }
 
+        /* TON DARK MODE SPÉCIFIQUE #020c15 */
         body.dark-mode {
-            --bg: #18191a;
-            --text: #e4e6eb;
-            --gray: #b0b3b8;
-            --hover-bg: #3a3b3c;
-            --card-border: #3e4042;
+            --bg: #020c15;
+            --sidebar-bg: #0b141a;
+            --text: #e9edef;
+            --gray: #8696a0;
+            --hover-bg: #1d282f;
+            --card-border: #222d34;
         }
 
         body {
@@ -34,124 +35,142 @@
             color: var(--text);
             font-family: var(--app-font-family);
             font-size: var(--app-font-size);
-            letter-spacing: var(--app-spacing);
             margin: 0;
-            transition: background 0.3s ease;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
         }
 
-        /* --- STYLE DE LA FLÈCHE (TON STYLE) --- */
-        .fleche-retour {
-            position: absolute; top: 20px; left: 20px; width: 45px; height: 45px;
-            background: none; border: none; border-radius: 50%; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            transition: all 0.3s ease; z-index: 100;
+        /* --- LAYOUT 2 PARTIES --- */
+        .app-container {
+            display: flex;
+            width: 100%;
+            height: 100vh;
         }
-        .fleche-retour::before { content: ''; position: absolute; width: 20px; height: 3px; background-color: var(--text); }
+
+        /* GAUCHE : Recherche et Historique */
+        .sidebar-left {
+            width: 380px;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--card-border);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        /* DROITE : Résultats de recherche */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            overflow-y: auto;
+        }
+
+        /* --- ÉLÉMENTS UI --- */
+        .header-box { width: 100%; margin-bottom: 25px; position: relative; }
+        
+        .fleche-retour {
+            width: 40px; height: 40px; background: none; border: none; 
+            border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            margin-bottom: 10px; transition: 0.3s;
+        }
+        .fleche-retour::before { content: ''; position: absolute; width: 18px; height: 2px; background-color: var(--text); }
         .fleche-retour::after {
-            content: ''; position: absolute; left: 12px; width: 10px; height: 10px;
-            border-left: 3px solid var(--text); border-bottom: 3px solid var(--text);
+            content: ''; position: absolute; left: 10px; width: 8px; height: 8px;
+            border-left: 2px solid var(--text); border-bottom: 2px solid var(--text);
             transform: rotate(45deg);
         }
-        .fleche-retour:hover { background-color: var(--hover-bg); transform: translateX(-3px); }
-
-        /* --- INTERFACE D'AJOUT --- */
-        .container {
-            max-width: 500px;
-            margin: 80px auto 20px auto;
-            padding: 0 20px;
-            text-align: center;
-        }
-
-        h2 { margin-bottom: 30px; }
+        .fleche-retour:hover { background-color: var(--hover-bg); }
 
         .input-field {
-            width: 100%;
-            padding: 14px;
-            margin-bottom: 15px;
+            width: 100%; padding: 12px; margin-bottom: 10px;
             border: 1px solid var(--card-border);
-            border-radius: var(--app-radius); /* Dynamique */
-            background: var(--hover-bg);
+            border-radius: var(--app-radius);
+            background: var(--bg);
             color: var(--text);
-            font-size: 16px;
-            font-family: inherit;
+            font-size: 14px;
             outline: none;
             box-sizing: border-box;
         }
 
         .btn-check {
-            width: 100%;
-            padding: 14px;
+            width: 100%; padding: 12px;
             background: var(--myme-blue);
-            color: white;
-            border: none;
-            border-radius: var(--app-radius); /* Dynamique */
-            font-weight: bold;
-            font-size: 16px;
-            font-family: inherit;
-            cursor: pointer;
-            transition: 0.2s;
+            color: white; border: none;
+            border-radius: var(--app-radius);
+            font-weight: bold; cursor: pointer; transition: 0.2s;
         }
-        .btn-check:hover { opacity: 0.9; transform: scale(0.98); }
 
-        /* --- RÉSULTAT --- */
-        #result-display { margin-top: 40px; }
+        /* Section Historique */
+        .history-section { margin-top: 30px; flex: 1; overflow-y: auto; }
+        .history-title { font-size: 14px; color: var(--gray); margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; }
 
+        /* Cartes Utilisateurs (Résultats) */
         .user-card {
             display: flex; align-items: center; gap: 15px; padding: 15px;
-            background: var(--hover-bg);
-            border-radius: var(--app-radius); /* Dynamique */
+            background: var(--sidebar-bg);
+            border-radius: var(--app-radius);
             border: 1px solid var(--card-border);
-            text-align: left;
+            width: 100%; max-width: 450px;
+            margin-bottom: 15px;
+            animation: slideIn 0.3s ease-out;
         }
-        .avatar { width: 55px; height: 55px; border-radius: 50%; object-fit: cover; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .avatar { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid var(--myme-blue); }
         .user-info { flex: 1; }
         .btn-chat {
             background: var(--myme-blue); color: white; border: none;
-            padding: 8px 15px; border-radius: 8px; cursor: pointer;
-            font-family: inherit;
+            padding: 10px 20px; border-radius: 8px; cursor: pointer;
+            font-weight: 600;
         }
 
-        /* Adaptation petits écrans */
-        @media (max-width: 380px) {
-            .container { margin-top: 60px; padding: 0 15px; }
-            h2 { font-size: 1.4rem; }
+        #empty-result { text-align: center; color: var(--gray); }
+        #empty-result svg { opacity: 0.2; margin-bottom: 10px; }
+
+        /* Responsive Mobile */
+        @media (max-width: 768px) {
+            body { flex-direction: column; overflow-y: auto; }
+            .sidebar-left { width: 100%; height: auto; }
+            .main-content { width: 100%; height: auto; padding: 20px; }
         }
     </style>
-    <link rel="apple-touch-icon" sizes="57x57" href="apple-icon-57x57.png">
-<link rel="apple-touch-icon" sizes="60x60" href="apple-icon-60x60.png">
-<link rel="apple-touch-icon" sizes="72x72" href="apple-icon-72x72.png">
-<link rel="apple-touch-icon" sizes="76x76" href="apple-icon-76x76.png">
-<link rel="apple-touch-icon" sizes="114x114" href="apple-icon-114x114.png">
-<link rel="apple-touch-icon" sizes="120x120" href="apple-icon-120x120.png">
-<link rel="apple-touch-icon" sizes="144x144" href="apple-icon-144x144.png">
-<link rel="apple-touch-icon" sizes="152x152" href="apple-icon-152x152.png">
-<link rel="apple-touch-icon" sizes="180x180" href="apple-icon-180x180.png">
-
-<link rel="icon" type="image/png" sizes="192x192" href="android-icon-192x192.png">
-
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
-<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
-
-<link rel="manifest" href="manifest.json">
-<meta name="msapplication-TileColor" content="#ffffff">
-<meta name="msapplication-TileImage" content="ms-icon-144x144.png">
-<meta name="theme-color" content="#ffffff">
 </head>
 <body>
 
-    <button class="fleche-retour" onclick="window.history.back()"></button>
+    <div class="app-container">
+        <aside class="sidebar-left">
+            <div class="header-box">
+                <button class="fleche-retour" onclick="window.history.back()"></button>
+                <h2 data-lang="add_contact_title" style="margin: 10px 0;">Contacts</h2>
+            </div>
 
-    <div class="container">
-        <h2 data-lang="add_contact_title">Ajouter un contact</h2>
+            <div class="search-box">
+                <input type="text" id="target-name" class="input-field" placeholder="Nom de votre ami(e)..." data-lang="place_name">
+                <input type="tel" id="target-phone" class="input-field" placeholder="Numéro de téléphone (ex: +243...)" data-lang="place_phone">
+                <button class="btn-check" onclick="checkMymeUser()" data-lang="btn_verify">Vérifier sur Myme</button>
+                <div id="error-message" style="color: #ff4d4d; font-size: 12px; margin-top: 8px; min-height: 15px;"></div>
+            </div>
 
-        <input type="text" id="target-name" class="input-field" placeholder="Nom de votre ami(e)..." data-lang="place_name">
-        <input type="tel" id="target-phone" class="input-field" placeholder="Numéro de téléphone (ex: +243...)" data-lang="place_phone">
+            <div class="history-section">
+                <div class="history-title">Recherches récentes</div>
+                <div id="search-history">
+                    </div>
+            </div>
+        </aside>
 
-        <button class="btn-check" onclick="checkMymeUser()" data-lang="btn_verify">Vérifier sur Myme</button>
-
-        <div id="result-display"></div>
-        <div id="error-message" style="color: #ff4d4d; font-size: 12px; margin-top: 5px; min-height: 15px;"></div>
+        <main class="main-content">
+            <div id="result-display" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+                <div id="empty-result">
+                    <svg viewBox="0 0 24 24" width="80" height="80" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <p>Recherchez un numéro pour voir le profil ici</p>
+                </div>
+            </div>
+        </main>
     </div>
 
 <script type="module">
@@ -172,76 +191,58 @@
     const db = getFirestore(app);
     const auth = getAuth(app);
     const errorDis = document.getElementById('error-message');
-
-    // Variable globale pour les traductions
     let langData = {};
 
-    // --- MISE À JOUR : Synchronisation Style ---
+    // --- SYNCHRONISATION STYLE (PRÉSERVÉE) ---
     function syncMymeStyle() {
         const fs = localStorage.getItem('myme-fsize') || '16px';
         const ff = localStorage.getItem('myme-ffam') || "'Segoe UI'";
-        const gh = localStorage.getItem('myme-ghost') || '1';
-        const fi = localStorage.getItem('myme-filter') || 'none';
         const rad = localStorage.getItem('myme-radius') || '12px';
-        const spc = localStorage.getItem('myme-spacing') || 'normal';
-        const brw = localStorage.getItem('myme-border') || '1px';
+        const gh = localStorage.getItem('myme-ghost') || '1';
 
         document.documentElement.style.setProperty('--app-font-size', fs);
         document.documentElement.style.setProperty('--app-font-family', ff);
         document.documentElement.style.setProperty('--app-radius', rad);
-
         document.body.style.opacity = gh;
-        document.body.style.filter = fi;
-        document.body.style.letterSpacing = spc;
 
-        // Appliquer aux éléments dynamiques
-        document.querySelectorAll('.input-field, .btn-check, .user-card').forEach(el => {
-            el.style.borderRadius = rad;
-            if(el.classList.contains('user-card')) el.style.borderWidth = brw;
-        });
-
-        // Dark Mode
         if (localStorage.getItem('theme') === 'dark') {
             document.body.classList.add('dark-mode');
         } else {
             document.body.classList.remove('dark-mode');
         }
+        renderHistory();
     }
 
-    async function applyTranslations() {
-        const lang = localStorage.getItem("lang") || "fr";
-        try {
-            const res = await fetch("lang.json");
-            langData = await res.json();
-            document.querySelectorAll("[data-lang]").forEach(el => {
-                const key = el.getAttribute("data-lang");
-                if (!langData[lang] || !langData[lang][key]) return;
-                if (el.tagName === "INPUT") { el.placeholder = langData[lang][key]; }
-                else { el.textContent = langData[lang][key]; }
-            });
-        } catch (error) { console.error("Erreur langues:", error); }
+    // --- LOGIQUE HISTORIQUE ---
+    function saveToHistory(userData, docId) {
+        let history = JSON.parse(localStorage.getItem('myme_search_history') || '[]');
+        // Eviter les doublons
+        history = history.filter(u => u.id !== docId);
+        history.unshift({ id: docId, name: userData.prenom, photo: userData.photoURL });
+        localStorage.setItem('myme_search_history', JSON.stringify(history.slice(0, 5)));
+        renderHistory();
     }
 
-    // Initialisation
-    document.addEventListener('DOMContentLoaded', () => {
-        syncMymeStyle();
-        applyTranslations();
-    });
+    function renderHistory() {
+        const container = document.getElementById('search-history');
+        const history = JSON.parse(localStorage.getItem('myme_search_history') || '[]');
+        if(history.length === 0) {
+            container.innerHTML = '<p style="font-size:12px; color:var(--gray)">Aucune recherche récente</p>';
+            return;
+        }
+        container.innerHTML = history.map(u => `
+            <div class="user-card" style="padding: 8px; cursor:pointer; margin-bottom:8px; background:var(--bg)" onclick="window.location.href='chat.html?uid=${u.id}'">
+                <img src="${u.photo || 'https://ui-avatars.com/api/?name='+u.name}" style="width:30px; height:30px; border-radius:50%">
+                <span style="font-size:13px">${u.name}</span>
+            </div>
+        `).join('');
+    }
 
-    onAuthStateChanged(auth, (user) => {
-        if (!user) window.location.href = "authent.html";
-    });
-
-    // --- LOGIQUE DE RECHERCHE ---
-    // --- LOGIQUE DE RECHERCHE CORRIGÉE ---
+    // --- LOGIQUE DE RECHERCHE (AMÉLIORÉE POUR LES 2 PARTIES) ---
     window.checkMymeUser = async () => {
         errorDis.textContent = "";
-
-        // 1. On récupère et on nettoie le numéro tout de suite (supprime espaces et tirets)
         const rawPhone = document.getElementById('target-phone').value.trim();
         const phoneCleaned = rawPhone.replace(/[\s\-]/g, '');
-
-        const nameInMyList = document.getElementById('target-name').value.trim();
         const display = document.getElementById('result-display');
         const lang = localStorage.getItem("lang") || "fr";
 
@@ -251,42 +252,62 @@
         }
 
         try {
-            // 2. On utilise le numéro nettoyé pour la recherche Firestore
             const q = query(collection(db, "users"), where("phoneNumber", "==", phoneCleaned));
             const snapshot = await getDocs(q);
 
             if (snapshot.empty) {
-                let msg = langData[lang]?.["not-on-myme"] || "<b>{name}</b> n'est pas sur Myme.";
-                const displayName = nameInMyList || (lang === 'fr' ? 'Cet utilisateur' : 'This user');
-                display.innerHTML = `<p style="color:#ff4d4d; margin-top:20px;">${msg.replace("{name}", displayName)}</p>`;
+                display.innerHTML = `<div id="empty-result"><p style="color:#ff4d4d;">Aucun utilisateur trouvé avec ce numéro.</p></div>`;
             } else {
                 display.innerHTML = "";
                 snapshot.forEach(docSnap => {
                     const userData = docSnap.data();
-                    const displayName = (userData.prenom && userData.nom) ? `${userData.prenom} ${userData.nom}` : (userData.prenom || userData.nom || "Utilisateur");
-
+                    const displayName = `${userData.prenom || ''} ${userData.nom || ''}`.trim() || "Utilisateur";
+                    
                     display.innerHTML += `
-                        <div class="user-card" style="margin-top:20px;">
+                        <div class="user-card">
                             <img src="${userData.photoURL || 'https://ui-avatars.com/api/?name='+encodeURIComponent(displayName)}" class="avatar">
                             <div class="user-info">
                                 <strong>${displayName}</strong><br>
-                                <small style="color:var(--myme-blue)">Utilise Myme</small>
+                                <small style="color:var(--myme-blue)">Membre Myme</small>
                             </div>
                             <button class="btn-chat" onclick="window.location.href='chat.html?uid=${docSnap.id}'">
                                 Message
                             </button>
                         </div>`;
+                    
+                    saveToHistory(userData, docSnap.id);
                 });
-                // Relance le style pour les cartes générées
                 syncMymeStyle();
             }
         } catch (error) {
-            console.error("Erreur Firestore:", error);
-            errorDis.textContent = "Erreur de recherche.";
+            errorDis.textContent = "Erreur de connexion.";
         }
     };
+
+    // --- TRADUCTIONS ET INITIALISATION ---
+    async function applyTranslations() {
+        const lang = localStorage.getItem("lang") || "fr";
+        try {
+            const res = await fetch("lang.json");
+            langData = await res.json();
+            document.querySelectorAll("[data-lang]").forEach(el => {
+                const key = el.getAttribute("data-lang");
+                if (langData[lang] && langData[lang][key]) {
+                    if (el.tagName === "INPUT") el.placeholder = langData[lang][key];
+                    else el.textContent = langData[lang][key];
+                }
+            });
+        } catch (e) {}
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        syncMymeStyle();
+        applyTranslations();
+    });
+
+    onAuthStateChanged(auth, (user) => {
+        if (!user) window.location.href = "authent.html";
+    });
 </script>
 </body>
-
 </html>
-
