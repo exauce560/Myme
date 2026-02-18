@@ -85,6 +85,17 @@
             transform: rotate(45deg);
         }
         .fleche-retour:hover { background-color: var(--hover-bg); }
+        /* Force tous les éléments à utiliser la police et la taille de l'app */
+        *, *::before, *::after {
+            font-family: var(--app-font-family) !important;
+            /* On ne force pas le font-size partout pour garder la hiérarchie (h1, small, etc.) 
+               mais on s'assure que les inputs et boutons l'utilisent */
+        }
+
+        input, button, textarea, select {
+            font-family: var(--app-font-family) !important;
+            font-size: var(--app-font-size) !important;
+        }
 
         .input-field {
             width: 100%; padding: 12px; margin-bottom: 10px;
@@ -196,20 +207,23 @@
     // --- SYNCHRONISATION STYLE (PRÉSERVÉE) ---
     function syncMymeStyle() {
         const fs = localStorage.getItem('myme-fsize') || '16px';
-        const ff = localStorage.getItem('myme-ffam') || "'Segoe UI'";
+        const ff = localStorage.getItem('myme-ffam') || "'Segoe UI', sans-serif";
         const rad = localStorage.getItem('myme-radius') || '12px';
-        const gh = localStorage.getItem('myme-ghost') || '1';
 
-        document.documentElement.style.setProperty('--app-font-size', fs);
-        document.documentElement.style.setProperty('--app-font-family', ff);
-        document.documentElement.style.setProperty('--app-radius', rad);
-        document.body.style.opacity = gh;
+        // On applique à l'élément racine (le plus haut)
+        const root = document.documentElement;
+        root.style.setProperty('--app-font-size', fs);
+        root.style.setProperty('--app-font-family', ff);
+        root.style.setProperty('--app-radius', rad);
 
+        // Dark Mode
         if (localStorage.getItem('theme') === 'dark') {
             document.body.classList.add('dark-mode');
         } else {
             document.body.classList.remove('dark-mode');
-        }
+        }    
+    
+        // Si tu as des éléments générés dynamiquement (historique, résultats)
         renderHistory();
     }
 
@@ -311,3 +325,4 @@
 </script>
 </body>
 </html>
+
