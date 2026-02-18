@@ -8,8 +8,9 @@
     <style>
         :root {
             --bg: #ffffff; --text: #020c15; --gray: #667781;
-            --accent: #00a884; --header-bg: #ffffff; --border: #f0f2f5;
+            --accent: #ff8c1a; --header-bg: #ffffff; --border: #f0f2f5;
             --app-radius: 25px;
+            --app-font-family: 'Segoe UI', system-ui, sans-serif;
         }
         body.dark-mode {
             --bg: #020c15; --text: #e9edef; --gray: #8696a0;
@@ -17,20 +18,19 @@
         }
 
         body { 
-            font-family: 'Segoe UI', system-ui, sans-serif; 
+            font-family: var(--app-font-family); 
             background: var(--bg); color: var(--text); margin: 0; 
             height: 100vh; overflow-x: hidden;
+            transition: background 0.3s;
         }
 
-        /* Header plein écran */
         .header { 
             padding: 15px 20px; background: var(--header-bg); 
             border-bottom: 1px solid var(--border); display: flex; 
-            align-items: center; gap: 20px; sticky: top; z-index: 100;
+            align-items: center; gap: 20px; position: sticky; top: 0; z-index: 100;
         }
         .back-btn { background: none; border: none; color: var(--text); font-size: 24px; cursor: pointer; }
 
-        /* Conteneur principal */
         .container { max-width: 800px; margin: 0 auto; padding: 20px; }
 
         .post-box { 
@@ -40,9 +40,9 @@
         .post-input { 
             width: 100%; border: none; background: transparent; 
             font-size: 16px; color: var(--text); outline: none; margin-bottom: 10px;
+            font-family: inherit;
         }
 
-        /* Liste des statuts */
         .notes-list { display: flex; flex-direction: column; gap: 10px; }
         .note-item { 
             display: flex; align-items: center; padding: 15px; 
@@ -53,7 +53,6 @@
         .avatar { width: 55px; height: 55px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent); margin-right: 15px; }
         .name { font-weight: 600; font-size: 17px; }
 
-        /* Story Viewer Fullscreen */
         #story-viewer {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #000; z-index: 9999; flex-direction: column;
@@ -65,34 +64,37 @@
 
         .story-main { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; }
         .story-img { max-width: 100%; max-height: 85vh; object-fit: contain; }
-        .story-text-overlay { color: white; font-size: 22px; margin-top: 20px; text-align: center; padding: 0 20px; }
+        .story-text-overlay { color: white; font-size: 22px; margin-top: 20px; text-align: center; padding: 0 20px; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
 
         .close-story { position: absolute; top: 30px; right: 20px; color: white; font-size: 35px; cursor: pointer; z-index: 10002; }
-        .pause-btn { background: rgba(255,255,255,0.2); border: none; color: white; padding: 5px 15px; border-radius: 20px; cursor: pointer; }
+        .pause-btn { background: rgba(255,255,255,0.2); border: none; color: white; padding: 5px 15px; border-radius: 20px; cursor: pointer; font-size: 12px; }
 
-        .reply-bar { padding: 20px; display: flex; gap: 10px; background: rgba(0,0,0,0.5); }
+        .reply-bar { padding: 20px; display: flex; gap: 10px; background: rgba(0,0,0,0.8); }
         .reply-input { flex: 1; border-radius: 25px; border: none; padding: 12px 20px; background: rgba(255,255,255,0.15); color: white; outline: none; }
+        
+        /* Petit indicateur de fichier sélectionné */
+        #file-status { font-size: 12px; color: var(--accent); margin-top: 5px; display: none; }
     </style>
 </head>
-<body class="dark-mode">
+<body>
 
     <div class="header">
         <button class="back-btn" onclick="window.history.back()">←</button>
-        <h2 style="margin:0">Statuts</h2>
+        <h2 style="margin:0" data-i18n="status_title">Statuts</h2>
     </div>
 
     <div class="container">
         <div class="post-box">
-            <input type="text" id="note-text" class="post-input" placeholder="Partagez un statut...">
-            <div style="display:flex; justify-content: space-between; align-items: center;">
+            <input type="text" id="note-text" class="post-input" placeholder="Partagez un statut..." data-i18n-placeholder="post_placeholder">
+            <div id="file-status">📷 Image sélectionnée</div>
+            <div style="display:flex; justify-content: space-between; align-items: center; margin-top: 10px;">
                 <input type="file" id="note-file" hidden onchange="handleFileSelect(this)">
                 <button onclick="document.getElementById('note-file').click()" style="background:none; border:none; color:var(--accent); cursor:pointer; font-weight:bold;">+ Image</button>
-                <button onclick="publishNote()" style="background:var(--accent); color:white; border:none; padding:8px 20px; border-radius:20px; cursor:pointer;">Publier</button>
+                <button onclick="publishNote()" style="background:var(--accent); color:white; border:none; padding:8px 20px; border-radius:20px; cursor:pointer;" data-i18n="btn_publish">Publier</button>
             </div>
         </div>
 
-        <div id="notes-list" class="notes-list">
-            </div>
+        <div id="notes-list" class="notes-list"></div>
     </div>
 
     <div id="story-viewer">
@@ -109,7 +111,7 @@
         </div>
 
         <div class="reply-bar">
-            <input type="text" id="reply-text" class="reply-input" placeholder="Répondre...">
+            <input type="text" id="reply-text" class="reply-input" placeholder="Répondre..." data-i18n-placeholder="reply_placeholder">
             <button onclick="sendReply()" style="background:var(--accent); border:none; color:white; border-radius:50%; width:45px; height:45px; cursor:pointer;">➔</button>
         </div>
     </div>
@@ -138,17 +140,60 @@
     let isPaused = false;
     let timer;
 
+    // --- TRADUCTIONS ---
+    const translations = {
+        fr: {
+            status_title: "Statuts",
+            post_placeholder: "Partagez un statut...",
+            btn_publish: "Publier",
+            reply_placeholder: "Répondre...",
+            pub_ok: "Statut publié !",
+            rep_ok: "Réponse envoyée !"
+        },
+        en: {
+            status_title: "Status",
+            post_placeholder: "Share a status...",
+            btn_publish: "Post",
+            reply_placeholder: "Reply...",
+            pub_ok: "Status posted!",
+            rep_ok: "Reply sent!"
+        }
+    };
+
+    function applyTranslations() {
+        const lang = localStorage.getItem('myme-lang') || 'fr';
+        const t = translations[lang] || translations.fr;
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            el.textContent = t[el.getAttribute('data-i18n')];
+        });
+        document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+            el.placeholder = t[el.getAttribute('data-i18n-placeholder')];
+        });
+    }
+
+    // --- SYNCHRO STYLE ---
+    function syncStyle() {
+        const theme = localStorage.getItem('theme') || 'light';
+        const fs = localStorage.getItem('myme-fsize') || '16px';
+        const ff = localStorage.getItem('myme-ffam') || "'Segoe UI'";
+        const rad = localStorage.getItem('myme-radius') || '25px';
+
+        if (theme === 'dark') document.body.classList.add('dark-mode');
+        document.documentElement.style.setProperty('--app-radius', rad);
+        document.documentElement.style.setProperty('--app-font-family', ff);
+        document.body.style.fontSize = fs;
+    }
+
     onAuthStateChanged(auth, (user) => {
         if (!user) return;
         currentUser = user;
+        syncStyle();
+        applyTranslations();
         loadProfiles();
     });
 
-    // Charger les profils ayant posté un statut
     function loadProfiles() {
-        // Requête simplifiée pour éviter l'erreur d'index au début
         const q = query(collection(db, "notes"), orderBy("createdAt", "desc"));
-        
         onSnapshot(q, async (snap) => {
             const list = document.getElementById('notes-list');
             list.innerHTML = "";
@@ -166,7 +211,7 @@
                 item.className = "note-item";
                 item.onclick = () => openUserStories(data.authorId);
                 item.innerHTML = `
-                    <img src="${uData.photoURL || 'https://via.placeholder.com/50'}" class="avatar">
+                    <img src="${uData.photoURL || 'https://ui-avatars.com/api/?name=?'}" class="avatar">
                     <div class="name">${uData.prenom || 'Utilisateur'}</div>
                 `;
                 list.appendChild(item);
@@ -175,21 +220,19 @@
     }
 
     async function openUserStories(userId) {
-        // CORRECTION : On récupère les statuts de l'utilisateur cliqué
         const q = query(collection(db, "notes"), where("authorId", "==", userId));
         const snap = await getDocs(q);
-        
         currentStories = snap.docs.map(d => d.data());
-        // Trier manuellement par date pour éviter l'erreur d'index Firestore
         currentStories.sort((a, b) => (a.createdAt?.toMillis() || 0) - (b.createdAt?.toMillis() || 0));
         
+        if(currentStories.length === 0) return;
         storyIdx = 0;
         document.getElementById('story-viewer').style.display = 'flex';
         showStory();
     }
 
     function showStory() {
-        if (storyIdx >= currentStories.length) return closeStory();
+        if (storyIdx >= currentStories.length) return window.closeStory();
 
         const story = currentStories[storyIdx];
         const img = document.getElementById('story-img');
@@ -221,10 +264,11 @@
         clearInterval(timer);
         isPaused = false;
         let width = 0;
-        const fill = document.querySelectorAll('.prog-fill')[storyIdx];
+        const fills = document.querySelectorAll('.prog-fill');
+        const fill = fills[storyIdx];
 
         timer = setInterval(() => {
-            if (!isPaused) {
+            if (!isPaused && fill) {
                 width += 1;
                 fill.style.width = width + "%";
                 if (width >= 100) {
@@ -233,26 +277,37 @@
                     showStory();
                 }
             }
-        }, 50); // 5 secondes
+        }, 50); 
     }
+
+    // --- FONCTIONS GLOBALES (ATTACHÉES À WINDOW) ---
+    
+    window.handleFileSelect = (input) => {
+        const status = document.getElementById('file-status');
+        if (input.files && input.files[0]) {
+            status.style.display = 'block';
+        } else {
+            status.style.display = 'none';
+        }
+    };
 
     window.togglePause = () => {
         isPaused = !isPaused;
         document.getElementById('btn-pause').innerText = isPaused ? "Continuer" : "Pause";
-    }
+    };
 
     window.closeStory = () => {
         clearInterval(timer);
         document.getElementById('story-viewer').style.display = 'none';
-    }
+    };
 
     window.publishNote = async () => {
         const text = document.getElementById('note-text').value;
         const file = document.getElementById('note-file').files[0];
+        const lang = localStorage.getItem('myme-lang') || 'fr';
         
         if (!text && !file) return;
 
-        let base64 = "";
         if (file) {
             const reader = new FileReader();
             reader.readAsDataURL(file);
@@ -262,9 +317,10 @@
         } else {
             await saveToDB(text, "");
         }
-    }
+    };
 
     async function saveToDB(t, img) {
+        const lang = localStorage.getItem('myme-lang') || 'fr';
         await addDoc(collection(db, "notes"), {
             authorId: currentUser.uid,
             texte: t,
@@ -272,21 +328,28 @@
             createdAt: serverTimestamp()
         });
         document.getElementById('note-text').value = "";
-        alert("Statut publié !");
+        document.getElementById('note-file').value = "";
+        document.getElementById('file-status').style.display = 'none';
+        alert(translations[lang].pub_ok);
     }
 
     window.sendReply = async () => {
         const reply = document.getElementById('reply-text').value;
-        if (!reply) return;
+        const lang = localStorage.getItem('myme-lang') || 'fr';
+        if (!reply || !currentStories[storyIdx]) return;
+
         await addDoc(collection(db, "messages"), {
             senderId: currentUser.uid,
             receiverId: currentStories[storyIdx].authorId,
-            text: "Réponse statut : " + reply,
-            timestamp: serverTimestamp()
+            text: "💬 Statut : " + reply,
+            timestamp: serverTimestamp(),
+            read: false,
+            type: "text"
         });
         document.getElementById('reply-text').value = "";
-        alert("Réponse envoyée !");
-    }
+        alert(translations[lang].rep_ok);
+    };
+
 </script>
 </body>
 </html>
