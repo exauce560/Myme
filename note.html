@@ -4,105 +4,123 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Myme - Statuts</title>
-    
     <meta name="sync-status" content="active">
     
     <style>
         :root {
-            --bg: #ffffff; --text: #111b21; --gray: #667781;
-            --wa-green: #00a884; --header-bg: #ffffff; --border: #f0f2f5;
+            --bg: #ffffff; --text: #020c15; --gray: #667781;
+            --accent: #00a884; --header-bg: #ffffff; --border: #f0f2f5;
+            --app-radius: 25px; --app-font-size: 16px;
         }
         body.dark-mode {
-            --bg: #111b21; --text: #e9edef; --gray: #8696a0;
-            --header-bg: #111b21; --border: #222d34;
+            --bg: #020c15; --text: #e9edef; --gray: #8696a0;
+            --header-bg: #020c15; --border: #1a242d;
         }
 
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); color: var(--text); margin: 0; overflow: hidden; height: 100vh; }
-
-        .header { padding: 12px 16px; background: var(--header-bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 20px; }
-        .back-btn { background: none; border: none; color: var(--text); font-size: 24px; cursor: pointer; }
-
-        .content { height: calc(100vh - 60px); overflow-y: auto; }
-        .wa-list-item { display: flex; align-items: center; padding: 12px 16px; cursor: pointer; border-bottom: 0.5px solid var(--border); }
-
-        .avatar-wrapper { position: relative; width: 55px; height: 55px; margin-right: 15px; }
-        .avatar-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 2px solid var(--wa-green); padding: 2px; }
-
-        .info { flex: 1; }
-        .name { font-weight: 500; font-size: 16px; margin-bottom: 2px; }
-        .sub-text { font-size: 14px; color: var(--gray); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-        /* Story Viewer */
-        #story-viewer {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; z-index: 9999; flex-direction: column; align-items: center;
+        body { 
+            font-family: var(--app-font-family, 'Segoe UI'); 
+            font-size: var(--app-font-size);
+            background: var(--bg); color: var(--text); margin: 0; height: 100vh; overflow: hidden; 
         }
-        .story-bar { position: absolute; top: 10px; width: 95%; height: 2px; background: rgba(255,255,255,0.3); border-radius: 2px; z-index: 10002;}
-        .story-progress { width: 0%; height: 100%; background: white; border-radius: 2px; }
-        
-        .close-story { position: absolute; top: 25px; right: 20px; color: white; font-size: 35px; cursor: pointer; z-index: 10003; }
-        
-        .story-main { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; position: relative; }
-        .story-img { max-width: 100%; max-height: 70vh; object-fit: contain; }
-        .story-text { color: white; margin-top: 20px; font-size: 18px; padding: 0 20px; text-align: center; }
 
-        /* Système de Like sur Story */
-        .like-overlay { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; align-items: center; gap: 5px; }
-        .btn-like-story { background: rgba(255,255,255,0.2); border: none; border-radius: 50%; width: 50px; height: 50px; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
-        .btn-like-story.active { color: #ff3b30; }
+        /* Layout Split View */
+        .main-container { display: flex; height: 100vh; width: 100%; }
 
-        /* Barre de réponse style WhatsApp */
-        .story-reply-container { width: 100%; padding: 15px; background: linear-gradient(transparent, rgba(0,0,0,0.8)); display: flex; align-items: center; gap: 10px; z-index: 10004; }
-        .reply-input { flex: 1; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); border-radius: 25px; padding: 12px 20px; color: white; outline: none; }
-        .btn-send-reply { background: var(--wa-green); border: none; width: 45px; height: 45px; border-radius: 50%; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        /* Colonne Gauche (Liste) */
+        .sidebar { 
+            width: 350px; border-right: 1px solid var(--border); 
+            display: flex; flex-direction: column; background: var(--bg);
+        }
+        .header { padding: 15px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 15px; }
+        .back-btn { background: none; border: none; color: var(--text); font-size: 20px; cursor: pointer; }
 
-        .post-box { padding: 15px; border-bottom: 8px solid var(--border); }
-        .post-input { width: 100%; border: none; background: var(--border); border-radius: 20px; padding: 10px 15px; outline: none; }
+        .post-box { padding: 15px; border-bottom: 5px solid var(--border); }
+        .post-input { 
+            width: 100%; border: 1px solid var(--border); background: var(--border); 
+            border-radius: var(--app-radius); padding: 10px 15px; outline: none; color: var(--text);
+        }
+
+        .notes-scroll { flex: 1; overflow-y: auto; }
+        .note-item { 
+            display: flex; align-items: center; padding: 12px 15px; 
+            cursor: pointer; border-bottom: 1px solid var(--border); transition: 0.3s;
+        }
+        .note-item:hover { background: rgba(0,0,0,0.05); }
+        .note-item.active { background: rgba(0, 168, 132, 0.1); border-left: 4px solid var(--accent); }
+
+        .avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; margin-right: 12px; border: 2px solid var(--accent); }
+
+        /* Colonne Droite (Visualiseur) */
+        .viewer { 
+            flex: 1; background: #000; position: relative; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        #placeholder-text { color: var(--gray); font-size: 14px; text-align: center; }
+
+        .story-content { width: 100%; height: 100%; display: none; flex-direction: column; position: relative; }
+        .story-img { max-width: 100%; max-height: 80vh; object-fit: contain; margin: auto; }
+        .story-text-overlay { 
+            position: absolute; bottom: 80px; width: 100%; text-align: center; 
+            color: white; font-size: 20px; text-shadow: 0 2px 10px rgba(0,0,0,0.8); padding: 0 20px;
+        }
+
+        /* Barre de progression & Pause */
+        .progress-container { position: absolute; top: 0; width: 100%; height: 4px; display: flex; gap: 5px; padding: 5px; box-sizing: border-box; }
+        .prog-bar { flex: 1; background: rgba(255,255,255,0.3); border-radius: 2px; overflow: hidden; }
+        .prog-fill { width: 0%; height: 100%; background: #fff; transition: width linear; }
+
+        .pause-btn { 
+            position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.5); 
+            color: white; border: none; padding: 8px 15px; border-radius: 20px; cursor: pointer; z-index: 10;
+        }
+
+        /* Réponses */
+        .reply-bar { 
+            position: absolute; bottom: 0; width: 100%; padding: 15px; 
+            background: rgba(0,0,0,0.6); display: flex; gap: 10px;
+        }
+        .reply-input { 
+            flex: 1; background: rgba(255,255,255,0.2); border: none; 
+            border-radius: 20px; padding: 10px 15px; color: #fff; outline: none;
+        }
     </style>
 </head>
-<body>
-
-    <div class="header">
-        <button class="back-btn" onclick="window.history.back()">←</button>
-        <h2 style="margin:0; font-size:20px;">Statuts</h2>
-    </div>
-
-    <div class="content">
-        <div class="post-box">
-            <input type="text" id="note-text" class="post-input" placeholder="Partagez un statut...">
-            <input type="file" id="note-file" accept="image/*" style="margin-top:10px; font-size:12px;">
-            <button onclick="publishNote()" style="margin-top:10px; background:var(--wa-green); color:white; border:none; padding:8px 15px; border-radius:5px; width:100%">Publier</button>
-        </div>
-        <div id="notes-list"></div>
-    </div>
-
-    <div id="story-viewer">
-        <div class="story-bar"><div id="progress-run" class="story-progress"></div></div>
-        <span class="close-story" onclick="closeStory()">&times;</span>
-        
-        <div class="story-main">
-            <img id="story-img" class="story-img">
-            <div id="story-text" class="story-text"></div>
-            
-            <div class="like-overlay">
-                <button id="btn-like-action" class="btn-like-story">
-                    <svg width="28" height="28" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                </button>
-                <span id="story-like-count" style="color:white; font-size:12px; font-weight:bold;">0</span>
+<body class="dark-mode"> <div class="main-container">
+        <div class="sidebar">
+            <div class="header">
+                <button class="back-btn" onclick="window.history.back()">←</button>
+                <h3 data-i18n="status">Statuts</h3>
             </div>
+            <div class="post-box">
+                <input type="text" id="note-text" class="post-input" placeholder="Quoi de neuf ?" data-i18n-placeholder="whats_new">
+                <input type="file" id="note-file" hidden onchange="publishNote()">
+                <button onclick="document.getElementById('note-file').click()" style="margin-top:10px; background:none; border:1px solid var(--accent); color:var(--accent); width:100%; padding:5px; border-radius:10px; cursor:pointer;">+ Ajouter Photo</button>
+            </div>
+            <div id="notes-list" class="notes-scroll">
+                </div>
         </div>
 
-        <div class="story-reply-container">
-            <input type="text" id="reply-text" class="reply-input" placeholder="Répondre...">
-            <button id="btn-reply-action" class="btn-send-reply">
-                <svg width="24" height="24" fill="white" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-            </button>
+        <div class="viewer" id="main-viewer">
+            <div id="placeholder-text">Sélectionnez un statut pour l'afficher</div>
+            
+            <div class="story-content" id="story-display">
+                <div class="progress-container" id="prog-container"></div>
+                <button class="pause-btn" id="btn-pause" onclick="togglePause()">Pause</button>
+                
+                <img id="story-img" class="story-img" src="">
+                <div id="story-text" class="story-text-overlay"></div>
+
+                <div class="reply-bar">
+                    <input type="text" id="reply-text" class="reply-input" placeholder="Répondre...">
+                    <button onclick="sendReply()" style="background:var(--accent); border:none; color:white; border-radius:50%; width:40px; height:40px; cursor:pointer;">></button>
+                </div>
+            </div>
         </div>
     </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, getDocs, doc, getDoc, deleteDoc, where, serverTimestamp, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, getDoc, doc, where, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
     const firebaseConfig = {
@@ -119,121 +137,159 @@
     const auth = getAuth(app);
 
     let currentUser = null;
-    let currentStoryId = null;
-    let storyTimeout = null;
+    let isPaused = false;
+    let currentNotes = [];
+    let noteIndex = 0;
+    let timer;
+
+    // --- SYNCHRONISATION DES COULEURS ET DESIGN ---
+    function syncMymeStyle() {
+        const theme = localStorage.getItem('theme') || 'dark';
+        const fs = localStorage.getItem('myme-fsize') || '16px';
+        const rad = localStorage.getItem('myme-radius') || '25px';
+        
+        document.documentElement.style.setProperty('--app-font-size', fs);
+        document.documentElement.style.setProperty('--app-radius', rad);
+        
+        if(theme === 'dark') document.body.classList.add('dark-mode');
+        else document.body.classList.remove('dark-mode');
+    }
+    syncMymeStyle();
 
     onAuthStateChanged(auth, async (user) => {
         if (!user) return;
         currentUser = user;
 
-        const chatsSnap = await getDocs(query(collection(db, "chats"), where("participants", "array-contains", user.uid)));
-        const contactIds = new Set([user.uid]);
-        chatsSnap.forEach(d => d.data().participants.forEach(p => contactIds.add(p)));
-
+        // Charger les statuts (Grouper par utilisateur pour éviter les doublons)
         onSnapshot(query(collection(db, "notes"), orderBy("createdAt", "desc")), async (snap) => {
             const list = document.getElementById('notes-list');
             list.innerHTML = "";
-            snap.docs.forEach(async (d) => {
+            const usersSeen = new Set();
+
+            for (const d of snap.docs) {
                 const data = d.data();
-                if (!contactIds.has(data.authorId)) return;
+                if (usersSeen.has(data.authorId)) continue; // Evite de doubler le profil
+                usersSeen.add(data.authorId);
 
                 const uSnap = await getDoc(doc(db, "users", data.authorId));
                 const uData = uSnap.data() || {};
-                const name = `${uData.prenom || ''} ${uData.nom || ''}`.trim() || "Contact";
-                const pfp = uData.photoURL || `https://ui-avatars.com/api/?name=${name}`;
+                const name = uData.prenom || "Contact";
 
-                const item = document.createElement('div');
-                item.className = "wa-list-item";
-                item.onclick = () => window.openStory(d.id, data);
-                item.innerHTML = `
-                    <div class="avatar-wrapper"><img src="${pfp}" class="avatar-img"></div>
+                const div = document.createElement('div');
+                div.className = "note-item";
+                div.onclick = () => loadUserStories(data.authorId);
+                div.innerHTML = `
+                    <img src="${uData.photoURL || 'https://via.placeholder.com/50'}" class="avatar">
                     <div class="info">
                         <div class="name">${name}</div>
-                        <div class="sub-text">${data.texte || '📷 Statut photo'}</div>
+                        <div class="sub-text" style="color:var(--gray); font-size:12px;">Nouveau statut</div>
                     </div>
                 `;
-                list.appendChild(item);
-            });
+                list.appendChild(div);
+            }
         });
     });
+
+    // Charger tous les statuts d'un utilisateur pour les passer un par un
+    async function loadUserStories(userId) {
+        const q = query(collection(db, "notes"), where("authorId", "==", userId), orderBy("createdAt", "asc"));
+        const snap = await getDocs(q);
+        currentNotes = snap.docs.map(d => d.data());
+        noteIndex = 0;
+        
+        document.getElementById('placeholder-text').style.display = 'none';
+        document.getElementById('story-display').style.display = 'flex';
+        
+        showStory();
+    }
+
+    function showStory() {
+        if (noteIndex >= currentNotes.length) {
+            document.getElementById('story-display').style.display = 'none';
+            document.getElementById('placeholder-text').style.display = 'block';
+            return;
+        }
+
+        const note = currentNotes[noteIndex];
+        const img = document.getElementById('story-img');
+        const txt = document.getElementById('story-text');
+        
+        img.src = note.photoBase64 || "";
+        img.style.display = note.photoBase64 ? "block" : "none";
+        txt.innerText = note.texte || "";
+
+        // Générer les barres en haut
+        const container = document.getElementById('prog-container');
+        container.innerHTML = "";
+        currentNotes.forEach((_, i) => {
+            const b = document.createElement('div');
+            b.className = "prog-bar";
+            const f = document.createElement('div');
+            f.className = "prog-fill";
+            if (i < noteIndex) f.style.width = "100%";
+            b.appendChild(f);
+            container.appendChild(b);
+        });
+
+        startProgress();
+    }
+
+    function startProgress() {
+        const fill = document.querySelectorAll('.prog-fill')[noteIndex];
+        let width = 0;
+        clearInterval(timer);
+        isPaused = false;
+        document.getElementById('btn-pause').innerText = "Pause";
+
+        timer = setInterval(() => {
+            if (!isPaused) {
+                width += 1;
+                fill.style.width = width + "%";
+                if (width >= 100) {
+                    clearInterval(timer);
+                    noteIndex++;
+                    showStory();
+                }
+            }
+        }, 50); // 5 secondes au total
+    }
+
+    window.togglePause = () => {
+        isPaused = !isPaused;
+        document.getElementById('btn-pause').innerText = isPaused ? "Play" : "Pause";
+    };
 
     window.publishNote = async () => {
         const text = document.getElementById('note-text').value;
         const file = document.getElementById('note-file').files[0];
+        let base64 = "";
+
         if (file) {
             const reader = new FileReader();
             reader.readAsDataURL(file);
-            reader.onload = async () => { await saveNote(text, reader.result); };
-        } else if (text) { await saveNote(text, ""); }
+            reader.onload = async () => {
+                await addDoc(collection(db, "notes"), {
+                    authorId: currentUser.uid,
+                    texte: text,
+                    photoBase64: reader.result,
+                    createdAt: serverTimestamp()
+                });
+                document.getElementById('note-text').value = "";
+            };
+        }
     };
 
-    async function saveNote(t, img) {
-        await addDoc(collection(db, "notes"), {
-            authorId: currentUser.uid,
-            texte: t,
-            photoBase64: img,
-            likes: [],
-            createdAt: serverTimestamp()
+    window.sendReply = async () => {
+        const reply = document.getElementById('reply-text').value;
+        if (!reply) return;
+        await addDoc(collection(db, "messages"), {
+            senderId: currentUser.uid,
+            receiverId: currentNotes[noteIndex].authorId,
+            text: "Réponse statut: " + reply,
+            timestamp: serverTimestamp()
         });
-        document.getElementById('note-text').value = "";
-    }
-
-    window.openStory = (id, data) => {
-        currentStoryId = id;
-        const viewer = document.getElementById('story-viewer');
-        const sImg = document.getElementById('story-img');
-        const btnLike = document.getElementById('btn-like-action');
-        
-        if(data.photoBase64) { sImg.src = data.photoBase64; sImg.style.display = 'block'; } else { sImg.style.display = 'none'; }
-        document.getElementById('story-text').innerText = data.texte || "";
-        document.getElementById('story-like-count').innerText = data.likes ? data.likes.length : 0;
-        
-        // État du like
-        if(data.likes?.includes(currentUser.uid)) btnLike.classList.add('active');
-        else btnLike.classList.remove('active');
-
-        viewer.style.display = 'flex';
-
-        // Barre de progression
-        const prog = document.getElementById('progress-run');
-        prog.style.width = '0%';
-        setTimeout(() => prog.style.transition = 'width 5s linear', 10);
-        setTimeout(() => prog.style.width = '100%', 50);
-
-        clearTimeout(storyTimeout);
-        storyTimeout = setTimeout(() => closeStory(), 5000);
-
-        // Action Like
-        btnLike.onclick = async (e) => {
-            e.stopPropagation();
-            const ref = doc(db, "notes", id);
-            const isLiked = btnLike.classList.contains('active');
-            await updateDoc(ref, {
-                likes: isLiked ? arrayRemove(currentUser.uid) : arrayUnion(currentUser.uid)
-            });
-            btnLike.classList.toggle('active');
-        };
-
-        // Action Répondre
-        document.getElementById('btn-reply-action').onclick = async () => {
-            const reply = document.getElementById('reply-text').value;
-            if(!reply) return;
-            // On envoie la réponse comme un message privé à l'auteur
-            await addDoc(collection(db, "messages"), {
-                senderId: currentUser.uid,
-                receiverId: data.authorId,
-                text: `Réponse à votre statut : ${reply}`,
-                timestamp: serverTimestamp()
-            });
-            document.getElementById('reply-text').value = "";
-            alert("Réponse envoyée !");
-        };
-    };
-
-    window.closeStory = () => { 
-        document.getElementById('story-viewer').style.display = 'none';
-        document.getElementById('progress-run').style.transition = 'none';
-        document.getElementById('progress-run').style.width = '0%';
+        document.getElementById('reply-text').value = "";
+        alert("Envoyé !");
     };
 </script>
 </body>
