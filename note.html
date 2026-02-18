@@ -4,13 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Myme - Statuts</title>
-    <meta name="sync-status" content="active">
     
     <style>
         :root {
             --bg: #ffffff; --text: #020c15; --gray: #667781;
             --accent: #00a884; --header-bg: #ffffff; --border: #f0f2f5;
-            --app-radius: 25px; --app-font-size: 16px;
+            --app-radius: 25px;
         }
         body.dark-mode {
             --bg: #020c15; --text: #e9edef; --gray: #8696a0;
@@ -18,103 +17,100 @@
         }
 
         body { 
-            font-family: var(--app-font-family, 'Segoe UI'); 
-            font-size: var(--app-font-size);
-            background: var(--bg); color: var(--text); margin: 0; height: 100vh; overflow: hidden; 
+            font-family: 'Segoe UI', system-ui, sans-serif; 
+            background: var(--bg); color: var(--text); margin: 0; 
+            height: 100vh; overflow-x: hidden;
         }
 
-        /* Layout Split View */
-        .main-container { display: flex; height: 100vh; width: 100%; }
-
-        /* Colonne Gauche (Liste) */
-        .sidebar { 
-            width: 350px; border-right: 1px solid var(--border); 
-            display: flex; flex-direction: column; background: var(--bg);
+        /* Header plein écran */
+        .header { 
+            padding: 15px 20px; background: var(--header-bg); 
+            border-bottom: 1px solid var(--border); display: flex; 
+            align-items: center; gap: 20px; sticky: top; z-index: 100;
         }
-        .header { padding: 15px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 15px; }
-        .back-btn { background: none; border: none; color: var(--text); font-size: 20px; cursor: pointer; }
+        .back-btn { background: none; border: none; color: var(--text); font-size: 24px; cursor: pointer; }
 
-        .post-box { padding: 15px; border-bottom: 5px solid var(--border); }
+        /* Conteneur principal */
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+
+        .post-box { 
+            background: var(--border); padding: 20px; 
+            border-radius: var(--app-radius); margin-bottom: 30px; 
+        }
         .post-input { 
-            width: 100%; border: 1px solid var(--border); background: var(--border); 
-            border-radius: var(--app-radius); padding: 10px 15px; outline: none; color: var(--text);
+            width: 100%; border: none; background: transparent; 
+            font-size: 16px; color: var(--text); outline: none; margin-bottom: 10px;
         }
 
-        .notes-scroll { flex: 1; overflow-y: auto; }
+        /* Liste des statuts */
+        .notes-list { display: flex; flex-direction: column; gap: 10px; }
         .note-item { 
-            display: flex; align-items: center; padding: 12px 15px; 
-            cursor: pointer; border-bottom: 1px solid var(--border); transition: 0.3s;
+            display: flex; align-items: center; padding: 15px; 
+            background: var(--header-bg); border-radius: 15px;
+            border: 1px solid var(--border); cursor: pointer; transition: 0.2s;
         }
-        .note-item:hover { background: rgba(0,0,0,0.05); }
-        .note-item.active { background: rgba(0, 168, 132, 0.1); border-left: 4px solid var(--accent); }
+        .note-item:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .avatar { width: 55px; height: 55px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent); margin-right: 15px; }
+        .name { font-weight: 600; font-size: 17px; }
 
-        .avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; margin-right: 12px; border: 2px solid var(--accent); }
-
-        /* Colonne Droite (Visualiseur) */
-        .viewer { 
-            flex: 1; background: #000; position: relative; 
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        /* Story Viewer Fullscreen */
+        #story-viewer {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 9999; flex-direction: column;
         }
-        #placeholder-text { color: var(--gray); font-size: 14px; text-align: center; }
-
-        .story-content { width: 100%; height: 100%; display: none; flex-direction: column; position: relative; }
-        .story-img { max-width: 100%; max-height: 80vh; object-fit: contain; margin: auto; }
-        .story-text-overlay { 
-            position: absolute; bottom: 80px; width: 100%; text-align: center; 
-            color: white; font-size: 20px; text-shadow: 0 2px 10px rgba(0,0,0,0.8); padding: 0 20px;
-        }
-
-        /* Barre de progression & Pause */
-        .progress-container { position: absolute; top: 0; width: 100%; height: 4px; display: flex; gap: 5px; padding: 5px; box-sizing: border-box; }
+        .story-top { position: absolute; top: 0; width: 100%; padding: 10px; z-index: 10001; }
+        .progress-container { display: flex; gap: 5px; height: 3px; margin-bottom: 15px; }
         .prog-bar { flex: 1; background: rgba(255,255,255,0.3); border-radius: 2px; overflow: hidden; }
-        .prog-fill { width: 0%; height: 100%; background: #fff; transition: width linear; }
+        .prog-fill { width: 0%; height: 100%; background: #fff; }
 
-        .pause-btn { 
-            position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.5); 
-            color: white; border: none; padding: 8px 15px; border-radius: 20px; cursor: pointer; z-index: 10;
-        }
+        .story-main { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; }
+        .story-img { max-width: 100%; max-height: 85vh; object-fit: contain; }
+        .story-text-overlay { color: white; font-size: 22px; margin-top: 20px; text-align: center; padding: 0 20px; }
 
-        /* Réponses */
-        .reply-bar { 
-            position: absolute; bottom: 0; width: 100%; padding: 15px; 
-            background: rgba(0,0,0,0.6); display: flex; gap: 10px;
-        }
-        .reply-input { 
-            flex: 1; background: rgba(255,255,255,0.2); border: none; 
-            border-radius: 20px; padding: 10px 15px; color: #fff; outline: none;
-        }
+        .close-story { position: absolute; top: 30px; right: 20px; color: white; font-size: 35px; cursor: pointer; z-index: 10002; }
+        .pause-btn { background: rgba(255,255,255,0.2); border: none; color: white; padding: 5px 15px; border-radius: 20px; cursor: pointer; }
+
+        .reply-bar { padding: 20px; display: flex; gap: 10px; background: rgba(0,0,0,0.5); }
+        .reply-input { flex: 1; border-radius: 25px; border: none; padding: 12px 20px; background: rgba(255,255,255,0.15); color: white; outline: none; }
     </style>
 </head>
-<body class="dark-mode"> <div class="main-container">
-        <div class="sidebar">
-            <div class="header">
-                <button class="back-btn" onclick="window.history.back()">←</button>
-                <h3 data-i18n="status">Statuts</h3>
+<body class="dark-mode">
+
+    <div class="header">
+        <button class="back-btn" onclick="window.history.back()">←</button>
+        <h2 style="margin:0">Statuts</h2>
+    </div>
+
+    <div class="container">
+        <div class="post-box">
+            <input type="text" id="note-text" class="post-input" placeholder="Partagez un statut...">
+            <div style="display:flex; justify-content: space-between; align-items: center;">
+                <input type="file" id="note-file" hidden onchange="handleFileSelect(this)">
+                <button onclick="document.getElementById('note-file').click()" style="background:none; border:none; color:var(--accent); cursor:pointer; font-weight:bold;">+ Image</button>
+                <button onclick="publishNote()" style="background:var(--accent); color:white; border:none; padding:8px 20px; border-radius:20px; cursor:pointer;">Publier</button>
             </div>
-            <div class="post-box">
-                <input type="text" id="note-text" class="post-input" placeholder="Quoi de neuf ?" data-i18n-placeholder="whats_new">
-                <input type="file" id="note-file" hidden onchange="publishNote()">
-                <button onclick="document.getElementById('note-file').click()" style="margin-top:10px; background:none; border:1px solid var(--accent); color:var(--accent); width:100%; padding:5px; border-radius:10px; cursor:pointer;">+ Ajouter Photo</button>
-            </div>
-            <div id="notes-list" class="notes-scroll">
-                </div>
         </div>
 
-        <div class="viewer" id="main-viewer">
-            <div id="placeholder-text">Sélectionnez un statut pour l'afficher</div>
-            
-            <div class="story-content" id="story-display">
-                <div class="progress-container" id="prog-container"></div>
-                <button class="pause-btn" id="btn-pause" onclick="togglePause()">Pause</button>
-                
-                <img id="story-img" class="story-img" src="">
-                <div id="story-text" class="story-text-overlay"></div>
-
-                <div class="reply-bar">
-                    <input type="text" id="reply-text" class="reply-input" placeholder="Répondre...">
-                    <button onclick="sendReply()" style="background:var(--accent); border:none; color:white; border-radius:50%; width:40px; height:40px; cursor:pointer;">></button>
-                </div>
+        <div id="notes-list" class="notes-list">
             </div>
+    </div>
+
+    <div id="story-viewer">
+        <span class="close-story" onclick="closeStory()">&times;</span>
+        
+        <div class="story-top">
+            <div class="progress-container" id="prog-container"></div>
+            <button class="pause-btn" onclick="togglePause()" id="btn-pause">Pause</button>
+        </div>
+
+        <div class="story-main">
+            <img id="story-img" class="story-img">
+            <div id="story-text" class="story-text-overlay"></div>
+        </div>
+
+        <div class="reply-bar">
+            <input type="text" id="reply-text" class="reply-input" placeholder="Répondre...">
+            <button onclick="sendReply()" style="background:var(--accent); border:none; color:white; border-radius:50%; width:45px; height:45px; cursor:pointer;">➔</button>
         </div>
     </div>
 
@@ -137,109 +133,95 @@
     const auth = getAuth(app);
 
     let currentUser = null;
+    let currentStories = [];
+    let storyIdx = 0;
     let isPaused = false;
-    let currentNotes = [];
-    let noteIndex = 0;
     let timer;
 
-    // --- SYNCHRONISATION DES COULEURS ET DESIGN ---
-    function syncMymeStyle() {
-        const theme = localStorage.getItem('theme') || 'dark';
-        const fs = localStorage.getItem('myme-fsize') || '16px';
-        const rad = localStorage.getItem('myme-radius') || '25px';
-        
-        document.documentElement.style.setProperty('--app-font-size', fs);
-        document.documentElement.style.setProperty('--app-radius', rad);
-        
-        if(theme === 'dark') document.body.classList.add('dark-mode');
-        else document.body.classList.remove('dark-mode');
-    }
-    syncMymeStyle();
-
-    onAuthStateChanged(auth, async (user) => {
+    onAuthStateChanged(auth, (user) => {
         if (!user) return;
         currentUser = user;
+        loadProfiles();
+    });
 
-        // Charger les statuts (Grouper par utilisateur pour éviter les doublons)
-        onSnapshot(query(collection(db, "notes"), orderBy("createdAt", "desc")), async (snap) => {
+    // Charger les profils ayant posté un statut
+    function loadProfiles() {
+        // Requête simplifiée pour éviter l'erreur d'index au début
+        const q = query(collection(db, "notes"), orderBy("createdAt", "desc"));
+        
+        onSnapshot(q, async (snap) => {
             const list = document.getElementById('notes-list');
             list.innerHTML = "";
             const usersSeen = new Set();
 
             for (const d of snap.docs) {
                 const data = d.data();
-                if (usersSeen.has(data.authorId)) continue; // Evite de doubler le profil
+                if (usersSeen.has(data.authorId)) continue;
                 usersSeen.add(data.authorId);
 
                 const uSnap = await getDoc(doc(db, "users", data.authorId));
                 const uData = uSnap.data() || {};
-                const name = uData.prenom || "Contact";
 
-                const div = document.createElement('div');
-                div.className = "note-item";
-                div.onclick = () => loadUserStories(data.authorId);
-                div.innerHTML = `
+                const item = document.createElement('div');
+                item.className = "note-item";
+                item.onclick = () => openUserStories(data.authorId);
+                item.innerHTML = `
                     <img src="${uData.photoURL || 'https://via.placeholder.com/50'}" class="avatar">
-                    <div class="info">
-                        <div class="name">${name}</div>
-                        <div class="sub-text" style="color:var(--gray); font-size:12px;">Nouveau statut</div>
-                    </div>
+                    <div class="name">${uData.prenom || 'Utilisateur'}</div>
                 `;
-                list.appendChild(div);
+                list.appendChild(item);
             }
         });
-    });
+    }
 
-    // Charger tous les statuts d'un utilisateur pour les passer un par un
-    async function loadUserStories(userId) {
-        const q = query(collection(db, "notes"), where("authorId", "==", userId), orderBy("createdAt", "asc"));
+    async function openUserStories(userId) {
+        // CORRECTION : On récupère les statuts de l'utilisateur cliqué
+        const q = query(collection(db, "notes"), where("authorId", "==", userId));
         const snap = await getDocs(q);
-        currentNotes = snap.docs.map(d => d.data());
-        noteIndex = 0;
         
-        document.getElementById('placeholder-text').style.display = 'none';
-        document.getElementById('story-display').style.display = 'flex';
+        currentStories = snap.docs.map(d => d.data());
+        // Trier manuellement par date pour éviter l'erreur d'index Firestore
+        currentStories.sort((a, b) => (a.createdAt?.toMillis() || 0) - (b.createdAt?.toMillis() || 0));
         
+        storyIdx = 0;
+        document.getElementById('story-viewer').style.display = 'flex';
         showStory();
     }
 
     function showStory() {
-        if (noteIndex >= currentNotes.length) {
-            document.getElementById('story-display').style.display = 'none';
-            document.getElementById('placeholder-text').style.display = 'block';
-            return;
-        }
+        if (storyIdx >= currentStories.length) return closeStory();
 
-        const note = currentNotes[noteIndex];
+        const story = currentStories[storyIdx];
         const img = document.getElementById('story-img');
         const txt = document.getElementById('story-text');
-        
-        img.src = note.photoBase64 || "";
-        img.style.display = note.photoBase64 ? "block" : "none";
-        txt.innerText = note.texte || "";
 
-        // Générer les barres en haut
-        const container = document.getElementById('prog-container');
-        container.innerHTML = "";
-        currentNotes.forEach((_, i) => {
-            const b = document.createElement('div');
-            b.className = "prog-bar";
-            const f = document.createElement('div');
-            f.className = "prog-fill";
-            if (i < noteIndex) f.style.width = "100%";
-            b.appendChild(f);
-            container.appendChild(b);
-        });
+        img.src = story.photoBase64 || "";
+        img.style.display = story.photoBase64 ? "block" : "none";
+        txt.innerText = story.texte || "";
 
-        startProgress();
+        setupProgressBars();
+        startTimer();
     }
 
-    function startProgress() {
-        const fill = document.querySelectorAll('.prog-fill')[noteIndex];
-        let width = 0;
+    function setupProgressBars() {
+        const container = document.getElementById('prog-container');
+        container.innerHTML = "";
+        currentStories.forEach((_, i) => {
+            const bar = document.createElement('div');
+            bar.className = "prog-bar";
+            const fill = document.createElement('div');
+            fill.className = "prog-fill";
+            if (i < storyIdx) fill.style.width = "100%";
+            bar.appendChild(fill);
+            container.appendChild(bar);
+        });
+    }
+
+    function startTimer() {
         clearInterval(timer);
         isPaused = false;
-        document.getElementById('btn-pause').innerText = "Pause";
+        let width = 0;
+        const fill = document.querySelectorAll('.prog-fill')[storyIdx];
 
         timer = setInterval(() => {
             if (!isPaused) {
@@ -247,50 +229,64 @@
                 fill.style.width = width + "%";
                 if (width >= 100) {
                     clearInterval(timer);
-                    noteIndex++;
+                    storyIdx++;
                     showStory();
                 }
             }
-        }, 50); // 5 secondes au total
+        }, 50); // 5 secondes
     }
 
     window.togglePause = () => {
         isPaused = !isPaused;
-        document.getElementById('btn-pause').innerText = isPaused ? "Play" : "Pause";
-    };
+        document.getElementById('btn-pause').innerText = isPaused ? "Continuer" : "Pause";
+    }
+
+    window.closeStory = () => {
+        clearInterval(timer);
+        document.getElementById('story-viewer').style.display = 'none';
+    }
 
     window.publishNote = async () => {
         const text = document.getElementById('note-text').value;
         const file = document.getElementById('note-file').files[0];
-        let base64 = "";
+        
+        if (!text && !file) return;
 
+        let base64 = "";
         if (file) {
             const reader = new FileReader();
             reader.readAsDataURL(file);
             reader.onload = async () => {
-                await addDoc(collection(db, "notes"), {
-                    authorId: currentUser.uid,
-                    texte: text,
-                    photoBase64: reader.result,
-                    createdAt: serverTimestamp()
-                });
-                document.getElementById('note-text').value = "";
+                await saveToDB(text, reader.result);
             };
+        } else {
+            await saveToDB(text, "");
         }
-    };
+    }
+
+    async function saveToDB(t, img) {
+        await addDoc(collection(db, "notes"), {
+            authorId: currentUser.uid,
+            texte: t,
+            photoBase64: img,
+            createdAt: serverTimestamp()
+        });
+        document.getElementById('note-text').value = "";
+        alert("Statut publié !");
+    }
 
     window.sendReply = async () => {
         const reply = document.getElementById('reply-text').value;
         if (!reply) return;
         await addDoc(collection(db, "messages"), {
             senderId: currentUser.uid,
-            receiverId: currentNotes[noteIndex].authorId,
-            text: "Réponse statut: " + reply,
+            receiverId: currentStories[storyIdx].authorId,
+            text: "Réponse statut : " + reply,
             timestamp: serverTimestamp()
         });
         document.getElementById('reply-text').value = "";
-        alert("Envoyé !");
-    };
+        alert("Réponse envoyée !");
+    }
 </script>
 </body>
 </html>
