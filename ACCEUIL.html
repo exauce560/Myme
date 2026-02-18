@@ -6,21 +6,18 @@
     <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Rock+Salt&family=Caveat:wght@400;700&family=Shadows+Into+Light&family=Gochi+Hand&display=swap" rel="stylesheet">
     <title>Myme - Accueil</title>
     <style>
-/* --- VARIABLES UNIFIÉES (Look WhatsApp + Tes Fonctions) --- */
+/* --- VARIABLES UNIFIÉES --- */
 :root {
-    /* Couleurs Light (par défaut) */
-    --bg: #ffffff; 
-    --text: #1c1e21; 
+    --bg: #ffffff;
+    --text: #1c1e21;
     --gray: #65676b;
-    --myme-blue: #0866ff; 
+    --myme-blue: #0088ff;
     --hover-bg: #f2f2f2;
-    --header-bg: #ffffff; 
     --card-border: #f0f2f5;
     --sidebar-mini: #f7f8fa;
     --app-font-family: 'Segoe UI', system-ui, sans-serif;
-    --app-font-size: 16px;
-    
-    /* Spécifiques WhatsApp Dark (utilisées en Dark Mode) */
+
+    /* WhatsApp Dark Mode */
     --wa-bg-mini: #202c33;
     --wa-bg-main: #111b21;
     --wa-bg-chat: #0b141a;
@@ -30,25 +27,22 @@
     --wa-border: #222d34;
 }
 
-/* --- MODE SOMBRE (Le look WhatsApp pur) --- */
 body.dark-mode {
     --bg: var(--wa-bg-main);
     --text: var(--wa-text-primary);
     --gray: var(--wa-text-secondary);
     --hover-bg: #2b3943;
-    --header-bg: var(--wa-bg-main);
     --card-border: var(--wa-border);
     --sidebar-mini: var(--wa-bg-mini);
-    --myme-blue: var(--wa-green); /* Le bleu devient le vert WhatsApp */
+    --myme-blue: var(--wa-green);
 }
 
 body {
     font-family: var(--app-font-family);
-    font-size: var(--app-font-size);
-    background: var(--bg); 
-    color: var(--text); 
+    background: var(--bg);
+    color: var(--text);
     margin: 0;
-    height: 100vh; 
+    height: 100vh;
     overflow: hidden;
 }
 
@@ -61,200 +55,197 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 20px 0;
+    padding: 15px 0;
     border-right: 1px solid var(--card-border);
     justify-content: space-between;
 }
 
-.mini-nav-vertical { display: flex; flex-direction: column; gap: 25px; }
-.mini-nav-vertical svg { width: 26px; height: 26px; fill: var(--gray); cursor: pointer; transition: 0.2s; }
-.mini-nav-vertical .active svg { fill: var(--text); }
-.mini-nav-vertical a:hover svg { transform: scale(1.1); fill: var(--myme-blue); }
-
-.profile-section-bottom { 
-    position: relative; 
-    padding-bottom: 10px;
+.mini-nav-vertical {
     display: flex;
     flex-direction: column;
+    gap: 22px;
     align-items: center;
 }
 
-.user-avatar-header {
-    width: 42px; height: 42px; border-radius: 50%; /* WhatsApp look */
-    object-fit: cover; cursor: pointer; border: 2px solid transparent;
+/* Style Contour Gris Pro */
+.mini-nav-vertical svg, .settings-icon svg {
+    width: 24px;
+    height: 24px;
+    stroke: #8696a0;
+    fill: none;
+    stroke-width: 2px;
+    transition: 0.3s;
+    cursor: pointer;
+}
+
+.mini-nav-vertical .active svg {
+    stroke: var(--myme-blue);
+    stroke-width: 2.5px;
+}
+
+.mini-nav-vertical a:hover svg, .settings-icon:hover svg {
+    stroke: var(--text);
+    transform: scale(1.1);
+}
+
+/* Bouton Ajouter */
+.add-btn {
+    background: var(--myme-blue);
+    border: none;
+    border-radius: 50%;
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
     transition: 0.2s;
 }
-.user-avatar-header:hover { border-color: var(--myme-blue); }
 
-#self-online-dot {
-    position: absolute; bottom: 12px; right: 2px;
-    width: 12px; height: 12px; background: #00a884;
-    border: 2px solid var(--sidebar-mini); border-radius: 50%;
+/* Section Profil et Paramètres en bas */
+.profile-section-bottom {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    padding-bottom: 10px;
 }
 
-/* --- 2. COLONNE DISCUSSIONS --- */
+.user-avatar-header {
+    width: 40px; height: 40px; border-radius: 50%;
+    object-fit: cover; cursor: pointer; border: 2px solid transparent;
+}
+
+/* --- 2. COLONNE DISCUSSIONS (NOM MYME ICI) --- */
 .sidebar-main {
-    width: 350px;
+    width: 380px;
     display: flex;
     flex-direction: column;
     background: var(--bg);
     border-right: 1px solid var(--card-border);
 }
 
-.sidebar-header { padding: 20px 15px 10px 15px; }
-.sidebar-header h1 { 
-    margin: 0; font-size: 22px; font-weight: 700; color: var(--text);
+.sidebar-header {
+    padding: 20px 20px 10px 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sidebar-header h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--text);
+    letter-spacing: -0.5px;
 }
 
 .search-container { padding: 10px 15px; }
 .search-bar {
     width: 100%; box-sizing: border-box; padding: 10px 15px;
     border-radius: 8px; border: none;
-    background: var(--hover-bg); color: var(--text); outline: none;
+    background: var(--sidebar-mini); color: var(--text); outline: none;
 }
-
-.sidebar-content { flex: 1; overflow-y: auto; }
 
 .chat-item {
     display: flex; height: 72px; padding: 0 15px; align-items: center; cursor: pointer;
-    border-bottom: 1px solid var(--card-border); transition: 0.2s;
+    border-bottom: 1px solid var(--card-border);
 }
 .chat-item:hover { background: var(--hover-bg); }
 
-/* --- 3. VUE CHAT (DROITE) --- */
-.main-chat-view { 
-    flex: 1; 
-    background-color: var(--bg); /* Fond dynamique */
-    position: relative; 
-}
-
-/* Application du Doodle uniquement en Dark Mode */
-body.dark-mode .main-chat-view {
-    background-color: var(--wa-bg-chat);
-}
+/* --- 3. VUE CHAT --- */
+.main-chat-view { flex: 1; position: relative; background: var(--bg); }
 
 body.dark-mode .main-chat-view::before {
-    content: "";
-    position: absolute;
-    top: 0; left: 0; width: 100%; height: 100%;
+    content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
     background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
-    background-repeat: repeat;
-    background-size: 400px;
-    opacity: 0.06;
-    z-index: 0;
+    background-repeat: repeat; background-size: 400px; opacity: 0.05; z-index: 0;
 }
 
 #chat-iframe { width: 100%; height: 100%; border: none; position: relative; z-index: 1; }
 
-.no-chat-selected {
-    display: flex; flex-direction: column; align-items: center;
-    justify-content: center; height: 100%; color: var(--gray);
-    position: relative; z-index: 1;
-}
-
-/* --- ÉLÉMENTS UI (Dropdown, Badges, Switch) --- */
 #dropdown-menu {
-    position: absolute; bottom: 70px; left: 70px; background: var(--header-bg);
+    position: absolute; bottom: 80px; left: 70px; background: var(--bg);
     box-shadow: 0 4px 20px rgba(0,0,0,0.2); border-radius: 12px;
-    display: none; flex-direction: column; width: 220px; z-index: 1000; padding: 8px 0;
+    display: none; flex-direction: column; width: 200px; z-index: 1000;
     border: 1px solid var(--card-border);
 }
-
-.menu-item { padding: 12px 15px; cursor: pointer; color: var(--text); display: flex; justify-content: space-between; align-items: center; }
+.menu-item { padding: 12px 15px; cursor: pointer; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
 .menu-item:hover { background: var(--hover-bg); }
 
-.add-btn {
-    background: var(--myme-blue); border: none; border-radius: 50%;
-    width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; 
-    cursor: pointer; margin-top: 20px; color: white;
-}
-
-/* Badge de notification */
-[id^='badge-'] {
-    background-color: var(--myme-blue) !important;
-    color: white !important;
-    font-weight: bold;
-}
-
-.online-indicator {
-    position: absolute; bottom: 2px; right: 2px;
-    width: 12px; height: 12px; background: #31a24c;
-    border: 2px solid var(--bg); border-radius: 50%; display: none;
-}
-.is-online .online-indicator { display: block; }
-
-/* Switch design */
-.switch { position: relative; display: inline-block; width: 34px; height: 18px; }
-.switch input { opacity: 0; width: 0; height: 0; }
-.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
-.slider:before { position: absolute; content: ""; height: 12px; width: 12px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
-input:checked + .slider { background-color: var(--myme-blue); }
-input:checked + .slider:before { transform: translateX(16px); }
-
-</style>
+    </style>
 </head>
 <body onclick="closeMenu()">
 
 <div class="app-container">
     <nav class="sidebar-mini">
         <div class="mini-nav-vertical">
-            <a href="ACCEUIL.html" class="active" title="Messages">
-                <svg viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.14 2 11.25c0 2.913 1.45 5.503 3.71 7.218.158.119.24.32.21.516l-.37 2.417a.75.75 0 0 0 1.056.79l2.766-1.303a.75.75 0 0 1 .458-.063c.633.14 1.294.215 1.97.215 5.523 0 10-4.14 10-9.25S17.523 2 12 2Z"/></svg>
+            <a href="ACCEUIL.html" class="active" title="Discussions">
+                <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+                </svg>
             </a>
             <a href="javascript:void(0)" onclick="openSettingsInChat('appel.html')" title="Appels">
-                <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
-            </a>
-            <a href="javascript:void(0)" onclick="openSettingsInChat('note.html')" title="Notes">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20,2H4C2.9,2,2,2.9,2,4v12c0,1.1,0.9,2,2,2h4l4,4l4-4h4c1.1,0,2-0.9,2-2V4C22,2.9,21.1,2,20,2z"/></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                </svg>
             </a>
             <button class="add-btn" onclick="location.href='contacts.html'">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="white"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                <svg viewBox="0 0 24 24" width="20" height="20" stroke="white" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             </button>
         </div>
 
         <div class="profile-section-bottom">
-            <img id="headerUserImg" class="user-avatar-header" src="https://ui-avatars.com/api/?name=?" onclick="toggleMenu(event)">
-            <div id="self-online-dot"></div>
-            <div id="global-unread-badge" style="position:absolute; top:-5px; right:-5px; background:red; color:white; border-radius:50%; font-size:10px; width:18px; height:18px; display:none; align-items:center; justify-content:center;">0</div>
+            <div class="settings-icon"
+                onclick="openSettingsInChat('parametres.html')"
+                style="margin-bottom: 5px; cursor: pointer;"
+                title="Paramètres">
+                <svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                </svg>
+            </div>
+            <div style="position:relative;">
+                <img id="headerUserImg" class="user-avatar-header" src="https://ui-avatars.com/api/?name=?" onclick="toggleMenu(event)">
+                <div id="self-online-dot" style="position:absolute; bottom:0; right:0; width:12px; height:12px; background:#00a884; border:2px solid var(--sidebar-mini); border-radius:50%;"></div>
+            </div>
         </div>
     </nav>
 
     <aside class="sidebar-main">
         <div class="sidebar-header">
-            <h1>Myme</h1>
-        </div>
-        
+            <h1>Myme</h1> </div>
+
         <div class="search-container">
-            <input type="text" class="search-bar" id="search-input" placeholder="Rechercher..." data-lang="search_placeholder">
+            <input type="text" class="search-bar" id="search-input" placeholder="Rechercher une discussion">
         </div>
 
         <div class="sidebar-content">
             <div class="chat-list" id="chat-container"></div>
-            <div id="empty-state">
-                <p id="empty-text" data-lang="no-chat" style="text-align:center; padding:20px; color:var(--gray);">Aucune discussion</p>
+            <div id="empty-state" style="display:none; flex-direction:column; align-items:center; margin-top:50px;">
+                <p style="color:var(--gray);">Aucune discussion</p>
             </div>
         </div>
     </aside>
 
     <main class="main-chat-view">
-        <div id="no-chat-welcome" class="no-chat-selected">
+        <div id="no-chat-welcome" class="no-chat-selected" style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:var(--gray);">
             <svg viewBox="0 0 24 24" width="80" height="80" style="opacity: 0.1; margin-bottom: 15px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
             <p>Sélectionnez une discussion pour commencer</p>
         </div>
-        <iframe id="chat-iframe" name="chat-frame"></iframe>
+        <iframe id="chat-iframe" name="chat-frame" style="display:none;"></iframe>
 
         <div id="dropdown-menu">
-            <div class="menu-item" onclick="openSettingsInChat('fond_ecran.html')" data-lang="font">Fond & Style</div>
-            <div class="menu-item" onclick="openSettingsInChat('parametres.html')" data-lang="parameter">Paramètres</div>
-            <div class="menu-item" onclick="event.stopPropagation()">
-                <span data-lang="dark_mode">Mode Sombre</span>
+            <div class="menu-item" onclick="openSettingsInChat('parametres.html')">Paramètres</div>
+            <div class="menu-item" onclick="openSettingsInChat('fond_ecran.html')">Personnalisation</div>
+            <div class="menu-item">
+                <span>Mode Sombre</span>
                 <label class="switch">
                     <input type="checkbox" id="theme-switch" onchange="toggleTheme()">
                     <span class="slider"></span>
                 </label>
             </div>
-            <hr style="border: 0; border-top: 1px solid var(--card-border); margin: 4px 0;">
-            <div class="menu-item" style="color: #ff4d4d;" onclick="logout()" data-lang="logout">Déconnexion</div>
+            <div class="menu-item" style="color: #ff4d4d;" onclick="logout()">Déconnexion</div>
         </div>
     </main>
 </div>
@@ -681,6 +672,7 @@ input:checked + .slider:before { transform: translateX(16px); }
 </body>
 
 </html>
+
 
 
 
