@@ -1,108 +1,109 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Myme - Statuts</title>
+    
+    <meta name="sync-status" content="active">
+    
     <style>
         :root {
-            --bg: #ffffff; --text: #1c1e21; --gray: #65676b;
-            --myme-blue: #0866ff; --header-bg: #ffffff; --card-border: #f0f2f5;
-            --wa-green: #25D366;
+            --bg: #ffffff; --text: #111b21; --gray: #667781;
+            --wa-green: #00a884; --header-bg: #ffffff; --border: #f0f2f5;
         }
-
         body.dark-mode {
-            --bg: #020c15; --text: #e4e6eb; --gray: #b0b3b8;
-            --header-bg: #05121d; --card-border: #0d1b2a;
+            --bg: #111b21; --text: #e9edef; --gray: #8696a0;
+            --header-bg: #111b21; --border: #222d34;
         }
 
-        body {
-            background-color: var(--bg); color: var(--text);
-            font-family: 'Segoe UI', sans-serif; margin: 0;
-            display: flex; flex-direction: column; height: 100vh; overflow: hidden;
-        }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); color: var(--text); margin: 0; overflow: hidden; height: 100vh; }
 
-        .content { flex: 1; overflow-y: auto; padding: 10px; scrollbar-width: none; }
+        .header { padding: 12px 16px; background: var(--header-bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 20px; }
+        .back-btn { background: none; border: none; color: var(--text); font-size: 24px; cursor: pointer; }
+
+        .content { height: calc(100vh - 60px); overflow-y: auto; }
+        .wa-list-item { display: flex; align-items: center; padding: 12px 16px; cursor: pointer; border-bottom: 0.5px solid var(--border); }
+
+        .avatar-wrapper { position: relative; width: 55px; height: 55px; margin-right: 15px; }
+        .avatar-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 2px solid var(--wa-green); padding: 2px; }
+
+        .info { flex: 1; }
+        .name { font-weight: 500; font-size: 16px; margin-bottom: 2px; }
+        .sub-text { font-size: 14px; color: var(--gray); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        /* Story Viewer */
+        #story-viewer {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 9999; flex-direction: column; align-items: center;
+        }
+        .story-bar { position: absolute; top: 10px; width: 95%; height: 2px; background: rgba(255,255,255,0.3); border-radius: 2px; z-index: 10002;}
+        .story-progress { width: 0%; height: 100%; background: white; border-radius: 2px; }
         
-        /* Liste style WhatsApp */
-        .wa-list { display: flex; flex-direction: column; gap: 2px; }
-        .wa-item {
-            display: flex; align-items: center; padding: 12px;
-            background: var(--header-bg); border-bottom: 1px solid var(--card-border);
-            cursor: pointer; transition: 0.2s;
-        }
-        .wa-item:active { background: var(--card-border); }
+        .close-story { position: absolute; top: 25px; right: 20px; color: white; font-size: 35px; cursor: pointer; z-index: 10003; }
         
-        .wa-avatar-container { position: relative; margin-right: 15px; }
-        .wa-avatar {
-            width: 55px; height: 55px; border-radius: 50%;
-            object-fit: cover; border: 2px solid var(--wa-green); padding: 2px;
-        }
-        
-        .wa-body { flex: 1; display: flex; flex-direction: column; }
-        .wa-name { font-weight: bold; font-size: 16px; margin-bottom: 4px; }
-        .wa-text { font-size: 14px; color: var(--gray); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        
-        .wa-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
-        .wa-time { font-size: 11px; color: var(--gray); }
-        .like-btn { background: none; border: none; cursor: pointer; color: var(--gray); padding: 5px; }
-        .like-btn.active { color: #e0245e; }
+        .story-main { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; position: relative; }
+        .story-img { max-width: 100%; max-height: 70vh; object-fit: contain; }
+        .story-text { color: white; margin-top: 20px; font-size: 18px; padding: 0 20px; text-align: center; }
 
-        /* Publish Card */
-        .publish-area {
-            padding: 15px; background: var(--header-bg);
-            border-bottom: 1px solid var(--card-border);
-        }
-        .input-group {
-            display: flex; align-items: center; background: var(--card-border);
-            border-radius: 25px; padding: 8px 15px; gap: 10px;
-        }
-        .input-group textarea {
-            flex: 1; background: none; border: none; outline: none;
-            color: var(--text); resize: none; font-family: inherit;
-        }
-        .btn-send {
-            background: var(--myme-blue); color: white; border: none;
-            width: 35px; height: 35px; border-radius: 50%; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-        }
+        /* Système de Like sur Story */
+        .like-overlay { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; align-items: center; gap: 5px; }
+        .btn-like-story { background: rgba(255,255,255,0.2); border: none; border-radius: 50%; width: 50px; height: 50px; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        .btn-like-story.active { color: #ff3b30; }
 
-        /* Preview Photo */
-        .img-preview { display: flex; gap: 10px; margin-top: 10px; }
-        .img-preview img { width: 50px; height: 50px; border-radius: 8px; object-fit: cover; }
+        /* Barre de réponse style WhatsApp */
+        .story-reply-container { width: 100%; padding: 15px; background: linear-gradient(transparent, rgba(0,0,0,0.8)); display: flex; align-items: center; gap: 10px; z-index: 10004; }
+        .reply-input { flex: 1; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); border-radius: 25px; padding: 12px 20px; color: white; outline: none; }
+        .btn-send-reply { background: var(--wa-green); border: none; width: 45px; height: 45px; border-radius: 50%; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
-        .fleche-retour { margin: 10px; background: none; border: none; color: var(--text); cursor: pointer; }
+        .post-box { padding: 15px; border-bottom: 8px solid var(--border); }
+        .post-input { width: 100%; border: none; background: var(--border); border-radius: 20px; padding: 10px 15px; outline: none; }
     </style>
 </head>
 <body>
 
-    <div class="publish-area">
-        <button class="fleche-retour" onclick="window.history.back()">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-        </button>
-        <div class="input-group">
-            <textarea id="note-text" placeholder="Ma note (max 100)" maxlength="100" rows="1"></textarea>
-            <label style="cursor:pointer">
-                <input type="file" id="note-images" accept="image/*" multiple hidden onchange="previewImages()">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-            </label>
-            <button class="btn-send" onclick="postNote()">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-            </button>
-        </div>
-        <div id="preview-container" class="img-preview"></div>
+    <div class="header">
+        <button class="back-btn" onclick="window.history.back()">←</button>
+        <h2 style="margin:0; font-size:20px;">Statuts</h2>
     </div>
 
     <div class="content">
-        <div class="wa-list" id="wa-notes-list">
+        <div class="post-box">
+            <input type="text" id="note-text" class="post-input" placeholder="Partagez un statut...">
+            <input type="file" id="note-file" accept="image/*" style="margin-top:10px; font-size:12px;">
+            <button onclick="publishNote()" style="margin-top:10px; background:var(--wa-green); color:white; border:none; padding:8px 15px; border-radius:5px; width:100%">Publier</button>
+        </div>
+        <div id="notes-list"></div>
+    </div>
+
+    <div id="story-viewer">
+        <div class="story-bar"><div id="progress-run" class="story-progress"></div></div>
+        <span class="close-story" onclick="closeStory()">&times;</span>
+        
+        <div class="story-main">
+            <img id="story-img" class="story-img">
+            <div id="story-text" class="story-text"></div>
+            
+            <div class="like-overlay">
+                <button id="btn-like-action" class="btn-like-story">
+                    <svg width="28" height="28" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                </button>
+                <span id="story-like-count" style="color:white; font-size:12px; font-weight:bold;">0</span>
             </div>
+        </div>
+
+        <div class="story-reply-container">
+            <input type="text" id="reply-text" class="reply-input" placeholder="Répondre...">
+            <button id="btn-reply-action" class="btn-send-reply">
+                <svg width="24" height="24" fill="white" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+            </button>
+        </div>
     </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, onSnapshot, query, orderBy, setDoc, doc, serverTimestamp, getDoc, updateDoc, arrayUnion, arrayRemove, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, getDocs, doc, getDoc, deleteDoc, where, serverTimestamp, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyA3YTGXBA9Cf9QNaGau0PCBgyuGSJv5pi0",
@@ -116,113 +117,124 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
-    const storage = getStorage(app);
 
-    // --- LOGIQUE PHOTO ---
-    window.previewImages = () => {
-        const preview = document.getElementById('preview-container');
-        const files = document.getElementById('note-images').files;
-        preview.innerHTML = "";
-        if (files.length > 3) { alert("Max 3 photos !"); return; }
-        Array.from(files).forEach(file => {
-            const reader = new FileReader();
-            reader.onload = e => {
-                preview.innerHTML += `<img src="${e.target.result}">`;
-            };
-            reader.readAsDataURL(file);
-        });
-    };
+    let currentUser = null;
+    let currentStoryId = null;
+    let storyTimeout = null;
 
-    // --- PUBLIER ---
-    window.postNote = async () => {
-        const user = auth.currentUser;
-        const text = document.getElementById('note-text').value.trim();
-        const files = document.getElementById('note-images').files;
-        if (!user || (!text && files.length === 0)) return;
-
-        try {
-            let imageUrls = [];
-            for (let i = 0; i < Math.min(files.length, 3); i++) {
-                const fileRef = ref(storage, `notes/${user.uid}_${Date.now()}_${i}`);
-                await uploadBytes(fileRef, files[i]);
-                imageUrls.push(await getDownloadURL(fileRef));
-            }
-
-            // On utilise l'ID utilisateur comme ID de document pour n'avoir qu'une seule note par personne
-            await setDoc(doc(db, "notes", user.uid), {
-                authorId: user.uid,
-                texte: text,
-                photos: imageUrls,
-                likes: [],
-                createdAt: serverTimestamp()
-            });
-
-            document.getElementById('note-text').value = "";
-            document.getElementById('preview-container').innerHTML = "";
-            alert("Note publiée !");
-        } catch (e) { console.error(e); }
-    };
-
-    // --- LIKE ---
-    window.toggleLike = async (noteId, isLiked) => {
-        const user = auth.currentUser;
+    onAuthStateChanged(auth, async (user) => {
         if (!user) return;
-        const noteRef = doc(db, "notes", noteId);
-        await updateDoc(noteRef, {
-            likes: isLiked ? arrayRemove(user.uid) : arrayUnion(user.uid)
-        });
-    };
+        currentUser = user;
 
-    // --- AFFICHAGE & FILTRE 24H ---
-    onAuthStateChanged(auth, user => {
-        if (!user) return;
-        if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode');
+        const chatsSnap = await getDocs(query(collection(db, "chats"), where("participants", "array-contains", user.uid)));
+        const contactIds = new Set([user.uid]);
+        chatsSnap.forEach(d => d.data().participants.forEach(p => contactIds.add(p)));
 
-        const q = query(collection(db, "notes"), orderBy("createdAt", "desc"));
-        onSnapshot(q, async (snapshot) => {
-            const list = document.getElementById('wa-notes-list');
+        onSnapshot(query(collection(db, "notes"), orderBy("createdAt", "desc")), async (snap) => {
+            const list = document.getElementById('notes-list');
             list.innerHTML = "";
-            const now = Date.now();
-
-            for (const d of snapshot.docs) {
+            snap.docs.forEach(async (d) => {
                 const data = d.data();
-                
-                // Calcul 24h
-                if (data.createdAt) {
-                    const noteAge = now - data.createdAt.toMillis();
-                    if (noteAge > 24 * 60 * 60 * 1000) {
-                        await deleteDoc(doc(db, "notes", d.id)); // Supprime du serveur si > 24h
-                        continue;
-                    }
-                }
+                if (!contactIds.has(data.authorId)) return;
 
-                const userSnap = await getDoc(doc(db, "users", data.authorId));
-                const userData = userSnap.data() || {};
-                const fullName = `${userData.prenom || ''} ${userData.nom || ''}`.trim() || "Myme User";
-                const photo = userData.photoURL || `https://ui-avatars.com/api/?name=${fullName}`;
-                const isLiked = data.likes?.includes(user.uid);
+                const uSnap = await getDoc(doc(db, "users", data.authorId));
+                const uData = uSnap.data() || {};
+                const name = `${uData.prenom || ''} ${uData.nom || ''}`.trim() || "Contact";
+                const pfp = uData.photoURL || `https://ui-avatars.com/api/?name=${name}`;
 
-                const html = `
-                    <div class="wa-item">
-                        <div class="wa-avatar-container" onclick="alert('Voir profil de ${fullName}')">
-                            <img src="${photo}" class="wa-avatar">
-                        </div>
-                        <div class="wa-body">
-                            <div class="wa-name">${fullName}</div>
-                            <div class="wa-text">${data.texte || (data.photos.length ? '📷 Photo' : '')}</div>
-                        </div>
-                        <div class="wa-meta">
-                            <div class="wa-time">Maintenant</div>
-                            <button class="like-btn ${isLiked ? 'active' : ''}" onclick="event.stopPropagation(); toggleLike('${d.id}', ${isLiked})">
-                                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                            </button>
-                        </div>
+                const item = document.createElement('div');
+                item.className = "wa-list-item";
+                item.onclick = () => window.openStory(d.id, data);
+                item.innerHTML = `
+                    <div class="avatar-wrapper"><img src="${pfp}" class="avatar-img"></div>
+                    <div class="info">
+                        <div class="name">${name}</div>
+                        <div class="sub-text">${data.texte || '📷 Statut photo'}</div>
                     </div>
                 `;
-                list.innerHTML += html;
-            }
+                list.appendChild(item);
+            });
         });
     });
+
+    window.publishNote = async () => {
+        const text = document.getElementById('note-text').value;
+        const file = document.getElementById('note-file').files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = async () => { await saveNote(text, reader.result); };
+        } else if (text) { await saveNote(text, ""); }
+    };
+
+    async function saveNote(t, img) {
+        await addDoc(collection(db, "notes"), {
+            authorId: currentUser.uid,
+            texte: t,
+            photoBase64: img,
+            likes: [],
+            createdAt: serverTimestamp()
+        });
+        document.getElementById('note-text').value = "";
+    }
+
+    window.openStory = (id, data) => {
+        currentStoryId = id;
+        const viewer = document.getElementById('story-viewer');
+        const sImg = document.getElementById('story-img');
+        const btnLike = document.getElementById('btn-like-action');
+        
+        if(data.photoBase64) { sImg.src = data.photoBase64; sImg.style.display = 'block'; } else { sImg.style.display = 'none'; }
+        document.getElementById('story-text').innerText = data.texte || "";
+        document.getElementById('story-like-count').innerText = data.likes ? data.likes.length : 0;
+        
+        // État du like
+        if(data.likes?.includes(currentUser.uid)) btnLike.classList.add('active');
+        else btnLike.classList.remove('active');
+
+        viewer.style.display = 'flex';
+
+        // Barre de progression
+        const prog = document.getElementById('progress-run');
+        prog.style.width = '0%';
+        setTimeout(() => prog.style.transition = 'width 5s linear', 10);
+        setTimeout(() => prog.style.width = '100%', 50);
+
+        clearTimeout(storyTimeout);
+        storyTimeout = setTimeout(() => closeStory(), 5000);
+
+        // Action Like
+        btnLike.onclick = async (e) => {
+            e.stopPropagation();
+            const ref = doc(db, "notes", id);
+            const isLiked = btnLike.classList.contains('active');
+            await updateDoc(ref, {
+                likes: isLiked ? arrayRemove(currentUser.uid) : arrayUnion(currentUser.uid)
+            });
+            btnLike.classList.toggle('active');
+        };
+
+        // Action Répondre
+        document.getElementById('btn-reply-action').onclick = async () => {
+            const reply = document.getElementById('reply-text').value;
+            if(!reply) return;
+            // On envoie la réponse comme un message privé à l'auteur
+            await addDoc(collection(db, "messages"), {
+                senderId: currentUser.uid,
+                receiverId: data.authorId,
+                text: `Réponse à votre statut : ${reply}`,
+                timestamp: serverTimestamp()
+            });
+            document.getElementById('reply-text').value = "";
+            alert("Réponse envoyée !");
+        };
+    };
+
+    window.closeStory = () => { 
+        document.getElementById('story-viewer').style.display = 'none';
+        document.getElementById('progress-run').style.transition = 'none';
+        document.getElementById('progress-run').style.width = '0%';
+    };
 </script>
 </body>
 </html>
