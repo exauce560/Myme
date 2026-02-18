@@ -20,7 +20,6 @@
             --app-radius: 12px;
         }
 
-        /* TON DARK MODE SPÉCIFIQUE #020c15 */
         body.dark-mode {
             --bg: #020c15;
             --sidebar-bg: #0b141a;
@@ -30,10 +29,18 @@
             --card-border: #222d34;
         }
 
+        /* FORCE LE STYLE SUR TOUT L'APP */
+        *, *::before, *::after {
+            font-family: var(--app-font-family) !important;
+        }
+
+        input, button, textarea, select, span, div, h2 {
+            font-family: var(--app-font-family) !important;
+        }
+
         body {
             background-color: var(--bg);
             color: var(--text);
-            font-family: var(--app-font-family);
             font-size: var(--app-font-size);
             margin: 0;
             height: 100vh;
@@ -41,16 +48,10 @@
             display: flex;
         }
 
-        /* --- LAYOUT 2 PARTIES --- */
-        .app-container {
-            display: flex;
-            width: 100%;
-            height: 100vh;
-        }
+        .app-container { display: flex; width: 100%; height: 100vh; }
 
-        /* GAUCHE : Recherche et Historique */
         .sidebar-left {
-            width: 380px;
+            width: 350px;
             background: var(--sidebar-bg);
             border-right: 1px solid var(--card-border);
             display: flex;
@@ -59,7 +60,6 @@
             box-sizing: border-box;
         }
 
-        /* DROITE : Résultats de recherche */
         .main-content {
             flex: 1;
             display: flex;
@@ -70,13 +70,12 @@
             overflow-y: auto;
         }
 
-        /* --- ÉLÉMENTS UI --- */
         .header-box { width: 100%; margin-bottom: 25px; position: relative; }
         
         .fleche-retour {
             width: 40px; height: 40px; background: none; border: none; 
             border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;
-            margin-bottom: 10px; transition: 0.3s;
+            margin-bottom: 10px; transition: 0.3s; position: relative;
         }
         .fleche-retour::before { content: ''; position: absolute; width: 18px; height: 2px; background-color: var(--text); }
         .fleche-retour::after {
@@ -85,17 +84,6 @@
             transform: rotate(45deg);
         }
         .fleche-retour:hover { background-color: var(--hover-bg); }
-        /* Force tous les éléments à utiliser la police et la taille de l'app */
-        *, *::before, *::after {
-            font-family: var(--app-font-family) !important;
-            /* On ne force pas le font-size partout pour garder la hiérarchie (h1, small, etc.) 
-               mais on s'assure que les inputs et boutons l'utilisent */
-        }
-
-        input, button, textarea, select {
-            font-family: var(--app-font-family) !important;
-            font-size: var(--app-font-size) !important;
-        }
 
         .input-field {
             width: 100%; padding: 12px; margin-bottom: 10px;
@@ -103,7 +91,7 @@
             border-radius: var(--app-radius);
             background: var(--bg);
             color: var(--text);
-            font-size: 14px;
+            font-size: var(--app-font-size);
             outline: none;
             box-sizing: border-box;
         }
@@ -114,40 +102,46 @@
             color: white; border: none;
             border-radius: var(--app-radius);
             font-weight: bold; cursor: pointer; transition: 0.2s;
+            font-size: var(--app-font-size);
         }
 
         /* Section Historique */
         .history-section { margin-top: 30px; flex: 1; overflow-y: auto; }
-        .history-title { font-size: 14px; color: var(--gray); margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; }
+        .history-title { font-size: 13px; color: var(--gray); margin-bottom: 15px; text-transform: uppercase; }
 
-        /* Cartes Utilisateurs (Résultats) */
+        .history-item {
+            display: flex; align-items: center; gap: 10px; padding: 10px;
+            background: var(--bg);
+            border-radius: var(--app-radius);
+            border: 1px solid var(--card-border);
+            width: 90%; /* Largeur diminuée */
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .history-item:hover { background: var(--hover-bg); }
+        .history-item img { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; }
+        .history-item span { font-size: 14px; font-weight: 500; }
+
+        /* Cartes Résultats */
         .user-card {
             display: flex; align-items: center; gap: 15px; padding: 15px;
             background: var(--sidebar-bg);
             border-radius: var(--app-radius);
             border: 1px solid var(--card-border);
             width: 100%; max-width: 450px;
-            margin-bottom: 15px;
             animation: slideIn 0.3s ease-out;
         }
-        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
         .avatar { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid var(--myme-blue); }
         .user-info { flex: 1; }
         .btn-chat {
             background: var(--myme-blue); color: white; border: none;
-            padding: 10px 20px; border-radius: 8px; cursor: pointer;
-            font-weight: 600;
+            padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600;
         }
 
-        #empty-result { text-align: center; color: var(--gray); }
-        #empty-result svg { opacity: 0.2; margin-bottom: 10px; }
-
-        /* Responsive Mobile */
         @media (max-width: 768px) {
             body { flex-direction: column; overflow-y: auto; }
             .sidebar-left { width: 100%; height: auto; }
-            .main-content { width: 100%; height: auto; padding: 20px; }
         }
     </style>
 </head>
@@ -162,23 +156,21 @@
 
             <div class="search-box">
                 <input type="text" id="target-name" class="input-field" placeholder="Nom de votre ami(e)..." data-lang="place_name">
-                <input type="tel" id="target-phone" class="input-field" placeholder="Numéro de téléphone (ex: +243...)" data-lang="place_phone">
+                <input type="tel" id="target-phone" class="input-field" placeholder="Numéro de téléphone" data-lang="place_phone">
                 <button class="btn-check" onclick="checkMymeUser()" data-lang="btn_verify">Vérifier sur Myme</button>
                 <div id="error-message" style="color: #ff4d4d; font-size: 12px; margin-top: 8px; min-height: 15px;"></div>
             </div>
 
             <div class="history-section">
-                <div class="history-title">Recherches récentes</div>
-                <div id="search-history">
-                    </div>
+                <div class="history-title">Récents</div>
+                <div id="search-history"></div>
             </div>
         </aside>
 
         <main class="main-content">
             <div id="result-display" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
-                <div id="empty-result">
-                    <svg viewBox="0 0 24 24" width="80" height="80" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                    <p>Recherchez un numéro pour voir le profil ici</p>
+                <div id="empty-result" style="text-align: center; color: var(--gray);">
+                    <p>Le résultat de la recherche s'affichera ici.</p>
                 </div>
             </div>
         </main>
@@ -202,66 +194,66 @@
     const db = getFirestore(app);
     const auth = getAuth(app);
     const errorDis = document.getElementById('error-message');
-    let langData = {};
 
-    // --- SYNCHRONISATION STYLE (PRÉSERVÉE) ---
     function syncMymeStyle() {
         const fs = localStorage.getItem('myme-fsize') || '16px';
         const ff = localStorage.getItem('myme-ffam') || "'Segoe UI', sans-serif";
         const rad = localStorage.getItem('myme-radius') || '12px';
 
-        // On applique à l'élément racine (le plus haut)
         const root = document.documentElement;
         root.style.setProperty('--app-font-size', fs);
         root.style.setProperty('--app-font-family', ff);
         root.style.setProperty('--app-radius', rad);
 
-        // Dark Mode
         if (localStorage.getItem('theme') === 'dark') {
             document.body.classList.add('dark-mode');
         } else {
             document.body.classList.remove('dark-mode');
         }    
-    
-        // Si tu as des éléments générés dynamiquement (historique, résultats)
         renderHistory();
     }
 
-    // --- LOGIQUE HISTORIQUE ---
+    // LOGIQUE HISTORIQUE : Prend Prénom + Nom
     function saveToHistory(userData, docId) {
         let history = JSON.parse(localStorage.getItem('myme_search_history') || '[]');
-        // Eviter les doublons
         history = history.filter(u => u.id !== docId);
-        history.unshift({ id: docId, name: userData.prenom, photo: userData.photoURL });
-        localStorage.setItem('myme_search_history', JSON.stringify(history.slice(0, 5)));
+        
+        // On stocke les deux pour les avoir en data
+        history.unshift({ 
+            id: docId, 
+            prenom: userData.prenom || "", 
+            nom: userData.nom || "", 
+            photo: userData.photoURL 
+        });
+        
+        localStorage.setItem('myme_search_history', JSON.stringify(history.slice(0, 8)));
         renderHistory();
     }
 
+    // RENDER HISTORIQUE : Affiche uniquement le prénom
     function renderHistory() {
         const container = document.getElementById('search-history');
         const history = JSON.parse(localStorage.getItem('myme_search_history') || '[]');
         if(history.length === 0) {
-            container.innerHTML = '<p style="font-size:12px; color:var(--gray)">Aucune recherche récente</p>';
+            container.innerHTML = '<p style="font-size:12px; color:var(--gray)">Aucun contact récent</p>';
             return;
         }
         container.innerHTML = history.map(u => `
-            <div class="user-card" style="padding: 8px; cursor:pointer; margin-bottom:8px; background:var(--bg)" onclick="window.location.href='chat.html?uid=${u.id}'">
-                <img src="${u.photo || 'https://ui-avatars.com/api/?name='+u.name}" style="width:30px; height:30px; border-radius:50%">
-                <span style="font-size:13px">${u.name}</span>
+            <div class="history-item" onclick="window.location.href='chat.html?uid=${u.id}'">
+                <img src="${u.photo || 'https://ui-avatars.com/api/?name='+u.prenom}" alt="">
+                <span>${u.prenom}</span>
             </div>
         `).join('');
     }
 
-    // --- LOGIQUE DE RECHERCHE (AMÉLIORÉE POUR LES 2 PARTIES) ---
     window.checkMymeUser = async () => {
         errorDis.textContent = "";
         const rawPhone = document.getElementById('target-phone').value.trim();
         const phoneCleaned = rawPhone.replace(/[\s\-]/g, '');
         const display = document.getElementById('result-display');
-        const lang = localStorage.getItem("lang") || "fr";
 
         if(!phoneCleaned) {
-            errorDis.textContent = lang === "fr" ? "Entrez un numéro." : "Enter a phone number.";
+            errorDis.textContent = "Entrez un numéro.";
             return;
         }
 
@@ -270,23 +262,21 @@
             const snapshot = await getDocs(q);
 
             if (snapshot.empty) {
-                display.innerHTML = `<div id="empty-result"><p style="color:#ff4d4d;">Aucun utilisateur trouvé avec ce numéro.</p></div>`;
+                display.innerHTML = `<p style="color:#ff4d4d;">Utilisateur introuvable.</p>`;
             } else {
                 display.innerHTML = "";
                 snapshot.forEach(docSnap => {
                     const userData = docSnap.data();
-                    const displayName = `${userData.prenom || ''} ${userData.nom || ''}`.trim() || "Utilisateur";
+                    const fullName = `${userData.prenom || ''} ${userData.nom || ''}`.trim();
                     
                     display.innerHTML += `
                         <div class="user-card">
-                            <img src="${userData.photoURL || 'https://ui-avatars.com/api/?name='+encodeURIComponent(displayName)}" class="avatar">
+                            <img src="${userData.photoURL || 'https://ui-avatars.com/api/?name='+encodeURIComponent(fullName)}" class="avatar">
                             <div class="user-info">
-                                <strong>${displayName}</strong><br>
+                                <strong>${fullName}</strong><br>
                                 <small style="color:var(--myme-blue)">Membre Myme</small>
                             </div>
-                            <button class="btn-chat" onclick="window.location.href='chat.html?uid=${docSnap.id}'">
-                                Message
-                            </button>
+                            <button class="btn-chat" onclick="window.location.href='chat.html?uid=${docSnap.id}'">Message</button>
                         </div>`;
                     
                     saveToHistory(userData, docSnap.id);
@@ -294,29 +284,12 @@
                 syncMymeStyle();
             }
         } catch (error) {
-            errorDis.textContent = "Erreur de connexion.";
+            errorDis.textContent = "Erreur Firestore.";
         }
     };
 
-    // --- TRADUCTIONS ET INITIALISATION ---
-    async function applyTranslations() {
-        const lang = localStorage.getItem("lang") || "fr";
-        try {
-            const res = await fetch("lang.json");
-            langData = await res.json();
-            document.querySelectorAll("[data-lang]").forEach(el => {
-                const key = el.getAttribute("data-lang");
-                if (langData[lang] && langData[lang][key]) {
-                    if (el.tagName === "INPUT") el.placeholder = langData[lang][key];
-                    else el.textContent = langData[lang][key];
-                }
-            });
-        } catch (e) {}
-    }
-
     document.addEventListener('DOMContentLoaded', () => {
         syncMymeStyle();
-        applyTranslations();
     });
 
     onAuthStateChanged(auth, (user) => {
@@ -325,4 +298,3 @@
 </script>
 </body>
 </html>
-
