@@ -3,128 +3,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Status - Myme</title>
-    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Segoe+UI:wght@400;700&display=swap" rel="stylesheet">
+    <title>Myme - Statuts</title>
     <style>
         :root {
             --bg: #ffffff; --text: #1c1e21; --gray: #65676b;
-            --myme-blue: #0866ff; --hover-bg: #f2f2f2;
-            --header-bg: #ffffff; --card-border: #f0f2f5;
-            --note-grad: linear-gradient(135deg, #0866ff, #00c6ff);
-            --back-btn-color: #1c1e21;
-            --app-radius: 20px;
+            --myme-blue: #0866ff; --header-bg: #ffffff; --card-border: #f0f2f5;
+            --wa-green: #25D366;
         }
 
-        /* Dark Mode mis à jour selon ta demande */
         body.dark-mode {
             --bg: #020c15; --text: #e4e6eb; --gray: #b0b3b8;
-            --hover-bg: #1a252f; --header-bg: #05121d; --card-border: #0d1b2a;
-            --note-grad: linear-gradient(135deg, #0866ff, #1e90ff);
-            --back-btn-color: #ffffff;
+            --header-bg: #05121d; --card-border: #0d1b2a;
         }
 
         body {
             background-color: var(--bg); color: var(--text);
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            margin: 0; transition: background 0.3s ease;
-            height: 100vh; display: flex; flex-direction: column; overflow: hidden;
+            font-family: 'Segoe UI', sans-serif; margin: 0;
+            display: flex; flex-direction: column; height: 100vh; overflow: hidden;
         }
 
-        .content { flex: 1; padding: 15px; overflow-y: auto; scrollbar-width: none; }
-        .content::-webkit-scrollbar { display: none; }
+        .content { flex: 1; overflow-y: auto; padding: 10px; scrollbar-width: none; }
+        
+        /* Liste style WhatsApp */
+        .wa-list { display: flex; flex-direction: column; gap: 2px; }
+        .wa-item {
+            display: flex; align-items: center; padding: 12px;
+            background: var(--header-bg); border-bottom: 1px solid var(--card-border);
+            cursor: pointer; transition: 0.2s;
+        }
+        .wa-item:active { background: var(--card-border); }
+        
+        .wa-avatar-container { position: relative; margin-right: 15px; }
+        .wa-avatar {
+            width: 55px; height: 55px; border-radius: 50%;
+            object-fit: cover; border: 2px solid var(--wa-green); padding: 2px;
+        }
+        
+        .wa-body { flex: 1; display: flex; flex-direction: column; }
+        .wa-name { font-weight: bold; font-size: 16px; margin-bottom: 4px; }
+        .wa-text { font-size: 14px; color: var(--gray); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        
+        .wa-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+        .wa-time { font-size: 11px; color: var(--gray); }
+        .like-btn { background: none; border: none; cursor: pointer; color: var(--gray); padding: 5px; }
+        .like-btn.active { color: #e0245e; }
 
-        /* Style des Statuts (Images) */
-        .status-container {
-            display: flex; gap: 12px; overflow-x: auto; padding: 10px 5px;
-            scrollbar-width: none; margin-bottom: 20px;
+        /* Publish Card */
+        .publish-area {
+            padding: 15px; background: var(--header-bg);
+            border-bottom: 1px solid var(--card-border);
         }
-        .status-item {
-            flex: 0 0 80px; text-align: center; position: relative;
+        .input-group {
+            display: flex; align-items: center; background: var(--card-border);
+            border-radius: 25px; padding: 8px 15px; gap: 10px;
         }
-        .status-ring {
-            width: 70px; height: 70px; border-radius: 50%;
-            padding: 3px; border: 2px solid var(--myme-blue);
+        .input-group textarea {
+            flex: 1; background: none; border: none; outline: none;
+            color: var(--text); resize: none; font-family: inherit;
+        }
+        .btn-send {
+            background: var(--myme-blue); color: white; border: none;
+            width: 35px; height: 35px; border-radius: 50%; cursor: pointer;
             display: flex; align-items: center; justify-content: center;
         }
-        .status-ring img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
-        
-        /* Card de publication */
-        .publish-card {
-            background: var(--header-bg); border-radius: var(--app-radius);
-            padding: 15px; margin: 0 auto 20px auto;
-            border: 1px solid var(--card-border); max-width: 500px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        .publish-card textarea {
-            width: 100%; background: none; border: none; outline: none;
-            color: var(--text); font-size: 15px; resize: none; font-family: inherit;
-        }
-        .publish-actions {
-            display: flex; justify-content: space-between; align-items: center; margin-top: 10px;
-        }
-        .img-preview { display: flex; gap: 5px; margin-top: 5px; }
-        .img-preview img { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; border: 1px solid var(--card-border); }
 
-        .btn-post {
-            background: var(--myme-blue); color: white; border: none;
-            padding: 8px 18px; border-radius: 30px; font-weight: bold; cursor: pointer;
-        }
-        .btn-upload { color: var(--myme-blue); cursor: pointer; display: flex; align-items: center; gap: 5px; font-size: 14px; }
+        /* Preview Photo */
+        .img-preview { display: flex; gap: 10px; margin-top: 10px; }
+        .img-preview img { width: 50px; height: 50px; border-radius: 8px; object-fit: cover; }
 
-        /* Grille des notes */
-        .notes-grid { display: flex; overflow-x: auto; gap: 15px; padding: 10px 0; scrollbar-width: none; }
-        .note-item { flex: 0 0 100px; display: flex; flex-direction: column; align-items: center; }
-        .note-bubble {
-            background: var(--note-grad); color: white; padding: 10px;
-            border-radius: 18px; font-size: 13px; width: 90px; height: 90px;
-            display: flex; align-items: center; justify-content: center; text-align: center;
-            box-shadow: 0 4px 10px rgba(8, 102, 255, 0.2); margin-bottom: 8px;
-            overflow: hidden; word-break: break-word;
-        }
-        .avatar { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--myme-blue); }
-        .user-name { font-size: 11px; font-weight: bold; margin-top: 5px; }
-
-        .fleche-retour {
-            margin: 15px; width: 40px; height: 40px; background: var(--header-bg);
-            border: 1px solid var(--card-border); border-radius: 50%; display: flex;
-            align-items: center; justify-content: center; color: var(--back-btn-color);
-        }
+        .fleche-retour { margin: 10px; background: none; border: none; color: var(--text); cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <button class="fleche-retour" onclick="window.history.back()">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-    </button>
+    <div class="publish-area">
+        <button class="fleche-retour" onclick="window.history.back()">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        </button>
+        <div class="input-group">
+            <textarea id="note-text" placeholder="Ma note (max 100)" maxlength="100" rows="1"></textarea>
+            <label style="cursor:pointer">
+                <input type="file" id="note-images" accept="image/*" multiple hidden onchange="previewImages()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            </label>
+            <button class="btn-send" onclick="postNote()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+            </button>
+        </div>
+        <div id="preview-container" class="img-preview"></div>
+    </div>
 
     <div class="content">
-        <h2 style="text-align:center; color: var(--myme-blue);" data-lang="notes-title">Notes & Statuts</h2>
-
-        <div class="status-container" id="status-list">
+        <div class="wa-list" id="wa-notes-list">
             </div>
-
-        <div class="publish-card">
-            <textarea id="note-text" data-lang="input-placeholder" placeholder="Quoi de neuf ? (Max 100)" maxlength="100" rows="2"></textarea>
-            
-            <div id="preview-container" class="img-preview"></div>
-
-            <div class="publish-actions">
-                <label class="btn-upload">
-                    <input type="file" id="note-images" accept="image/*" multiple hidden onchange="previewImages()">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                    <span data-lang="add-photo">Photo (Max 3)</span>
-                </label>
-                <button class="btn-post" onclick="postNote()" data-lang="publish-btn">Publier</button>
-            </div>
-        </div>
-
-        <div style="font-weight: bold; margin: 10px 0;" data-lang="recent-notes">Notes récentes</div>
-        <div class="notes-grid" id="notes-list"></div>
     </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, onSnapshot, query, orderBy, setDoc, doc, serverTimestamp, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, onSnapshot, query, orderBy, setDoc, doc, serverTimestamp, getDoc, updateDoc, arrayUnion, arrayRemove, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
@@ -142,122 +118,109 @@
     const auth = getAuth(app);
     const storage = getStorage(app);
 
-    // Prévisualisation des images
+    // --- LOGIQUE PHOTO ---
     window.previewImages = () => {
         const preview = document.getElementById('preview-container');
         const files = document.getElementById('note-images').files;
         preview.innerHTML = "";
-        
-        if (files.length > 3) {
-            alert("Maximum 3 photos autorisées pour économiser l'espace.");
-            document.getElementById('note-images').value = "";
-            return;
-        }
-
+        if (files.length > 3) { alert("Max 3 photos !"); return; }
         Array.from(files).forEach(file => {
             const reader = new FileReader();
-            reader.onload = (e) => {
-                const img = document.createElement('img');
-                img.src = e.target.result;
-                preview.appendChild(img);
+            reader.onload = e => {
+                preview.innerHTML += `<img src="${e.target.result}">`;
             };
             reader.readAsDataURL(file);
         });
     };
 
-    // Publication de la Note/Statut
+    // --- PUBLIER ---
     window.postNote = async () => {
         const user = auth.currentUser;
         const text = document.getElementById('note-text').value.trim();
         const files = document.getElementById('note-images').files;
-
         if (!user || (!text && files.length === 0)) return;
 
         try {
             let imageUrls = [];
-            
-            // Upload des images vers Storage
             for (let i = 0; i < Math.min(files.length, 3); i++) {
                 const fileRef = ref(storage, `notes/${user.uid}_${Date.now()}_${i}`);
                 await uploadBytes(fileRef, files[i]);
-                const url = await getDownloadURL(fileRef);
-                imageUrls.push(url);
+                imageUrls.push(await getDownloadURL(fileRef));
             }
 
+            // On utilise l'ID utilisateur comme ID de document pour n'avoir qu'une seule note par personne
             await setDoc(doc(db, "notes", user.uid), {
                 authorId: user.uid,
                 texte: text,
                 photos: imageUrls,
+                likes: [],
                 createdAt: serverTimestamp()
             });
 
             document.getElementById('note-text').value = "";
-            document.getElementById('note-images').value = "";
             document.getElementById('preview-container').innerHTML = "";
-            alert("Publié !");
+            alert("Note publiée !");
         } catch (e) { console.error(e); }
     };
 
-    // Synchronisation Style et Dark Mode
-    function syncStyle() {
-        const theme = localStorage.getItem('theme');
-        if (theme === 'dark') document.body.classList.add('dark-mode');
-        
-        // Appliquer data-lang
-        const lang = localStorage.getItem('lang') || 'fr';
-        // Simulation rapide de traduction
-        const dict = {
-            'fr': { 'notes-title': 'Notes & Statuts', 'add-photo': 'Photos (Max 3)', 'publish-btn': 'Publier', 'recent-notes': 'Notes récentes', 'input-placeholder': 'Quoi de neuf ? (Max 100)' },
-            'en': { 'notes-title': 'Notes & Status', 'add-photo': 'Photos (Max 3)', 'publish-btn': 'Post', 'recent-notes': 'Recent Notes', 'input-placeholder': 'Whats new? (Max 100)' }
-        };
-
-        document.querySelectorAll("[data-lang]").forEach(el => {
-            const key = el.getAttribute("data-lang");
-            if (el.tagName === "TEXTAREA") el.placeholder = dict[lang][key];
-            else el.textContent = dict[lang][key];
-        });
-    }
-
-    onAuthStateChanged(auth, (user) => {
+    // --- LIKE ---
+    window.toggleLike = async (noteId, isLiked) => {
+        const user = auth.currentUser;
         if (!user) return;
-        
-        syncStyle();
+        const noteRef = doc(db, "notes", noteId);
+        await updateDoc(noteRef, {
+            likes: isLiked ? arrayRemove(user.uid) : arrayUnion(user.uid)
+        });
+    };
+
+    // --- AFFICHAGE & FILTRE 24H ---
+    onAuthStateChanged(auth, user => {
+        if (!user) return;
+        if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode');
 
         const q = query(collection(db, "notes"), orderBy("createdAt", "desc"));
         onSnapshot(q, async (snapshot) => {
-            const list = document.getElementById('notes-list');
-            const statusList = document.getElementById('status-list');
+            const list = document.getElementById('wa-notes-list');
             list.innerHTML = "";
-            statusList.innerHTML = "";
+            const now = Date.now();
 
-            snapshot.docs.forEach(async (d) => {
+            for (const d of snapshot.docs) {
                 const data = d.data();
+                
+                // Calcul 24h
+                if (data.createdAt) {
+                    const noteAge = now - data.createdAt.toMillis();
+                    if (noteAge > 24 * 60 * 60 * 1000) {
+                        await deleteDoc(doc(db, "notes", d.id)); // Supprime du serveur si > 24h
+                        continue;
+                    }
+                }
+
                 const userSnap = await getDoc(doc(db, "users", data.authorId));
                 const userData = userSnap.data() || {};
-                const name = userData.prenom || "Myme User";
-                const photo = userData.photoURL || `https://ui-avatars.com/api/?name=${name}`;
+                const fullName = `${userData.prenom || ''} ${userData.nom || ''}`.trim() || "Myme User";
+                const photo = userData.photoURL || `https://ui-avatars.com/api/?name=${fullName}`;
+                const isLiked = data.likes?.includes(user.uid);
 
-                // Si la note a des photos -> Afficher dans Statuts
-                if (data.photos && data.photos.length > 0) {
-                    statusList.innerHTML += `
-                        <div class="status-item">
-                            <div class="status-ring"><img src="${data.photos[0]}"></div>
-                            <div class="user-name">${name}</div>
+                const html = `
+                    <div class="wa-item">
+                        <div class="wa-avatar-container" onclick="alert('Voir profil de ${fullName}')">
+                            <img src="${photo}" class="wa-avatar">
                         </div>
-                    `;
-                }
-
-                // Affichage dans la grille des notes
-                if (data.texte) {
-                    list.innerHTML += `
-                        <div class="note-item">
-                            <div class="note-bubble">${data.texte}</div>
-                            <img src="${photo}" class="avatar">
-                            <div class="user-name">${name}</div>
+                        <div class="wa-body">
+                            <div class="wa-name">${fullName}</div>
+                            <div class="wa-text">${data.texte || (data.photos.length ? '📷 Photo' : '')}</div>
                         </div>
-                    `;
-                }
-            });
+                        <div class="wa-meta">
+                            <div class="wa-time">Maintenant</div>
+                            <button class="like-btn ${isLiked ? 'active' : ''}" onclick="event.stopPropagation(); toggleLike('${d.id}', ${isLiked})">
+                                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                list.innerHTML += html;
+            }
         });
     });
 </script>
