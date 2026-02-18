@@ -35,6 +35,7 @@
             border-right: 1px solid var(--border);
             overflow-y: auto; background: var(--bg);
             padding: 15px; flex-shrink: 0;
+            box-sizing: border-box;
         }
 
         .content-view {
@@ -87,8 +88,14 @@
         .prog-bar { flex: 1; background: rgba(255,255,255,0.2); border-radius: 2px; overflow: hidden; }
         .prog-fill { width: 0%; height: 100%; background: #fff; }
 
-        .story-main { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; }
+        .story-main { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; position: relative; }
         .story-img { max-width: 90%; max-height: 70vh; object-fit: contain; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        
+        .story-text-overlay {
+            position: absolute; bottom: 40px; background: rgba(0,0,0,0.6);
+            color: white; padding: 10px 20px; border-radius: 10px; text-align: center;
+        }
+
         .story-text-content {
             width: 80%; aspect-ratio: 9/16; max-height: 70vh; display: flex; align-items: center; 
             justify-content: center; font-size: 24px; font-weight: bold;
@@ -96,14 +103,15 @@
         }
 
         .delete-btn {
-            position: absolute; top: 40px; right: 20px; background: rgba(255,50,50,0.7);
+            position: absolute; top: 50px; right: 20px; background: rgba(255,50,50,0.8);
             border: none; color: white; padding: 10px; border-radius: 50%; cursor: pointer; z-index: 10002; display: none;
         }
 
-        .reply-bar { padding: 15px; display: flex; gap: 10px; width: 100%; box-sizing: border-box; }
-        .reply-input { flex: 1; border-radius: 25px; border: none; padding: 12px 20px; background: rgba(255,255,255,0.1); color: white; outline: none; }
+        .reply-bar { padding: 15px; display: flex; gap: 10px; width: 100%; box-sizing: border-box; z-index: 10003; }
+        .reply-input { flex: 1; border-radius: 25px; border: none; padding: 12px 20px; background: rgba(255,255,255,0.2); color: white; outline: none; }
         
         #file-status { font-size: 11px; color: var(--accent); margin: 5px 0; display: none; }
+        .empty-state { color: white; text-align: center; z-index: 2; }
 
         @media (max-width: 768px) {
             .sidebar { width: 100%; border-right: none; }
@@ -148,7 +156,7 @@
                 <div class="story-main" id="story-main-zone"></div>
                 <div class="reply-bar" id="story-reply-bar">
                     <input type="text" id="reply-text" class="reply-input" placeholder="Répondre...">
-                    <button onclick="sendReply()" style="background:var(--accent); border:none; color:white; border-radius:50%; width:40px; height:40px;">➔</button>
+                    <button onclick="sendReply()" style="background:var(--accent); border:none; color:white; border-radius:50%; width:40px; height:40px; cursor:pointer;">➔</button>
                 </div>
             </div>
         </div>
@@ -156,7 +164,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, getDoc, doc, where, getDocs, serverTimestamp, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, getDoc, doc, where, getDocs, serverTimestamp, deleteDoc, limit } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
     const firebaseConfig = {
@@ -177,7 +185,6 @@
     let storyIdx = 0;
     let timer;
 
-    // --- FONCTION DE SYNCHRO MYME ---
     window.syncMymeStyle = function() {
         const fs = localStorage.getItem('myme-fsize') || '16px';
         const ff = localStorage.getItem('myme-ffam') || "'Segoe UI'";
@@ -188,22 +195,17 @@
         const brw = localStorage.getItem('myme-border') || '1px';
         const theme = localStorage.getItem('theme');
 
-        // Application des variables root
         document.documentElement.style.setProperty('--app-font-size', fs);
         document.documentElement.style.setProperty('--app-font-family', ff);
         document.documentElement.style.setProperty('--app-radius', rad);
-        document.documentElement.style.setProperty('--app-spacing', spc);
 
-        // Application au body
         document.body.style.opacity = gh;
         document.body.style.filter = fi;
-        document.body.style.fontFamily = ff;
         document.body.style.letterSpacing = spc;
         
         if (theme === 'dark') document.body.classList.add('dark-mode');
         else document.body.classList.remove('dark-mode');
 
-        // Application aux éléments spécifiques (post-box et note-items)
         document.querySelectorAll('.note-item, .post-box').forEach(el => {
             el.style.borderRadius = rad;
             el.style.borderWidth = brw;
@@ -243,7 +245,7 @@
                 `;
                 list.appendChild(item);
             }
-            window.syncMymeStyle(); // Re-sync après chargement
+            window.syncMymeStyle();
         });
     }
 
@@ -265,19 +267,19 @@
         const story = currentStories[storyIdx];
         const mainZone = document.getElementById('story-main-zone');
         const blurBg = document.getElementById('story-blur-bg');
-        mainZone.innerHTML = "";
+        
         const isMine = story.authorId === currentUser.uid;
         document.getElementById('delete-story-btn').style.display = isMine ? 'block' : 'none';
-        document.getElementById('story-reply-bar').style.display = isMine ? 'none' : 'flex';
 
         if (story.photoBase64) {
             blurBg.style.backgroundImage = `url(${story.photoBase64})`;
             mainZone.innerHTML = `<img src="${story.photoBase64}" class="story-img">${story.texte ? `<div class="story-text-overlay">${story.texte}</div>` : ''}`;
         } else {
-            const colors = ["#e91e63", "#9c27b0", "#673ab7", "#3f51b5"];
+            const randomColors = ["#2ecc71", "#3498db", "#9b59b6", "#e67e22", "#1abc9c", "#d35400", "#c0392b"];
+            const color = randomColors[Math.floor(Math.random() * randomColors.length)];
             blurBg.style.backgroundImage = "none";
             blurBg.style.backgroundColor = "#000";
-            mainZone.innerHTML = `<div class="story-text-content" style="background:${colors[storyIdx % colors.length]}">${story.texte}</div>`;
+            mainZone.innerHTML = `<div class="story-text-content" style="background:${color}">${story.texte}</div>`;
         }
         setupProgressBars();
         startTimer();
