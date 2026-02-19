@@ -153,7 +153,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, getDoc, doc, where, getDocs, serverTimestamp, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, getDoc, doc, where, getDocs, serverTimestamp, deleteDoc, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
     const firebaseConfig = {
@@ -176,6 +176,7 @@
     let progress = 0;
     let isPaused = false;
 
+    // --- SYNCHRO STYLE ---
     window.syncMymeStyle = function() {
         const fs = localStorage.getItem('myme-fsize') || '16px';
         const ff = localStorage.getItem('myme-ffam') || "'Segoe UI'";
@@ -191,12 +192,32 @@
     onAuthStateChanged(auth, (user) => {
         if (!user) return;
         currentUser = user;
+        cleanupOldNotes(); // Supprime les vieux statuts à la connexion
         loadProfiles();
         window.syncMymeStyle();
     });
 
+    // --- FONCTION DE NETTOYAGE (SUR LE SERVEUR) ---
+    async function cleanupOldNotes() {
+        const twentyFourHoursAgo = Date.now() - (24 * 60 * 60 * 1000);
+        const q = query(collection(db, "notes"), where("createdAt", "<", Timestamp.fromMillis(twentyFourHoursAgo)));
+        const snap = await getDocs(q);
+        snap.forEach(async (d) => {
+            await deleteDoc(doc(db, "notes", d.id));
+            console.log("Statut expiré supprimé :", d.id);
+        });
+    }
+
+    // --- CHARGEMENT (FILTRÉ 24H) ---
     function loadProfiles() {
-        const q = query(collection(db, "notes"), orderBy("createdAt", "desc"));
+        const twentyFourHoursAgo = Date.now() - (24 * 60 * 60 * 1000);
+        // On ne prend que ce qui est récent
+        const q = query(
+            collection(db, "notes"), 
+            where("createdAt", ">=", Timestamp.fromMillis(twentyFourHoursAgo)),
+            orderBy("createdAt", "desc")
+        );
+
         onSnapshot(q, async (snap) => {
             const list = document.getElementById('notes-list');
             list.innerHTML = "";
@@ -220,46 +241,45 @@
         });
     }
 
+    // --- INTERACTIONS MESSAGES ---
     window.sendLike = async () => {
         const story = currentStories[storyIdx];
         if (story.authorId === currentUser.uid) return;
-
         const btn = document.getElementById('like-btn');
         btn.classList.add('liked');
 
+        const participants = [currentUser.uid, story.authorId].sort();
+        const chatId = participants.join('_');
+
         try {
-            const participants = [currentUser.uid, story.authorId].sort();
             await addDoc(collection(db, "messages"), {
                 senderId: currentUser.uid,
                 receiverId: story.authorId,
-                participants: participants, 
-                chatId: participants.join('_'), // Identifiant unique de la conv
+                participants: participants,
+                chatId: chatId,
                 text: "❤️ a aimé votre statut",
                 timestamp: serverTimestamp(),
                 read: false,
                 type: "text"
             });
             setTimeout(() => btn.classList.remove('liked'), 1000);
-        } catch (e) {
-            console.error("Erreur Like:", e);
-        }
+        } catch (e) { console.error(e); }
     };
-    
+
     window.sendReply = async () => {
         const replyInput = document.getElementById('reply-text');
         const reply = replyInput.value.trim();
         if (!reply) return;
-
         const story = currentStories[storyIdx];
+        const participants = [currentUser.uid, story.authorId].sort();
 
         try {
-            const participants = [currentUser.uid, story.authorId].sort();
             await addDoc(collection(db, "messages"), {
                 senderId: currentUser.uid,
                 receiverId: story.authorId,
                 participants: participants,
-                chatId: participants.join('_'), // AJOUTÉ ICI AUSSI
-                text: "💬 Statut : " + reply,
+                chatId: participants.join('_'),
+                text: "💬 Réponse Statut : " + reply,
                 timestamp: serverTimestamp(),
                 read: false,
                 type: "text"
@@ -267,16 +287,21 @@
             replyInput.value = "";
             replyInput.placeholder = "Envoyé !";
             setTimeout(() => replyInput.placeholder = "Répondre...", 2000);
-        } catch (e) {
-            console.error("Erreur Réponse:", e);
-        }
+        } catch (e) { console.error(e); }
     };
 
+    // --- LOGIQUE STORY (IMAGE/TEXTE) ---
     async function openUserStories(userId) {
-        const q = query(collection(db, "notes"), where("authorId", "==", userId));
+        const twentyFourHoursAgo = Date.now() - (24 * 60 * 60 * 1000);
+        const q = query(
+            collection(db, "notes"), 
+            where("authorId", "==", userId),
+            where("createdAt", ">=", Timestamp.fromMillis(twentyFourHoursAgo))
+        );
         const snap = await getDocs(q);
         currentStories = snap.docs.map(d => ({ id: d.id, ...d.data() }))
             .sort((a, b) => (a.createdAt?.toMillis() || 0) - (b.createdAt?.toMillis() || 0));
+        
         if(currentStories.length === 0) return;
         storyIdx = 0;
         document.getElementById('empty-msg').style.display = 'none';
@@ -301,7 +326,7 @@
         } else {
             blurBg.style.backgroundImage = "none";
             blurBg.style.backgroundColor = "#000";
-            mainZone.innerHTML = `<div class="story-text-content" style="background:#3498db">${story.texte}</div>`;
+            mainZone.innerHTML = `<div class="story-text-content" style="background: linear-gradient(45deg, #ff8c1a, #ff4b4b);">${story.texte}</div>`;
         }
         progress = 0;
         isPaused = false;
@@ -315,25 +340,18 @@
         const fills = document.querySelectorAll('.prog-fill');
         timer = setInterval(() => {
             if (!isPaused && fills[storyIdx]) {
-                progress++;
+                progress += 0.5; // Vitesse fluide
                 fills[storyIdx].style.width = progress + "%";
                 if (progress >= 100) { clearInterval(timer); storyIdx++; showStory(); }
             }
-        }, 50);
+        }, 30);
     }
 
-    window.toggleTimer = () => {
-        isPaused = !isPaused;
-        updatePauseIcon();
-    };
+    window.toggleTimer = () => { isPaused = !isPaused; updatePauseIcon(); };
 
     function updatePauseIcon() {
         const icon = document.getElementById('pause-icon');
-        if (isPaused) {
-            icon.innerHTML = '<path d="M8 5v14l11-7z"></path>'; // Play icon
-        } else {
-            icon.innerHTML = '<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>'; // Pause icon
-        }
+        icon.innerHTML = isPaused ? '<path d="M8 5v14l11-7z"></path>' : '<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>';
     }
 
     function setupProgressBars() {
@@ -368,17 +386,32 @@
         const text = document.getElementById('note-text').value;
         const file = document.getElementById('note-file').files[0];
         if (!text && !file) return;
+        
+        // Petit indicateur visuel pendant l'envoi
+        const btn = event.target;
+        const oldText = btn.innerText;
+        btn.innerText = "...";
+
         if (file) {
             const reader = new FileReader();
-            reader.onload = async () => saveToDB(text, reader.result);
+            reader.onload = async () => {
+                await saveToDB(text, reader.result);
+                btn.innerText = oldText;
+            };
             reader.readAsDataURL(file);
         } else {
-            saveToDB(text, "");
+            await saveToDB(text, "");
+            btn.innerText = oldText;
         }
     };
 
     async function saveToDB(t, img) {
-        await addDoc(collection(db, "notes"), { authorId: currentUser.uid, texte: t, photoBase64: img, createdAt: serverTimestamp() });
+        await addDoc(collection(db, "notes"), { 
+            authorId: currentUser.uid, 
+            texte: t, 
+            photoBase64: img, 
+            createdAt: serverTimestamp() 
+        });
         document.getElementById('note-text').value = "";
         document.getElementById('note-file').value = "";
         document.getElementById('file-status').style.display = 'none';
@@ -388,5 +421,6 @@
 </script>
 </body>
 </html>
+
 
 
