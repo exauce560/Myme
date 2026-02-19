@@ -221,55 +221,56 @@
     }
 
     window.sendLike = async () => {
-    const story = currentStories[storyIdx];
-    if (story.authorId === currentUser.uid) return;
+        const story = currentStories[storyIdx];
+        if (story.authorId === currentUser.uid) return;
 
-    const btn = document.getElementById('like-btn');
-    btn.classList.add('liked');
+        const btn = document.getElementById('like-btn');
+        btn.classList.add('liked');
 
-    try {
-        await addDoc(collection(db, "messages"), {
-            senderId: currentUser.uid,
-            receiverId: story.authorId,
-            // On ajoute 'participants' pour que la requête de ton chat trouve le message
-            participants: [currentUser.uid, story.authorId].sort(), 
-            text: "❤️ a aimé votre statut",
-            timestamp: serverTimestamp(),
-            read: false,
-            type: "text"
-        });
-        setTimeout(() => btn.classList.remove('liked'), 1000);
-    } catch (e) {
-        console.error("Erreur Like:", e);
-    }
-};
+        try {
+            const participants = [currentUser.uid, story.authorId].sort();
+            await addDoc(collection(db, "messages"), {
+                senderId: currentUser.uid,
+                receiverId: story.authorId,
+                participants: participants, 
+                chatId: participants.join('_'), // Identifiant unique de la conv
+                text: "❤️ a aimé votre statut",
+                timestamp: serverTimestamp(),
+                read: false,
+                type: "text"
+            });
+            setTimeout(() => btn.classList.remove('liked'), 1000);
+        } catch (e) {
+            console.error("Erreur Like:", e);
+        }
+    };
+    
+    window.sendReply = async () => {
+        const replyInput = document.getElementById('reply-text');
+        const reply = replyInput.value.trim();
+        if (!reply) return;
 
-window.sendReply = async () => {
-    const replyInput = document.getElementById('reply-text');
-    const reply = replyInput.value.trim();
-    if (!reply) return;
+        const story = currentStories[storyIdx];
 
-    const story = currentStories[storyIdx];
-
-    try {
-        await addDoc(collection(db, "messages"), {
-            senderId: currentUser.uid,
-            receiverId: story.authorId,
-            // Indispensable pour l'affichage dans le fil de discussion
-            participants: [currentUser.uid, story.authorId].sort(),
-            text: "💬 Réponse statut : " + reply,
-            timestamp: serverTimestamp(),
-            read: false,
-            type: "text"
-        });
-        replyInput.value = "";
-        // Petit feedback pour dire que c'est envoyé
-        replyInput.placeholder = "Envoyé !";
-        setTimeout(() => replyInput.placeholder = "Répondre...", 2000);
-    } catch (e) {
-        console.error("Erreur Réponse:", e);
-    }
-};
+        try {
+            const participants = [currentUser.uid, story.authorId].sort();
+            await addDoc(collection(db, "messages"), {
+                senderId: currentUser.uid,
+                receiverId: story.authorId,
+                participants: participants,
+                chatId: participants.join('_'), // AJOUTÉ ICI AUSSI
+                text: "💬 Statut : " + reply,
+                timestamp: serverTimestamp(),
+                read: false,
+                type: "text"
+            });
+            replyInput.value = "";
+            replyInput.placeholder = "Envoyé !";
+            setTimeout(() => replyInput.placeholder = "Répondre...", 2000);
+        } catch (e) {
+            console.error("Erreur Réponse:", e);
+        }
+    };
 
     async function openUserStories(userId) {
         const q = query(collection(db, "notes"), where("authorId", "==", userId));
@@ -387,4 +388,5 @@ window.sendReply = async () => {
 </script>
 </body>
 </html>
+
 
