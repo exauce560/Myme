@@ -306,7 +306,7 @@
         const chatId = participants.join('_');
 
         try {
-            await addDoc(collection(db, "chats"), {
+            await addDoc(collection(db, "chats", chatId, "messages"), {
                 chatId: chatId,
                 senderId: currentUser.uid,
                 receiverId: story.authorId,
@@ -338,7 +338,7 @@
         const chatId = participants.join('_');
 
         try {
-            await addDoc(collection(db, "chats"), {
+            await addDoc(collection(db, "chats", chatId, "messages"), {
                 chatId: chatId,
                 senderId: currentUser.uid,
                 receiverId: story.authorId,
@@ -488,6 +488,7 @@
 </script>
 </body>
 </html>
+
 
 
 
