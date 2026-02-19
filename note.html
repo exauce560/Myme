@@ -299,32 +299,36 @@
     // --- INTERACTIONS MESSAGES ---
     window.sendLike = async () => {
         const story = currentStories[storyIdx];
-        if (story.authorId === currentUser.uid) return;
+        if (!story || story.authorId === currentUser.uid) return;
 
-        // IMPORTANT : On crée l'ID de la conversation (toujours trié par ordre alphabétique)
-        const participants = [currentUser.uid, story.authorId].sort();
-        const chatId = participants.join('_');
+        // On crée l'ID unique de la conversation
+        const myUid = currentUser.uid;
+        const targetUid = story.authorId;
+        const chatId = myUid < targetUid ? myUid + "_" + targetUid : targetUid + "_" + myUid;
+        const participants = [myUid, targetUid].sort();
 
         try {
-            await addDoc(collection(db, "chats", chatId, "messages"), {
+            // Chemin exact : chats -> document(chatId) -> sous-collection(messages)
+            const messagesRef = collection(db, "chats", chatId, "messages");
+
+            await addDoc(messagesRef, {
                 chatId: chatId,
-                senderId: currentUser.uid,
-                receiverId: story.authorId,
-                participants: participants,
+                senderId: myUid,
+                receiverId: targetUid,
                 text: "❤️ a aimé votre statut",
-                type: "text", // Indispensable pour l'affichage
+                type: "text",
                 timestamp: serverTimestamp(),
                 read: false
             });
 
-            // Animation visuelle du bouton
+            // Animation du bouton
             const btn = document.getElementById('like-btn');
             btn.classList.add('liked');
             setTimeout(() => btn.classList.remove('liked'), 1000);
-        
-            console.log("Like envoyé au chat !");
+            
+            console.log("Like enregistré dans la sous-collection messages !");
         } catch (e) { 
-            console.error("Erreur Like Chat:", e); 
+            console.error("Erreur d'envoi du Like:", e); 
         }
     };
 
@@ -334,15 +338,18 @@
         if (!reply) return;
 
         const story = currentStories[storyIdx];
-        const participants = [currentUser.uid, story.authorId].sort();
-        const chatId = participants.join('_');
+        const myUid = currentUser.uid;
+        const targetUid = story.authorId;
+        const chatId = myUid < targetUid ? myUid + "_" + targetUid : targetUid + "_" + myUid;
 
         try {
-            await addDoc(collection(db, "chats", chatId, "messages"), {
+            // Même chemin : chats -> document(chatId) -> sous-collection(messages)
+            const messagesRef = collection(db, "chats", chatId, "messages");
+
+            await addDoc(messagesRef, {
                 chatId: chatId,
-                senderId: currentUser.uid,
-                receiverId: story.authorId,
-                participants: participants,
+                senderId: myUid,
+                receiverId: targetUid,
                 text: "💬 Réponse statut : " + reply,
                 type: "text",
                 timestamp: serverTimestamp(),
@@ -353,7 +360,7 @@
             replyInput.placeholder = "Envoyé !";
             setTimeout(() => replyInput.placeholder = "Répondre...", 2000);
         } catch (e) { 
-            console.error("Erreur Réponse Chat:", e); 
+            console.error("Erreur d'envoi de la réponse:", e); 
         }
     };
 
@@ -488,6 +495,7 @@
 </script>
 </body>
 </html>
+
 
 
 
