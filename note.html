@@ -273,6 +273,7 @@
         if (!reply) return;
         const story = currentStories[storyIdx];
         const participants = [currentUser.uid, story.authorId].sort();
+        const chatId = participants.join('_');
 
         try {
             await addDoc(collection(db, "messages"), {
@@ -422,4 +423,5 @@
 </script>
 </body>
 </html>
+
 
