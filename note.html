@@ -301,68 +301,80 @@
         const story = currentStories[storyIdx];
         if (!story || story.authorId === currentUser.uid) return;
 
-        // On crée l'ID unique de la conversation
         const myUid = currentUser.uid;
         const targetUid = story.authorId;
         const chatId = myUid < targetUid ? myUid + "_" + targetUid : targetUid + "_" + myUid;
-        const participants = [myUid, targetUid].sort();
 
         try {
-            // Chemin exact : chats -> document(chatId) -> sous-collection(messages)
+            const chatRef = doc(db, "chats", chatId);
             const messagesRef = collection(db, "chats", chatId, "messages");
 
+            const msgText = "❤️ a aimé votre statut";
+
+            // 1. Ajouter le message dans la sous-collection (pour l'historique)
             await addDoc(messagesRef, {
-                chatId: chatId,
                 senderId: myUid,
                 receiverId: targetUid,
-                text: "❤️ a aimé votre statut",
+                text: msgText,
                 type: "text",
                 timestamp: serverTimestamp(),
-                read: false
+                read: false // Important pour ton clearBadgeOnEntry
             });
 
-            // Animation du bouton
+            // 2. METTRE À JOUR LE PARENT (Pour l'affichage dans la liste des discussions)
+            // C'est ici que ça se joue pour que le message apparaisse enfin !
+            await setDoc(chatRef, {
+                lastMessage: msgText,
+                lastTimestamp: serverTimestamp(),
+                participants: [myUid, targetUid],
+                // On ne met pas read: false ici car c'est géré par message, 
+                // mais on assure que le document parent existe
+            }, { merge: true });
+
             const btn = document.getElementById('like-btn');
             btn.classList.add('liked');
             setTimeout(() => btn.classList.remove('liked'), 1000);
             
-            console.log("Like enregistré dans la sous-collection messages !");
-        } catch (e) { 
-            console.error("Erreur d'envoi du Like:", e); 
-        }
+        } catch (e) { console.error("Erreur Like:", e); }
     };
 
-    window.sendReply = async () => {
-        const replyInput = document.getElementById('reply-text');
-        const reply = replyInput.value.trim();
-        if (!reply) return;
+window.sendReply = async () => {
+    const replyInput = document.getElementById('reply-text');
+    const reply = replyInput.value.trim();
+    if (!reply) return;
 
-        const story = currentStories[storyIdx];
-        const myUid = currentUser.uid;
-        const targetUid = story.authorId;
-        const chatId = myUid < targetUid ? myUid + "_" + targetUid : targetUid + "_" + myUid;
+    const story = currentStories[storyIdx];
+    const myUid = currentUser.uid;
+    const targetUid = story.authorId;
+    const chatId = myUid < targetUid ? myUid + "_" + targetUid : targetUid + "_" + myUid;
 
-        try {
-            // Même chemin : chats -> document(chatId) -> sous-collection(messages)
-            const messagesRef = collection(db, "chats", chatId, "messages");
+    try {
+        const chatRef = doc(db, "chats", chatId);
+        const messagesRef = collection(db, "chats", chatId, "messages");
+        const msgText = "💬 Statut : " + reply;
 
-            await addDoc(messagesRef, {
-                chatId: chatId,
-                senderId: myUid,
-                receiverId: targetUid,
-                text: "💬 Réponse statut : " + reply,
-                type: "text",
-                timestamp: serverTimestamp(),
-                read: false
-            });
+        // 1. Envoi du message réel
+        await addDoc(messagesRef, {
+            senderId: myUid,
+            receiverId: targetUid,
+            text: msgText,
+            type: "text",
+            timestamp: serverTimestamp(),
+            read: false
+        });
 
-            replyInput.value = "";
-            replyInput.placeholder = "Envoyé !";
-            setTimeout(() => replyInput.placeholder = "Répondre...", 2000);
-        } catch (e) { 
-            console.error("Erreur d'envoi de la réponse:", e); 
-        }
-    };
+        // 2. Mise à jour du "preview" dans la liste des chats
+        await setDoc(chatRef, {
+            lastMessage: msgText,
+            lastTimestamp: serverTimestamp(),
+            participants: [myUid, targetUid]
+        }, { merge: true });
+
+        replyInput.value = "";
+        replyInput.placeholder = "Envoyé !";
+        setTimeout(() => replyInput.placeholder = "Répondre...", 2000);
+    } catch (e) { console.error("Erreur Réponse:", e); }
+};
 
     // --- LOGIQUE STORY (IMAGE/TEXTE) ---
     async function openUserStories(userId) {
@@ -495,6 +507,7 @@
 </script>
 </body>
 </html>
+
 
 
 
