@@ -20,16 +20,12 @@
             --header-bg: #020c15; --border: #1a242d;
         }
 
-        /* --- STYLE DU BOUTON LIKE --- */
-        .like-btn {
+        /* --- STYLE DES BOUTONS SVG --- */
+        .like-btn, .action-btn {
             position: absolute;
-            bottom: 80px;
-            right: 20px;
             background: rgba(255, 255, 255, 0.15);
             border: none;
             border-radius: 50%;
-            width: 50px;
-            height: 50px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -37,22 +33,16 @@
             z-index: 10003;
             transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             backdrop-filter: blur(5px);
+            color: white;
         }
 
-        .like-btn:hover {
-            transform: scale(1.15);
-            background: rgba(255, 255, 255, 0.3);
-        }
+        .like-btn { bottom: 80px; right: 20px; width: 50px; height: 50px; }
+        .delete-btn-svg { top: 50px; right: 20px; width: 40px; height: 40px; background: rgba(255, 50, 50, 0.6); display: none; }
+        .pause-btn { top: 50px; left: 20px; width: 40px; height: 40px; }
 
-        .like-btn svg {
-            fill: white;
-            transition: fill 0.3s, transform 0.2s;
-        }
-
-        .like-btn.liked svg {
-            fill: #ff4b4b;
-            transform: scale(1.2);
-        }
+        .like-btn:hover, .action-btn:hover { transform: scale(1.15); background: rgba(255, 255, 255, 0.3); }
+        .like-btn svg { fill: white; transition: fill 0.3s, transform 0.2s; }
+        .like-btn.liked svg { fill: #ff4b4b; transform: scale(1.2); }
 
         body { 
             font-family: var(--app-font-family); 
@@ -63,58 +53,23 @@
         }
 
         .main-wrapper { display: flex; height: calc(100vh - 65px); width: 100%; }
-
-        .sidebar {
-            width: var(--sidebar-width);
-            border-right: 1px solid var(--border);
-            overflow-y: auto; background: var(--bg);
-            padding: 15px; flex-shrink: 0;
-            box-sizing: border-box;
-        }
-
-        .content-view {
-            flex: 1; position: relative; background: #000;
-            display: flex; flex-direction: column;
-            justify-content: center; align-items: center;
-        }
-
-        .header { 
-            padding: 10px 20px; background: var(--header-bg); 
-            border-bottom: 1px solid var(--border); display: flex; 
-            align-items: center; gap: 15px; height: 45px;
-        }
-        
+        .sidebar { width: var(--sidebar-width); border-right: 1px solid var(--border); overflow-y: auto; background: var(--bg); padding: 15px; flex-shrink: 0; box-sizing: border-box; }
+        .content-view { flex: 1; position: relative; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .header { padding: 10px 20px; background: var(--header-bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 15px; height: 45px; }
         .back-btn { background: none; border: none; padding: 5px; cursor: pointer; color: var(--text); }
 
-        .post-box { 
-            background: var(--border); padding: 12px; 
-            border-radius: var(--app-radius); margin-bottom: 20px; 
-            border: 1px solid transparent;
-        }
-        .post-input { 
-            width: 100%; border: none; background: transparent; 
-            font-size: inherit; color: var(--text); outline: none; 
-            font-family: inherit; resize: none;
-        }
+        .post-box { background: var(--border); padding: 12px; border-radius: var(--app-radius); margin-bottom: 20px; border: 1px solid transparent; }
+        .post-input { width: 100%; border: none; background: transparent; font-size: inherit; color: var(--text); outline: none; font-family: inherit; resize: none; }
 
         .notes-list { display: flex; flex-direction: column; gap: 10px; }
-        .note-item { 
-            display: flex; align-items: center; gap: 12px;
-            padding: 12px; background: var(--header-bg); 
-            border-radius: var(--app-radius); border: 1px solid var(--border); 
-            cursor: pointer; transition: 0.2s;
-        }
+        .note-item { display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--header-bg); border-radius: var(--app-radius); border: 1px solid var(--border); cursor: pointer; transition: 0.2s; }
         .note-item:hover { background: var(--border); }
         .note-item.active { border-color: var(--accent); background: var(--border); }
         
         .avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent); }
         .name { font-weight: 600; font-size: 0.9em; color: var(--text); }
 
-        .story-bg-blur {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background-size: cover; background-position: center;
-            filter: blur(40px) brightness(0.4); z-index: 1;
-        }
+        .story-bg-blur { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; filter: blur(40px) brightness(0.4); z-index: 1; }
         .story-container-inner { position: relative; z-index: 2; width: 100%; height: 100%; display: flex; flex-direction: column; }
         .story-top { padding: 15px; width: 100%; box-sizing: border-box; }
         .progress-container { display: flex; gap: 4px; height: 3px; }
@@ -123,22 +78,8 @@
 
         .story-main { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; position: relative; }
         .story-img { max-width: 90%; max-height: 70vh; object-fit: contain; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        
-        .story-text-overlay {
-            position: absolute; bottom: 40px; background: rgba(0,0,0,0.6);
-            color: white; padding: 10px 20px; border-radius: 10px; text-align: center;
-        }
-
-        .story-text-content {
-            width: 80%; aspect-ratio: 9/16; max-height: 70vh; display: flex; align-items: center; 
-            justify-content: center; font-size: 24px; font-weight: bold;
-            color: white; text-align: center; padding: 30px; box-sizing: border-box; border-radius: 15px;
-        }
-
-        .delete-btn {
-            position: absolute; top: 50px; right: 20px; background: rgba(255,50,50,0.8);
-            border: none; color: white; padding: 10px; border-radius: 50%; cursor: pointer; z-index: 10002; display: none;
-        }
+        .story-text-overlay { position: absolute; bottom: 40px; background: rgba(0,0,0,0.6); color: white; padding: 10px 20px; border-radius: 10px; text-align: center; }
+        .story-text-content { width: 80%; aspect-ratio: 9/16; max-height: 70vh; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; color: white; text-align: center; padding: 30px; box-sizing: border-box; border-radius: 15px; }
 
         .reply-bar { padding: 15px; display: flex; gap: 10px; width: 100%; box-sizing: border-box; z-index: 10003; }
         .reply-input { flex: 1; border-radius: 25px; border: none; padding: 12px 20px; background: rgba(255,255,255,0.2); color: white; outline: none; }
@@ -183,20 +124,28 @@
             <div id="empty-msg" class="empty-state">
                 <p>Sélectionnez un contact pour voir son statut</p>
             </div>
+            
             <div id="story-content" class="story-container-inner" style="display: none;">
-                <button id="delete-story-btn" class="delete-btn" onclick="deleteCurrentStory()">🗑️</button>
+                <button id="pause-btn" class="action-btn pause-btn" onclick="toggleTimer()">
+                    <svg id="pause-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+                </button>
+
+                <button id="delete-story-btn" class="action-btn delete-btn-svg" onclick="deleteCurrentStory()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                </button>
                 
                 <button id="like-btn" class="like-btn" onclick="sendLike()" title="Aimer ce statut">
-                    <svg width="24" height="24" viewBox="0 0 24 24">
-                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                    </svg>
+                    <svg width="24" height="24" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
                 </button>
 
                 <div class="story-top"><div class="progress-container" id="prog-container"></div></div>
                 <div class="story-main" id="story-main-zone"></div>
+                
                 <div class="reply-bar" id="story-reply-bar">
-                    <input type="text" id="reply-text" class="reply-input" placeholder="Répondre...">
-                    <button onclick="sendReply()" style="background:var(--accent); border:none; color:white; border-radius:50%; width:40px; height:40px; cursor:pointer;">➔</button>
+                    <input type="text" id="reply-text" class="reply-input" placeholder="Répondre..." onkeypress="if(event.key === 'Enter') sendReply()">
+                    <button onclick="sendReply()" style="background:var(--accent); border:none; color:white; border-radius:50%; width:40px; height:40px; cursor:pointer; display:flex; align-items:center; justify-content:center;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                    </button>
                 </div>
             </div>
         </div>
@@ -204,7 +153,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, getDoc, doc, where, getDocs, serverTimestamp, deleteDoc, limit } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, getDoc, doc, where, getDocs, serverTimestamp, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
     const firebaseConfig = {
@@ -224,32 +173,19 @@
     let currentStories = [];
     let storyIdx = 0;
     let timer;
+    let progress = 0;
+    let isPaused = false;
 
     window.syncMymeStyle = function() {
         const fs = localStorage.getItem('myme-fsize') || '16px';
         const ff = localStorage.getItem('myme-ffam') || "'Segoe UI'";
-        const gh = localStorage.getItem('myme-ghost') || '1';
-        const fi = localStorage.getItem('myme-filter') || 'none';
         const rad = localStorage.getItem('myme-radius') || '20px';
-        const spc = localStorage.getItem('myme-spacing') || 'normal';
-        const brw = localStorage.getItem('myme-border') || '1px';
         const theme = localStorage.getItem('theme');
-
         document.documentElement.style.setProperty('--app-font-size', fs);
         document.documentElement.style.setProperty('--app-font-family', ff);
         document.documentElement.style.setProperty('--app-radius', rad);
-
-        document.body.style.opacity = gh;
-        document.body.style.filter = fi;
-        document.body.style.letterSpacing = spc;
-        
         if (theme === 'dark') document.body.classList.add('dark-mode');
         else document.body.classList.remove('dark-mode');
-
-        document.querySelectorAll('.note-item, .post-box').forEach(el => {
-            el.style.borderRadius = rad;
-            el.style.borderWidth = brw;
-        });
     }
 
     onAuthStateChanged(auth, (user) => {
@@ -274,42 +210,30 @@
                 const uData = uSnap.data();
                 const item = document.createElement('div');
                 item.className = "note-item";
-                item.onclick = () => {
-                    document.querySelectorAll('.note-item').forEach(i => i.classList.remove('active'));
-                    item.classList.add('active');
-                    openUserStories(data.authorId);
-                };
+                item.onclick = () => openUserStories(data.authorId);
                 item.innerHTML = `
                     <img src="${uData.photoURL || 'https://ui-avatars.com/api/?name=' + uData.prenom}" class="avatar">
                     <div class="name">${uData.prenom || 'Utilisateur'}</div>
                 `;
                 list.appendChild(item);
             }
-            window.syncMymeStyle();
         });
     }
 
     window.sendLike = async () => {
         const story = currentStories[storyIdx];
         if (story.authorId === currentUser.uid) return;
-
-        // Feedback visuel immédiat
         const btn = document.getElementById('like-btn');
         btn.classList.add('liked');
-
-        try {
-            await addDoc(collection(db, "messages"), {
-                senderId: currentUser.uid,
-                receiverId: story.authorId,
-                text: "❤️ a aimé votre statut",
-                timestamp: serverTimestamp(),
-                read: false,
-                type: "text"
-            });
-            setTimeout(() => btn.classList.remove('liked'), 1000);
-        } catch (e) {
-            console.error("Erreur lors du like:", e);
-        }
+        await addDoc(collection(db, "messages"), {
+            senderId: currentUser.uid,
+            receiverId: story.authorId,
+            text: "❤️ a aimé votre statut",
+            timestamp: serverTimestamp(),
+            read: false,
+            type: "text"
+        });
+        setTimeout(() => btn.classList.remove('liked'), 1000);
     };
 
     async function openUserStories(userId) {
@@ -331,23 +255,49 @@
         const mainZone = document.getElementById('story-main-zone');
         const blurBg = document.getElementById('story-blur-bg');
         
-        // Cacher le bouton like si c'est notre propre statut
         const isMine = story.authorId === currentUser.uid;
-        document.getElementById('delete-story-btn').style.display = isMine ? 'block' : 'none';
+        document.getElementById('delete-story-btn').style.display = isMine ? 'flex' : 'none';
         document.getElementById('like-btn').style.display = isMine ? 'none' : 'flex';
 
         if (story.photoBase64) {
             blurBg.style.backgroundImage = `url(${story.photoBase64})`;
             mainZone.innerHTML = `<img src="${story.photoBase64}" class="story-img">${story.texte ? `<div class="story-text-overlay">${story.texte}</div>` : ''}`;
         } else {
-            const randomColors = ["#2ecc71", "#3498db", "#9b59b6", "#e67e22", "#1abc9c", "#d35400", "#c0392b"];
-            const color = randomColors[Math.floor(Math.random() * randomColors.length)];
             blurBg.style.backgroundImage = "none";
             blurBg.style.backgroundColor = "#000";
-            mainZone.innerHTML = `<div class="story-text-content" style="background:${color}">${story.texte}</div>`;
+            mainZone.innerHTML = `<div class="story-text-content" style="background:#3498db">${story.texte}</div>`;
         }
+        progress = 0;
+        isPaused = false;
+        updatePauseIcon();
         setupProgressBars();
         startTimer();
+    }
+
+    function startTimer() {
+        clearInterval(timer);
+        const fills = document.querySelectorAll('.prog-fill');
+        timer = setInterval(() => {
+            if (!isPaused && fills[storyIdx]) {
+                progress++;
+                fills[storyIdx].style.width = progress + "%";
+                if (progress >= 100) { clearInterval(timer); storyIdx++; showStory(); }
+            }
+        }, 50);
+    }
+
+    window.toggleTimer = () => {
+        isPaused = !isPaused;
+        updatePauseIcon();
+    };
+
+    function updatePauseIcon() {
+        const icon = document.getElementById('pause-icon');
+        if (isPaused) {
+            icon.innerHTML = '<path d="M8 5v14l11-7z"></path>'; // Play icon
+        } else {
+            icon.innerHTML = '<rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect>'; // Pause icon
+        }
     }
 
     function setupProgressBars() {
@@ -364,24 +314,31 @@
         });
     }
 
-    function startTimer() {
-        clearInterval(timer);
-        let width = 0;
-        const fills = document.querySelectorAll('.prog-fill');
-        timer = setInterval(() => {
-            if (fills[storyIdx]) {
-                width++;
-                fills[storyIdx].style.width = width + "%";
-                if (width >= 100) { clearInterval(timer); storyIdx++; showStory(); }
-            }
-        }, 50);
-    }
-
     window.closeStory = () => {
         clearInterval(timer);
         document.getElementById('story-content').style.display = 'none';
         document.getElementById('empty-msg').style.display = 'block';
         document.getElementById('post-viewer').classList.remove('active');
+    };
+
+    window.sendReply = async () => {
+        const reply = document.getElementById('reply-text').value;
+        if (!reply) return;
+        await addDoc(collection(db, "messages"), {
+            senderId: currentUser.uid,
+            receiverId: currentStories[storyIdx].authorId,
+            text: "💬 Réponse statut : " + reply,
+            timestamp: serverTimestamp(),
+            read: false, type: "text"
+        });
+        document.getElementById('reply-text').value = "";
+    };
+
+    window.deleteCurrentStory = async () => {
+        if (!confirm("Supprimer ce statut ?")) return;
+        await deleteDoc(doc(db, "notes", currentStories[storyIdx].id));
+        currentStories.splice(storyIdx, 1);
+        if (currentStories.length === 0) window.closeStory(); else showStory();
     };
 
     window.publishNote = async () => {
@@ -390,8 +347,8 @@
         if (!text && !file) return;
         if (file) {
             const reader = new FileReader();
-            reader.readAsDataURL(file);
             reader.onload = async () => saveToDB(text, reader.result);
+            reader.readAsDataURL(file);
         } else {
             saveToDB(text, "");
         }
@@ -405,28 +362,6 @@
     }
 
     window.handleFileSelect = (i) => document.getElementById('file-status').style.display = i.files[0] ? 'block' : 'none';
-
-    window.sendReply = async () => {
-        const reply = document.getElementById('reply-text').value;
-        if (!reply) return;
-        await addDoc(collection(db, "messages"), {
-            senderId: currentUser.uid,
-            receiverId: currentStories[storyIdx].authorId,
-            text: "💬 Statut : " + reply,
-            timestamp: serverTimestamp(),
-            read: false, type: "text"
-        });
-        document.getElementById('reply-text').value = "";
-        alert("Réponse envoyée !");
-    };
-
-    window.deleteCurrentStory = async () => {
-        if (!confirm("Supprimer ce statut ?")) return;
-        await deleteDoc(doc(db, "notes", currentStories[storyIdx].id));
-        currentStories.splice(storyIdx, 1);
-        if (currentStories.length === 0) window.closeStory(); else showStory();
-    };
-
 </script>
 </body>
 </html>
