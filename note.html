@@ -153,7 +153,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, getDoc, doc, where, getDocs, serverTimestamp, deleteDoc, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, getDoc, doc, where, getDocs, serverTimestamp, deleteDoc, Timestamp, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
     const firebaseConfig = {
@@ -207,7 +207,62 @@
             console.log("Statut expiré supprimé :", d.id);
         });
     }
+    window.likeStatus = async (statusId, ownerUid, ownerPlayerId) => {
+    const myUid = auth.currentUser.uid;
+    const myName = localStorage.getItem('myme-user-name') || "Quelqu'un";
+    
+    try {
+        const likeRef = doc(db, "status", statusId, "likes", myUid);
+        
+        // 1. Ajouter le like dans Firestore
+        await setDoc(likeRef, {
+            likedAt: serverTimestamp(),
+            userUid: myUid
+        });
 
+        // 2. Envoyer la notification via ta fonction envoyerPush
+        if (ownerPlayerId && ownerUid !== myUid) {
+            envoyerPush(
+                ownerPlayerId, 
+                "Nouveau Like ! ❤️", 
+                `${myName} a aimé votre statut.`
+            );
+        }
+        
+        console.log("Statut liké !");
+    } catch (e) {
+        console.error("Erreur like:", e);
+    }
+};
+    window.addComment = async (statusId, ownerUid, ownerPlayerId, commentText) => {
+    if (!commentText.trim()) return;
+    
+    const myUid = auth.currentUser.uid;
+    const myName = localStorage.getItem('myme-user-name') || "Un utilisateur";
+
+    try {
+        // 1. Enregistrer le commentaire
+        await addDoc(collection(db, "status", statusId, "comments"), {
+            text: commentText,
+            senderId: myUid,
+            senderName: myName,
+            createdAt: serverTimestamp()
+        });
+
+        // 2. Notifier le propriétaire
+        if (ownerPlayerId && ownerUid !== myUid) {
+            envoyerPush(
+                ownerPlayerId, 
+                "Nouveau commentaire 💬", 
+                `${myName} a dit : ${commentText}`
+            );
+        }
+
+        window.showToast("Commentaire envoyé !");
+    } catch (e) {
+        console.error("Erreur commentaire:", e);
+    }
+};
     // --- CHARGEMENT (FILTRÉ 24H) ---
     function loadProfiles() {
         const twentyFourHoursAgo = Date.now() - (24 * 60 * 60 * 1000);
@@ -245,51 +300,61 @@
     window.sendLike = async () => {
         const story = currentStories[storyIdx];
         if (story.authorId === currentUser.uid) return;
-    
+
+        // IMPORTANT : On crée l'ID de la conversation (toujours trié par ordre alphabétique)
         const participants = [currentUser.uid, story.authorId].sort();
         const chatId = participants.join('_');
 
         try {
             await addDoc(collection(db, "messages"), {
+                chatId: chatId,
                 senderId: currentUser.uid,
                 receiverId: story.authorId,
                 participants: participants,
-                chatId: chatId, // Vérifie si ton chat utilise 'chatId' ou 'conversationId'
                 text: "❤️ a aimé votre statut",
+                type: "text", // Indispensable pour l'affichage
                 timestamp: serverTimestamp(),
-                read: false,
-                type: "text" // Indispensable pour que le chat sache comment l'afficher
+                read: false
             });
-            // Animation du bouton
+
+            // Animation visuelle du bouton
             const btn = document.getElementById('like-btn');
             btn.classList.add('liked');
             setTimeout(() => btn.classList.remove('liked'), 1000);
-        } catch (e) { console.error("Erreur envoi Like:", e); }
+        
+            console.log("Like envoyé au chat !");
+        } catch (e) { 
+            console.error("Erreur Like Chat:", e); 
+        }
     };
 
     window.sendReply = async () => {
         const replyInput = document.getElementById('reply-text');
         const reply = replyInput.value.trim();
         if (!reply) return;
+
         const story = currentStories[storyIdx];
         const participants = [currentUser.uid, story.authorId].sort();
         const chatId = participants.join('_');
 
         try {
             await addDoc(collection(db, "messages"), {
+                chatId: chatId,
                 senderId: currentUser.uid,
                 receiverId: story.authorId,
                 participants: participants,
-                chatId: chatId,
-                text: "💬 Réponse Statut : " + reply,
+                text: "💬 Réponse statut : " + reply,
+                type: "text",
                 timestamp: serverTimestamp(),
-                read: false,
-                type: "text"
+                read: false
             });
+
             replyInput.value = "";
             replyInput.placeholder = "Envoyé !";
             setTimeout(() => replyInput.placeholder = "Répondre...", 2000);
-        } catch (e) { console.error(e); }
+        } catch (e) { 
+            console.error("Erreur Réponse Chat:", e); 
+        }
     };
 
     // --- LOGIQUE STORY (IMAGE/TEXTE) ---
@@ -423,5 +488,6 @@
 </script>
 </body>
 </html>
+
 
 
