@@ -245,9 +245,7 @@
     window.sendLike = async () => {
         const story = currentStories[storyIdx];
         if (story.authorId === currentUser.uid) return;
-        const btn = document.getElementById('like-btn');
-        btn.classList.add('liked');
-
+    
         const participants = [currentUser.uid, story.authorId].sort();
         const chatId = participants.join('_');
 
@@ -256,14 +254,17 @@
                 senderId: currentUser.uid,
                 receiverId: story.authorId,
                 participants: participants,
-                chatId: chatId,
+                chatId: chatId, // Vérifie si ton chat utilise 'chatId' ou 'conversationId'
                 text: "❤️ a aimé votre statut",
                 timestamp: serverTimestamp(),
                 read: false,
-                type: "text"
+                type: "text" // Indispensable pour que le chat sache comment l'afficher
             });
+            // Animation du bouton
+            const btn = document.getElementById('like-btn');
+            btn.classList.add('liked');
             setTimeout(() => btn.classList.remove('liked'), 1000);
-        } catch (e) { console.error(e); }
+        } catch (e) { console.error("Erreur envoi Like:", e); }
     };
 
     window.sendReply = async () => {
@@ -278,7 +279,7 @@
                 senderId: currentUser.uid,
                 receiverId: story.authorId,
                 participants: participants,
-                chatId: participants.join('_'),
+                chatId: chatId,
                 text: "💬 Réponse Statut : " + reply,
                 timestamp: serverTimestamp(),
                 read: false,
@@ -421,3 +422,4 @@
 </script>
 </body>
 </html>
+
