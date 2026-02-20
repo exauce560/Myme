@@ -299,7 +299,62 @@
     // --- INTERACTIONS MESSAGES ---
     window.sendLike = async () => {
         const story = currentStories[storyIdx];
-        if (!story || story.authorId === currentUser.uid) return;
+    
+        // CONDITION CRUCIALE : Bloque si c'est ton propre statut
+        if (!story || !currentUser || story.authorId === currentUser.uid) {
+            console.log("Action annulée : Vous ne pouvez pas liker votre propre statut.");
+            return;
+        }
+
+        const myUid = currentUser.uid;
+        const targetUid = story.authorId;
+    // On génère l'ID unique entre les deux utilisateurs
+        const chatId = myUid < targetUid ? myUid + "_" + targetUid : targetUid + "_" + myUid;
+
+        try {
+            const messagesRef = collection(db, "chats", chatId, "messages");
+            const chatRef = doc(db, "chats", chatId);
+
+            const msgData = {
+                senderId: myUid,
+                receiverId: targetUid,
+                text: "❤️ a aimé votre statut",
+                type: "text",
+                timestamp: serverTimestamp(),
+                read: false
+            };
+
+            // Envoi de la bulle
+            await addDoc(messagesRef, msgData);
+
+            // Mise à jour de la liste des conversations
+            await setDoc(chatRef, {
+                lastMessage: "❤️ a aimé votre statut",
+                lastTimestamp: serverTimestamp(),
+                participants: [myUid, targetUid]
+            }, { merge: true });
+
+            // Animation visuelle
+            const btn = document.getElementById('like-btn');
+            btn.classList.add('liked');
+            setTimeout(() => btn.classList.remove('liked'), 1000);
+        
+        } catch (e) { 
+            console.error("Erreur d'affichage Like:", e); 
+        }
+    };
+
+window.sendReply = async () => {
+    const replyInput = document.getElementById('reply-text');
+    const reply = replyInput.value.trim();
+        const story = currentStories[storyIdx];
+
+        // On vérifie s'il y a du texte ET si ce n'est pas notre propre statut
+        if (!reply) return;
+        if (!story || !currentUser || story.authorId === currentUser.uid) {
+            alert("Vous ne pouvez pas répondre à votre propre statut.");
+            return;
+        }
 
         const myUid = currentUser.uid;
         const targetUid = story.authorId;
@@ -308,73 +363,32 @@
         try {
             const chatRef = doc(db, "chats", chatId);
             const messagesRef = collection(db, "chats", chatId, "messages");
+            const msgText = "💬 Réponse statut : " + reply;
 
-            const msgText = "❤️ a aimé votre statut";
-
-            // 1. Ajouter le message dans la sous-collection (pour l'historique)
+            // 1. Envoi de la bulle de message
             await addDoc(messagesRef, {
                 senderId: myUid,
                 receiverId: targetUid,
                 text: msgText,
                 type: "text",
                 timestamp: serverTimestamp(),
-                read: false // Important pour ton clearBadgeOnEntry
+                read: false
             });
 
-            // 2. METTRE À JOUR LE PARENT (Pour l'affichage dans la liste des discussions)
-            // C'est ici que ça se joue pour que le message apparaisse enfin !
+            // 2. Mise à jour de l'aperçu dans l'accueil
             await setDoc(chatRef, {
                 lastMessage: msgText,
                 lastTimestamp: serverTimestamp(),
-                participants: [myUid, targetUid],
-                // On ne met pas read: false ici car c'est géré par message, 
-                // mais on assure que le document parent existe
+                participants: [myUid, targetUid]
             }, { merge: true });
 
-            const btn = document.getElementById('like-btn');
-            btn.classList.add('liked');
-            setTimeout(() => btn.classList.remove('liked'), 1000);
-            
-        } catch (e) { console.error("Erreur Like:", e); }
+            replyInput.value = "";
+            replyInput.placeholder = "Envoyé !";
+            setTimeout(() => replyInput.placeholder = "Répondre...", 2000);
+        } catch (e) { 
+            console.error("Erreur Réponse:", e); 
+        }
     };
-
-window.sendReply = async () => {
-    const replyInput = document.getElementById('reply-text');
-    const reply = replyInput.value.trim();
-    if (!reply) return;
-
-    const story = currentStories[storyIdx];
-    const myUid = currentUser.uid;
-    const targetUid = story.authorId;
-    const chatId = myUid < targetUid ? myUid + "_" + targetUid : targetUid + "_" + myUid;
-
-    try {
-        const chatRef = doc(db, "chats", chatId);
-        const messagesRef = collection(db, "chats", chatId, "messages");
-        const msgText = "💬 Statut : " + reply;
-
-        // 1. Envoi du message réel
-        await addDoc(messagesRef, {
-            senderId: myUid,
-            receiverId: targetUid,
-            text: msgText,
-            type: "text",
-            timestamp: serverTimestamp(),
-            read: false
-        });
-
-        // 2. Mise à jour du "preview" dans la liste des chats
-        await setDoc(chatRef, {
-            lastMessage: msgText,
-            lastTimestamp: serverTimestamp(),
-            participants: [myUid, targetUid]
-        }, { merge: true });
-
-        replyInput.value = "";
-        replyInput.placeholder = "Envoyé !";
-        setTimeout(() => replyInput.placeholder = "Répondre...", 2000);
-    } catch (e) { console.error("Erreur Réponse:", e); }
-};
 
     // --- LOGIQUE STORY (IMAGE/TEXTE) ---
     async function openUserStories(userId) {
@@ -507,6 +521,7 @@ window.sendReply = async () => {
 </script>
 </body>
 </html>
+
 
 
 
