@@ -198,7 +198,40 @@
             filter: blur(80px) brightness(0.5);
             transform: scale(1.2); /* Évite les bords blancs lors du flou */
         }
+/* Conteneur de la réponse à l'intérieur de la bulle de chat */
+.reply-context-container {
+    background: rgba(0, 0, 0, 0.1);
+    border-left: 4px solid var(--accent);
+    border-radius: 8px;
+    padding: 8px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    max-width: 100%;
+}
 
+.dark-mode .reply-context-container {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.reply-miniature {
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.reply-text-preview {
+    font-size: 0.85em;
+    color: var(--gray);
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* Coupe le texte après 2 lignes */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.2;
+}
         /* Style des flèches de navigation */
 .nav-arrow {
     position: absolute;
@@ -516,37 +549,44 @@ window.sendReply = async () => {
     const reply = replyInput.value.trim();
     const story = currentStories[storyIdx];
 
-    if (!reply || !story || !currentUser || story.authorId === currentUser.uid) return;
+    if (!reply || !story || !currentUser) return;
 
     const myUid = currentUser.uid;
     const targetUid = story.authorId;
     const chatId = myUid < targetUid ? myUid + "_" + targetUid : targetUid + "_" + myUid;
 
-    // On prépare le contexte (si c'est une photo ou du texte)
-    const contexte = story.photoBase64 ? "📷 Photo" : "📝 Statut";
-    const legende = story.texte ? `("${story.texte}")` : "";
+    // Déterminer le type de contenu pour le texte du message
+    const typeLabel = story.photoBase64 ? "📷 Photo" : "📝 Statut";
+    const aperçu = story.photoBase64 ? story.photoBase64 : (story.texte || "");
 
     try {
         const messagesRef = collection(db, "chats", chatId, "messages");
         const chatRef = doc(db, "chats", chatId);
-        
-        // Le message affichera : "Réponse à [📷 Photo] : Super anniversaire !"
-        const msgText = `En réponse à votre ${contexte} ${legende} : ${reply}`;
 
+        // Envoi du message avec le contexte du statut
         await addDoc(messagesRef, {
             senderId: myUid,
             receiverId: targetUid,
-            text: msgText,
-            type: 'text',
+            text: `Réponse à votre ${typeLabel} : ${reply}`,
+            quotedContent: aperçu, // L'image Base64 ou le texte
+            isReplyToStatus: true,
             createdAt: serverTimestamp(),
             read: false
         });
 
-        // ... (reste du code de mise à jour du chat)
+        // Mise à jour de l'aperçu dans la liste des discussions
+        await setDoc(chatRef, {
+            lastMessage: `Réponse au statut : ${reply}`,
+            lastTimestamp: serverTimestamp(),
+            participants: [myUid, targetUid]
+        }, { merge: true });
+
         replyInput.value = "";
         replyInput.placeholder = "Envoyé !";
         setTimeout(() => replyInput.placeholder = "Répondre...", 2000);
-    } catch (e) { console.error(e); }
+    } catch (e) { 
+        console.error("Erreur envoi réponse:", e); 
+    }
 };
 
     // --- LOGIQUE STORY (IMAGE/TEXTE) ---
@@ -748,3 +788,4 @@ async function saveToDB(t, img) {
 </script>
 </body>
 </html>
+
