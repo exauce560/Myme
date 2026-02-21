@@ -79,12 +79,47 @@
         .story-main { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; position: relative; }
         .story-img { max-width: 90%; max-height: 70vh; object-fit: contain; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .story-text-overlay { position: absolute; bottom: 40px; background: rgba(0,0,0,0.6); color: white; padding: 10px 20px; border-radius: 10px; text-align: center; }
-        .story-text-content { width: 80%; aspect-ratio: 9/16; max-height: 70vh; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; color: white; text-align: center; padding: 30px; box-sizing: border-box; border-radius: 15px; }
+        .story-text-content {
+            width: 85%;
+            aspect-ratio: 9/16;
+            max-height: 75vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            font-weight: bold;
+            color: white;
+            text-align: center;
+            padding: 30px;
+            box-sizing: border-box;
+            border-radius: 20px;
+            /* Transparence appliquée ici */
+            background: rgba(255, 255, 255, 0.15) !important; 
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
 
         .reply-bar { padding: 15px; display: flex; gap: 10px; width: 100%; box-sizing: border-box; z-index: 10003; }
-        .reply-input { flex: 1; border-radius: 25px; border: none; padding: 12px 20px; background: rgba(255,255,255,0.2); color: white; outline: none; }
+        .reply-input {
+            flex: 1;
+            border-radius: 45px; /* Arrondi à 45px pour l'effet pilule */
+            border: 3px solid #ffffff !important; /* Bordure blanche de 3px */
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.2); /* Transparence */
+            color: white;
+            outline: none;
+            backdrop-filter: blur(10px); /* Flou derrière la barre pour la lisibilité */
+        }
         
-        #file-status { font-size: 11px; color: var(--accent); margin: 5px 0; display: none; }
+        #file-status {
+            font-size: 12px;
+            color: var(--accent);
+            margin: 8px 0;
+            display: none;
+            align-items: center;
+            gap: 5px;
+        }
         .empty-state { color: white; text-align: center; z-index: 2; }
 
         @media (max-width: 768px) {
@@ -108,7 +143,13 @@
         <div class="sidebar">
             <div class="post-box" id="post-box">
                 <textarea id="note-text" class="post-input" rows="2" placeholder="Quoi de neuf ?"></textarea>
-                <div id="file-status">📷 Photo prête</div>
+                <div id="file-status">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                        <circle cx="12" cy="13" r="4"></circle>
+                    </svg>
+                    <span>Image sélectionnée</span>
+                </div>
                 <div style="display:flex; justify-content: space-between; align-items: center; margin-top: 10px;">
                     <input type="file" id="note-file" hidden onchange="handleFileSelect(this)">
                     <button onclick="document.getElementById('note-file').click()" style="background:none; border:none; color:var(--accent); cursor:pointer; font-size:12px; font-weight:bold;">+ IMAGE</button>
@@ -506,6 +547,7 @@ window.sendReply = async () => {
 </script>
 </body>
 </html>
+
 
 
 
