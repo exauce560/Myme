@@ -121,6 +121,35 @@
             z-index: 10003;
             background: linear-gradient(to top, rgba(0,0,0,0.5), transparent); /* Ombre pour lisibilité */
         }
+
+        /* Style pour le compteur de vues/likes (uniquement pour l'auteur) */
+.story-stats {
+    position: absolute;
+    top: 70px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-size: 12px;
+    display: flex;
+    gap: 10px;
+    z-index: 10004;
+}
+
+/* Amélioration de la légende sur photo */
+.story-text-overlay {
+    position: absolute;
+    bottom: 100px; /* Remonté pour ne pas gêner la barre de réponse */
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    max-width: 80%;
+    word-wrap: break-word;
+    font-family: var(--app-font-family);
+    font-size: 16px;
+}        
         .reply-input {
             flex: 1;
             border-radius: 20px; /* Arrondi à 45px pour l'effet pilule */
@@ -445,6 +474,8 @@ window.prevStory = () => {
 window.sendLike = async () => {
     const story = currentStories[storyIdx];
     if (!story || !currentUser || story.authorId === currentUser.uid) return;
+    const likeRef = doc(db, "notes", story.id, "likes", currentUser.uid);
+    await setDoc(likeRef, { uid: currentUser.uid });
 
     const myUid = currentUser.uid;
     const targetUid = story.authorId;
@@ -491,12 +522,17 @@ window.sendReply = async () => {
     const targetUid = story.authorId;
     const chatId = myUid < targetUid ? myUid + "_" + targetUid : targetUid + "_" + myUid;
 
+    // On prépare le contexte (si c'est une photo ou du texte)
+    const contexte = story.photoBase64 ? "📷 Photo" : "📝 Statut";
+    const legende = story.texte ? `("${story.texte}")` : "";
+
     try {
         const messagesRef = collection(db, "chats", chatId, "messages");
         const chatRef = doc(db, "chats", chatId);
-        const msgText = "💬 Statut : " + reply;
+        
+        // Le message affichera : "Réponse à [📷 Photo] : Super anniversaire !"
+        const msgText = `En réponse à votre ${contexte} ${legende} : ${reply}`;
 
-        // 1. Envoi du message
         await addDoc(messagesRef, {
             senderId: myUid,
             receiverId: targetUid,
@@ -506,17 +542,11 @@ window.sendReply = async () => {
             read: false
         });
 
-        // 2. Mise à jour du chat pour l'accueil
-        await setDoc(chatRef, {
-            lastMessage: msgText,
-            lastTimestamp: serverTimestamp(),
-            participants: [myUid, targetUid]
-        }, { merge: true });
-
+        // ... (reste du code de mise à jour du chat)
         replyInput.value = "";
         replyInput.placeholder = "Envoyé !";
         setTimeout(() => replyInput.placeholder = "Répondre...", 2000);
-    } catch (e) { console.error("Erreur Réponse:", e); }
+    } catch (e) { console.error(e); }
 };
 
     // --- LOGIQUE STORY (IMAGE/TEXTE) ---
@@ -539,19 +569,18 @@ window.sendReply = async () => {
         showStory();
     }
 
-    function showStory() {
+    window.showStory = function() {
         if (storyIdx >= currentStories.length) return window.closeStory();
         const story = currentStories[storyIdx];
         const mainZone = document.getElementById('story-main-zone');
         const blurBg = document.getElementById('story-blur-bg');
-    
-        // Liste de 5 dégradés modernes
+        
         const gradients = [
-            "linear-gradient(135deg, #11998e 0%, #38ef7d 100%)", // Quepal (Vert)
-            "linear-gradient(135deg, #FF512F 0%, #DD2476 100%)", // Sunset
-            "linear-gradient(135deg, #12c2e9 0%, #c471ed 50%, #f64f59 100%)", // JShine
-            "linear-gradient(135deg, #8E2DE2 0%, #4A00E0 100%)", // Purple Love
-            "linear-gradient(135deg, #f89b29 0%, #ff0f7b 100%)"  // Orange-Pink
+            "linear-gradient(135deg, #11998e 0%, #38ef7d 100%)",
+            "linear-gradient(135deg, #FF512F 0%, #DD2476 100%)",
+            "linear-gradient(135deg, #12c2e9 0%, #c471ed 50%, #f64f59 100%)",
+            "linear-gradient(135deg, #8E2DE2 0%, #4A00E0 100%)",
+            "linear-gradient(135deg, #f89b29 0%, #ff0f7b 100%)"
         ];
 
         const isMine = story.authorId === currentUser.uid;
@@ -559,32 +588,38 @@ window.sendReply = async () => {
         document.getElementById('like-btn').style.display = isMine ? 'none' : 'flex';
 
         if (story.photoBase64) {
-            // Mode PHOTO
             blurBg.classList.remove('text-mode');
             blurBg.style.backgroundImage = `url(${story.photoBase64})`;
             mainZone.innerHTML = `<img src="${story.photoBase64}" class="story-img">${story.texte ? `<div class="story-text-overlay">${story.texte}</div>` : ''}`;
         } else {
-            // Mode TEXTE
-            // On choisit un dégradé (on utilise l'index ou l'id pour la constance)
             const gradIndex = Math.floor(Math.random() * gradients.length);
-            const selectedGradient = gradients[gradIndex];
-        
-            document.documentElement.style.setProperty('--story-gradient', selectedGradient);
+            document.documentElement.style.setProperty('--story-gradient', gradients[gradIndex]);
             blurBg.style.backgroundImage = "none";
             blurBg.classList.add('text-mode');
-        
-            mainZone.innerHTML = `
-                <div class="story-text-content has-gradient">
-                    ${story.texte}
-                </div>`;
+            mainZone.innerHTML = `<div class="story-text-content has-gradient">${story.texte}</div>`;
         }
-    
+
+        // Vues et Stats
+        if (!isMine) {
+            setDoc(doc(db, "notes", story.id, "views", currentUser.uid), { viewedAt: serverTimestamp() });
+        } else {
+            onSnapshot(collection(db, "notes", story.id, "views"), (vSnap) => {
+                onSnapshot(collection(db, "notes", story.id, "likes"), (lSnap) => {
+                    const existingStats = document.querySelector('.story-stats');
+                    if(existingStats) existingStats.remove();
+                    mainZone.insertAdjacentHTML('beforeend', `
+                        <div class="story-stats"><span>👁️ ${vSnap.size}</span><span>❤️ ${lSnap.size}</span></div>
+                    `);
+                });
+            });
+        }
+
         progress = 0;
         isPaused = false;
         updatePauseIcon();
         setupProgressBars();
         startTimer();
-    }
+    };
 
     function startTimer() {
         clearInterval(timer);
@@ -634,39 +669,73 @@ window.sendReply = async () => {
     };
 
     window.publishNote = async () => {
-        const text = document.getElementById('note-text').value;
-        const file = document.getElementById('note-file').files[0];
-        if (!text && !file) return;
-        
-        // Petit indicateur visuel pendant l'envoi
-        const btn = event.target;
-        const oldText = btn.innerText;
-        btn.innerText = "...";
+    const text = document.getElementById('note-text').value;
+    const fileInput = document.getElementById('note-file');
+    const file = fileInput.files[0];
+    const btn = event.currentTarget; // Sécurisation du bouton
+    
+    if (!text && !file) return;
+    
+    btn.disabled = true;
+    const oldText = btn.innerText;
+    btn.innerText = "...";
 
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = async () => {
-                await saveToDB(text, reader.result);
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = async () => {
+                // --- LOGIQUE DE COMPRESSION ---
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+                const max_size = 1080; // Taille max (HD)
+
+                if (width > height) {
+                    if (width > max_size) { height *= max_size / width; width = max_size; }
+                } else {
+                    if (height > max_size) { width *= max_size / height; height = max_size; }
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                
+                // Compression à 0.7 (70% de qualité, idéal pour le web)
+                const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+                
+                await saveToDB(text, compressedBase64);
+                btn.disabled = false;
                 btn.innerText = oldText;
             };
-            reader.readAsDataURL(file);
-        } else {
-            await saveToDB(text, "");
-            btn.innerText = oldText;
-        }
-    };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    } else {
+        await saveToDB(text, "");
+        btn.disabled = false;
+        btn.innerText = oldText;
+    }
+};
 
-    async function saveToDB(t, img) {
+async function saveToDB(t, img) {
+    try {
         await addDoc(collection(db, "notes"), { 
             authorId: currentUser.uid, 
             texte: t, 
             photoBase64: img, 
             createdAt: serverTimestamp() 
         });
+        // Réinitialisation interface
         document.getElementById('note-text').value = "";
         document.getElementById('note-file').value = "";
         document.getElementById('file-status').style.display = 'none';
+    } catch (e) {
+        console.error("Erreur de publication:", e);
+        alert("Oups, impossible de publier.");
     }
+}
 
     window.handleFileSelect = (i) => {
         const status = document.getElementById('file-status');
@@ -679,22 +748,3 @@ window.sendReply = async () => {
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
