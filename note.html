@@ -54,7 +54,22 @@
 
         .main-wrapper { display: flex; height: calc(100vh - 65px); width: 100%; }
         .sidebar { width: var(--sidebar-width); border-right: 1px solid var(--border); overflow-y: auto; background: var(--bg); padding: 15px; flex-shrink: 0; box-sizing: border-box; }
-        .content-view { flex: 1; position: relative; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .content-view {
+            flex: 1;
+            position: relative;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+    
+            /* --- AJOUTS POUR L'ÉCART --- */
+            margin-bottom: 3px; /* Écart en bas */
+            margin-right: 3px;  /* Écart à droite */
+            border-radius: var(--app-radius); /* Pour arrondir les coins du visionneur */
+            overflow: hidden;   /* Pour que le fond flou ne dépasse pas des coins arrondis */
+            height: calc(100vh - 65px - 5px); /* On déduit le header (65px) et la marge (5px) */
+        }
         .header { padding: 10px 20px; background: var(--header-bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 15px; height: 45px; }
         .back-btn { background: none; border: none; padding: 5px; cursor: pointer; color: var(--text); }
 
@@ -788,4 +803,5 @@ async function saveToDB(t, img) {
 </script>
 </body>
 </html>
+
 
