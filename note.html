@@ -170,7 +170,34 @@
             transform: scale(1.2); /* Évite les bords blancs lors du flou */
         }
 
+        /* Style des flèches de navigation */
+.nav-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.2);
+    border: none;
+    color: white;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 10004; /* Au-dessus du contenu */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.3s;
+}
+
+.nav-arrow:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.arrow-left { left: 15px; }
+.arrow-right { right: 15px; }
+
         @media (max-width: 768px) {
+            .nav-arrow { width: 40px; height: 40px; background: rgba(0, 0, 0, 0.1); }
             .sidebar { width: 100%; border-right: none; }
             .content-view { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1000; }
             .content-view.active { display: flex; }
@@ -226,13 +253,20 @@
                 <button id="like-btn" class="like-btn" onclick="sendLike()" title="Aimer ce statut">
                     <svg width="24" height="24" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
                 </button>
+                <button class="nav-arrow arrow-left" onclick="prevStory()">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                </button>
+
+                <button class="nav-arrow arrow-right" onclick="nextStory()">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </button>
 
                 <div class="story-top"><div class="progress-container" id="prog-container"></div></div>
                 <div class="story-main" id="story-main-zone"></div>
                 
                 <div class="reply-bar" id="story-reply-bar">
                     <input type="text" id="reply-text" class="reply-input" placeholder="Répondre..." onkeypress="if(event.key === 'Enter') sendReply()">
-                    <button onclick="sendReply()" style="background:var(--accent); border:none; color:white; border-radius:50%; width:40px; height:40px; cursor:pointer; display:flex; align-items:center; justify-content:center;">
+                    <button onclick="sendReply()" style="background: #29bd49; border:none; color:white; border-radius:50%; width:40px; height:40px; cursor:pointer; display:flex; align-items:center; justify-content:center;">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
                     </button>
                 </div>
@@ -384,8 +418,29 @@
             }
         });
     }
+// Fonction pour passer au statut suivant
+window.nextStory = () => {
+    clearInterval(timer); // Arrête le chrono actuel
+    storyIdx++;
+    if (storyIdx < currentStories.length) {
+        showStory();
+    } else {
+        window.closeStory(); // Ferme si c'était le dernier
+    }
+};
 
-    // --- INTERACTIONS MESSAGES ---
+// Fonction pour revenir au statut précédent
+window.prevStory = () => {
+    clearInterval(timer);
+    if (storyIdx > 0) {
+        storyIdx--;
+        showStory();
+    } else {
+        // Optionnel : Recommencer le premier statut si on clique à gauche au début
+        progress = 0;
+        showStory();
+    }
+};
     // --- INTERACTIONS MESSAGES ---
 window.sendLike = async () => {
     const story = currentStories[storyIdx];
@@ -624,6 +679,7 @@ window.sendReply = async () => {
 </script>
 </body>
 </html>
+
 
 
 
