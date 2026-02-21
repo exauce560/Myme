@@ -89,6 +89,8 @@
         .story-img { max-width: 90%; max-height: 70vh; object-fit: contain; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .story-text-overlay { position: absolute; bottom: 40px; background: rgba(0,0,0,0.6); color: white; padding: 10px 20px; border-radius: 10px; text-align: center; }
         .story-text-content {
+            font-family: 'Caveat', cursive; /* Ou 'Permanent Marker' */
+            line-height: 1.2;
             width: 85%;
             aspect-ratio: 9/16;
             max-height: 75vh;
@@ -121,8 +123,8 @@
         }
         .reply-input {
             flex: 1;
-            border-radius: 25px; /* Arrondi à 45px pour l'effet pilule */
-            border: 2px solid #ffffff !important; /* Bordure blanche de 3px */
+            border-radius: 20px; /* Arrondi à 45px pour l'effet pilule */
+            border: 2px solid #ffffff !important; /* Bordure blanche de 2px */
             padding: 12px 20px;
             background: rgba(255, 255, 255, 0.2); /* Transparence */
             color: white;
@@ -622,6 +624,7 @@ window.sendReply = async () => {
 </script>
 </body>
 </html>
+
 
 
 
