@@ -121,8 +121,8 @@
         }
         .reply-input {
             flex: 1;
-            border-radius: 45px; /* Arrondi à 45px pour l'effet pilule */
-            border: 3px solid #ffffff !important; /* Bordure blanche de 3px */
+            border-radius: 25px; /* Arrondi à 45px pour l'effet pilule */
+            border: 2px solid #ffffff !important; /* Bordure blanche de 3px */
             padding: 12px 20px;
             background: rgba(255, 255, 255, 0.2); /* Transparence */
             color: white;
@@ -490,10 +490,10 @@ window.sendReply = async () => {
     
         // Liste de 5 dégradés modernes
         const gradients = [
+            "linear-gradient(135deg, #11998e 0%, #38ef7d 100%)", // Quepal (Vert)
             "linear-gradient(135deg, #FF512F 0%, #DD2476 100%)", // Sunset
             "linear-gradient(135deg, #12c2e9 0%, #c471ed 50%, #f64f59 100%)", // JShine
             "linear-gradient(135deg, #8E2DE2 0%, #4A00E0 100%)", // Purple Love
-            "linear-gradient(135deg, #11998e 0%, #38ef7d 100%)", // Quepal (Vert)
             "linear-gradient(135deg, #f89b29 0%, #ff0f7b 100%)"  // Orange-Pink
         ];
 
@@ -509,7 +509,7 @@ window.sendReply = async () => {
         } else {
             // Mode TEXTE
             // On choisit un dégradé (on utilise l'index ou l'id pour la constance)
-            const gradIndex = (story.id.charCodeAt(0) % gradients.length); 
+            const gradIndex = Math.floor(Math.random() * gradients.length);
             const selectedGradient = gradients[gradIndex];
         
             document.documentElement.style.setProperty('--story-gradient', selectedGradient);
@@ -622,6 +622,7 @@ window.sendReply = async () => {
 </script>
 </body>
 </html>
+
 
 
 
