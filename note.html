@@ -121,6 +121,18 @@
             gap: 5px;
         }
         .empty-state { color: white; text-align: center; z-index: 2; }
+        /* Style pour le conteneur de texte avec dégradé */
+        .story-text-content.has-gradient {
+            background: var(--story-gradient) !important;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+        }
+
+        /* Ajustement du flou de fond quand c'est du texte */
+        .story-bg-blur.text-mode {
+            background: var(--story-gradient);
+            filter: blur(60px) brightness(0.6);
+        }
 
         @media (max-width: 768px) {
             .sidebar { width: 100%; border-right: none; }
@@ -441,19 +453,41 @@ window.sendReply = async () => {
         const story = currentStories[storyIdx];
         const mainZone = document.getElementById('story-main-zone');
         const blurBg = document.getElementById('story-blur-bg');
-        
+    
+        // Liste de 5 dégradés modernes
+        const gradients = [
+            "linear-gradient(135deg, #FF512F 0%, #DD2476 100%)", // Sunset
+            "linear-gradient(135deg, #12c2e9 0%, #c471ed 50%, #f64f59 100%)", // JShine
+            "linear-gradient(135deg, #8E2DE2 0%, #4A00E0 100%)", // Purple Love
+            "linear-gradient(135deg, #11998e 0%, #38ef7d 100%)", // Quepal (Vert)
+            "linear-gradient(135deg, #f89b29 0%, #ff0f7b 100%)"  // Orange-Pink
+        ];
+
         const isMine = story.authorId === currentUser.uid;
         document.getElementById('delete-story-btn').style.display = isMine ? 'flex' : 'none';
         document.getElementById('like-btn').style.display = isMine ? 'none' : 'flex';
 
         if (story.photoBase64) {
+            // Mode PHOTO
+            blurBg.classList.remove('text-mode');
             blurBg.style.backgroundImage = `url(${story.photoBase64})`;
             mainZone.innerHTML = `<img src="${story.photoBase64}" class="story-img">${story.texte ? `<div class="story-text-overlay">${story.texte}</div>` : ''}`;
         } else {
+            // Mode TEXTE
+            // On choisit un dégradé (on utilise l'index ou l'id pour la constance)
+            const gradIndex = (story.id.charCodeAt(0) % gradients.length); 
+            const selectedGradient = gradients[gradIndex];
+        
+            document.documentElement.style.setProperty('--story-gradient', selectedGradient);
             blurBg.style.backgroundImage = "none";
-            blurBg.style.backgroundColor = "#000";
-            mainZone.innerHTML = `<div class="story-text-content" style="background: linear-gradient(45deg, #ff8c1a, #ff4b4b);">${story.texte}</div>`;
+            blurBg.classList.add('text-mode');
+        
+            mainZone.innerHTML = `
+                <div class="story-text-content has-gradient">
+                    ${story.texte}
+                </div>`;
         }
+    
         progress = 0;
         isPaused = false;
         updatePauseIcon();
@@ -543,10 +577,18 @@ window.sendReply = async () => {
         document.getElementById('file-status').style.display = 'none';
     }
 
-    window.handleFileSelect = (i) => document.getElementById('file-status').style.display = i.files[0] ? 'block' : 'none';
+    window.handleFileSelect = (i) => {
+        const status = document.getElementById('file-status');
+        if (i.files && i.files[0]) {
+            status.style.display = 'flex'; // Utilise flex pour aligner le SVG et le texte
+        } else {
+            status.style.display = 'none';
+        }
+    };
 </script>
 </body>
 </html>
+
 
 
 
