@@ -299,49 +299,32 @@
     // --- INTERACTIONS MESSAGES ---
     window.sendLike = async () => {
         const story = currentStories[storyIdx];
-    
-        // CONDITION CRUCIALE : Bloque si c'est ton propre statut
-        if (!story || !currentUser || story.authorId === currentUser.uid) {
-            console.log("Action annulée : Vous ne pouvez pas liker votre propre statut.");
-            return;
-        }
+        if (!story || !currentUser || story.authorId === currentUser.uid) return;
 
         const myUid = currentUser.uid;
         const targetUid = story.authorId;
-    // On génère l'ID unique entre les deux utilisateurs
         const chatId = myUid < targetUid ? myUid + "_" + targetUid : targetUid + "_" + myUid;
 
         try {
             const messagesRef = collection(db, "chats", chatId, "messages");
-            const chatRef = doc(db, "chats", chatId);
-
-            const msgData = {
+        
+            // On utilise exactement les mêmes champs que sendMessage dans chat.html
+            await addDoc(messagesRef, {
                 senderId: myUid,
                 receiverId: targetUid,
                 text: "❤️ a aimé votre statut",
-                type: "text",
-                timestamp: serverTimestamp(),
+                type: 'text', // 'text' comme dans sendMessage
+                createdAt: serverTimestamp(), // CHANGÉ : createdAt au lieu de timestamp
                 read: false
-            };
+            });
 
-            // Envoi de la bulle
-            await addDoc(messagesRef, msgData);
+            // Mise à jour pour la liste des contacts (pour faire remonter le chat)
+            await updateContactsAfterMessage(myUid, targetUid); // Si cette fonction est dispo
 
-            // Mise à jour de la liste des conversations
-            await setDoc(chatRef, {
-                lastMessage: "❤️ a aimé votre statut",
-                lastTimestamp: serverTimestamp(),
-                participants: [myUid, targetUid]
-            }, { merge: true });
-
-            // Animation visuelle
             const btn = document.getElementById('like-btn');
             btn.classList.add('liked');
             setTimeout(() => btn.classList.remove('liked'), 1000);
-        
-        } catch (e) { 
-            console.error("Erreur d'affichage Like:", e); 
-        }
+        } catch (e) { console.error(e); }
     };
 
 window.sendReply = async () => {
@@ -371,7 +354,7 @@ window.sendReply = async () => {
                 receiverId: targetUid,
                 text: msgText,
                 type: "text",
-                timestamp: serverTimestamp(),
+                createdAt: serverTimestamp(),
                 read: false
             });
 
@@ -521,6 +504,7 @@ window.sendReply = async () => {
 </script>
 </body>
 </html>
+
 
 
 
