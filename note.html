@@ -297,81 +297,83 @@
     }
 
     // --- INTERACTIONS MESSAGES ---
-    window.sendLike = async () => {
-        const story = currentStories[storyIdx];
-        if (!story || !currentUser || story.authorId === currentUser.uid) return;
+    // --- INTERACTIONS MESSAGES ---
+window.sendLike = async () => {
+    const story = currentStories[storyIdx];
+    if (!story || !currentUser || story.authorId === currentUser.uid) return;
 
-        const myUid = currentUser.uid;
-        const targetUid = story.authorId;
-        const chatId = myUid < targetUid ? myUid + "_" + targetUid : targetUid + "_" + myUid;
+    const myUid = currentUser.uid;
+    const targetUid = story.authorId;
+    const chatId = myUid < targetUid ? myUid + "_" + targetUid : targetUid + "_" + myUid;
 
-        try {
-            const messagesRef = collection(db, "chats", chatId, "messages");
+    try {
+        const messagesRef = collection(db, "chats", chatId, "messages");
+        const chatRef = doc(db, "chats", chatId);
+        const msgText = "❤️ a aimé votre statut";
+
+        // 1. Envoi du message
+        await addDoc(messagesRef, {
+            senderId: myUid,
+            receiverId: targetUid,
+            text: msgText,
+            type: 'text',
+            createdAt: serverTimestamp(),
+            read: false
+        });
+
+        // 2. Mise à jour du chat pour l'accueil (Remplace updateContactsAfterMessage)
+        await setDoc(chatRef, {
+            lastMessage: msgText,
+            lastTimestamp: serverTimestamp(),
+            participants: [myUid, targetUid]
+        }, { merge: true });
+
+        // Animation du bouton
+        const btn = document.getElementById('like-btn');
+        btn.classList.add('liked');
+        setTimeout(() => btn.classList.remove('liked'), 1000);
         
-            // On utilise exactement les mêmes champs que sendMessage dans chat.html
-            await addDoc(messagesRef, {
-                senderId: myUid,
-                receiverId: targetUid,
-                text: "❤️ a aimé votre statut",
-                type: 'text', // 'text' comme dans sendMessage
-                createdAt: serverTimestamp(), // CHANGÉ : createdAt au lieu de timestamp
-                read: false
-            });
-
-            // Mise à jour pour la liste des contacts (pour faire remonter le chat)
-            await updateContactsAfterMessage(myUid, targetUid); // Si cette fonction est dispo
-
-            const btn = document.getElementById('like-btn');
-            btn.classList.add('liked');
-            setTimeout(() => btn.classList.remove('liked'), 1000);
-        } catch (e) { console.error(e); }
-    };
+    } catch (e) { console.error("Erreur Like:", e); }
+};
 
 window.sendReply = async () => {
     const replyInput = document.getElementById('reply-text');
     const reply = replyInput.value.trim();
-        const story = currentStories[storyIdx];
+    const story = currentStories[storyIdx];
 
-        // On vérifie s'il y a du texte ET si ce n'est pas notre propre statut
-        if (!reply) return;
-        if (!story || !currentUser || story.authorId === currentUser.uid) {
-            alert("Vous ne pouvez pas répondre à votre propre statut.");
-            return;
-        }
+    if (!reply || !story || !currentUser || story.authorId === currentUser.uid) return;
 
-        const myUid = currentUser.uid;
-        const targetUid = story.authorId;
-        const chatId = myUid < targetUid ? myUid + "_" + targetUid : targetUid + "_" + myUid;
+    const myUid = currentUser.uid;
+    const targetUid = story.authorId;
+    const chatId = myUid < targetUid ? myUid + "_" + targetUid : targetUid + "_" + myUid;
 
-        try {
-            const chatRef = doc(db, "chats", chatId);
-            const messagesRef = collection(db, "chats", chatId, "messages");
-            const msgText = "💬 Réponse statut : " + reply;
+    try {
+        const messagesRef = collection(db, "chats", chatId, "messages");
+        const chatRef = doc(db, "chats", chatId);
+        const msgText = "💬 Statut : " + reply;
 
-            // 1. Envoi de la bulle de message
-            await addDoc(messagesRef, {
-                senderId: myUid,
-                receiverId: targetUid,
-                text: msgText,
-                type: "text",
-                createdAt: serverTimestamp(),
-                read: false
-            });
+        // 1. Envoi du message
+        await addDoc(messagesRef, {
+            senderId: myUid,
+            receiverId: targetUid,
+            text: msgText,
+            type: 'text',
+            createdAt: serverTimestamp(),
+            read: false
+        });
 
-            // 2. Mise à jour de l'aperçu dans l'accueil
-            await setDoc(chatRef, {
-                lastMessage: msgText,
-                lastTimestamp: serverTimestamp(),
-                participants: [myUid, targetUid]
-            }, { merge: true });
+        // 2. Mise à jour du chat pour l'accueil
+        await setDoc(chatRef, {
+            lastMessage: msgText,
+            lastTimestamp: serverTimestamp(),
+            participants: [myUid, targetUid]
+        }, { merge: true });
 
-            replyInput.value = "";
-            replyInput.placeholder = "Envoyé !";
-            setTimeout(() => replyInput.placeholder = "Répondre...", 2000);
-        } catch (e) { 
-            console.error("Erreur Réponse:", e); 
-        }
-    };
+        replyInput.value = "";
+        replyInput.placeholder = "Envoyé !";
+        setTimeout(() => replyInput.placeholder = "Répondre...", 2000);
+    } catch (e) { console.error("Erreur Réponse:", e); }
+};
 
     // --- LOGIQUE STORY (IMAGE/TEXTE) ---
     async function openUserStories(userId) {
@@ -504,6 +506,7 @@ window.sendReply = async () => {
 </script>
 </body>
 </html>
+
 
 
 
