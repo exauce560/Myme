@@ -70,13 +70,22 @@
         .name { font-weight: 600; font-size: 0.9em; color: var(--text); }
 
         .story-bg-blur { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; filter: blur(40px) brightness(0.4); z-index: 1; }
-        .story-container-inner { position: relative; z-index: 2; width: 100%; height: 100%; display: flex; flex-direction: column; }
+        .story-container-inner { position: relative; z-index: 2; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: space-between; }
         .story-top { padding: 15px; width: 100%; box-sizing: border-box; }
         .progress-container { display: flex; gap: 4px; height: 3px; }
         .prog-bar { flex: 1; background: rgba(255,255,255,0.2); border-radius: 2px; overflow: hidden; }
         .prog-fill { width: 0%; height: 100%; background: #fff; }
 
-        .story-main { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; position: relative; }
+        .story-main {
+            flex: 1; /* Prend tout l'espace restant */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            width: 100%;
+            box-sizing: border-box;
+        }
         .story-img { max-width: 90%; max-height: 70vh; object-fit: contain; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .story-text-overlay { position: absolute; bottom: 40px; background: rgba(0,0,0,0.6); color: white; padding: 10px 20px; border-radius: 10px; text-align: center; }
         .story-text-content {
@@ -100,7 +109,16 @@
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
         }
 
-        .reply-bar { padding: 15px; display: flex; gap: 10px; width: 100%; box-sizing: border-box; z-index: 10003; }
+        .reply-bar {
+            padding: 20px; /* Plus d'espace pour ne pas coller au bord */
+            padding-bottom: 30px; /* Sécurité pour les écrans d'iPhone (notch bas) */
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            box-sizing: border-box;
+            z-index: 10003;
+            background: linear-gradient(to top, rgba(0,0,0,0.5), transparent); /* Ombre pour lisibilité */
+        }
         .reply-input {
             flex: 1;
             border-radius: 45px; /* Arrondi à 45px pour l'effet pilule */
@@ -123,15 +141,31 @@
         .empty-state { color: white; text-align: center; z-index: 2; }
         /* Style pour le conteneur de texte avec dégradé */
         .story-text-content.has-gradient {
+            width: 85%;
+            max-height: 60vh; /* Réduit pour laisser de la place à la barre de texte */
+            aspect-ratio: auto; /* Plus flexible que 9/16 pour les longs textes */
+            min-height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: 800;
+            color: white;
+            text-align: center;
+            padding: 40px;
+            box-sizing: border-box;
+            border-radius: 30px;
             background: var(--story-gradient) !important;
-            border: 2px solid rgba(255, 255, 255, 0.4);
-            box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 15px 45px rgba(0,0,0,0.5);
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
         }
 
-        /* Ajustement du flou de fond quand c'est du texte */
+        /* Flou de fond dynamique */
         .story-bg-blur.text-mode {
             background: var(--story-gradient);
-            filter: blur(60px) brightness(0.6);
+            filter: blur(80px) brightness(0.5);
+            transform: scale(1.2); /* Évite les bords blancs lors du flou */
         }
 
         @media (max-width: 768px) {
@@ -588,6 +622,7 @@ window.sendReply = async () => {
 </script>
 </body>
 </html>
+
 
 
 
