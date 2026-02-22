@@ -614,15 +614,17 @@ window.sendLike = async () => {
     const myUid = currentUser.uid;
     const targetUid = story.authorId;
     const chatId = myUid < targetUid ? myUid + "_" + targetUid : targetUid + "_" + myUid;
+    const miniature = story.photoBase64 
+        ? `<img src="${story.photoBase64}" style="width: 45px; height: 45px; border-radius: 8px; object-fit: cover;">`
+        : `<div style="width: 45px; height: 45px; border-radius: 8px; background: linear-gradient(135deg, #ff8c1a, #ff4b4b); color: white; font-size: 8px; display: flex; align-items: center; justify-content: center; padding: 4px; overflow: hidden; text-align: center; line-height: 1;">${story.texte.substring(0, 20)}...</div>`;
 
     // On prépare un HTML spécifique que le chat affichera
     // Le style 'pointer-events: none' empêche de copier le texte facilement
     const customLikeHTML = `
-        <div style="display: flex; align-items: center; gap: 10px; background: rgba(255,140,26,0.1); padding: 8px; border-radius: 12px; border-left: 4px solid #ff8c1a; pointer-events: none; user-select: none;">
-            <img src="${story.photoBase64 || 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png'}" 
-                 style="width: 40px; height: 40px; border-radius: 6px; object-fit: cover; background: #eee;">
+        <div style="display: flex; align-items: center; gap: 12px; background: rgba(255,140,26,0.1); padding: 10px; border-radius: 15px; border-left: 5px solid #ff8c1a; pointer-events: none; user-select: none;">
+            ${miniature}
             <div style="font-size: 13px; color: var(--text);">
-                <b style="color: #ff8c1a; display: block;">❤️ Like</b>
+                <b style="color: #ff8c1a; display: block; font-size: 11px; text-transform: uppercase;">❤️ Like</b>
                 A aimé votre ${story.photoBase64 ? 'photo' : 'statut'}
             </div>
         </div>`;
@@ -654,58 +656,44 @@ window.sendLike = async () => {
 
 window.sendReply = async () => {
     const replyInput = document.getElementById('reply-text');
-    const reply = replyInput.value.trim();
-    
-    // 1. Vérification de la story actuelle
+    const replyText = replyInput.value.trim();
     const story = currentStories[storyIdx];
 
-    if (!reply || !story || !currentUser) {
-        console.error("Envoi impossible : données manquantes", { reply, story, currentUser });
-        return;
-    }
+    if (!replyText || !story || !currentUser) return;
 
     const myUid = currentUser.uid;
     const targetUid = story.authorId;
     const chatId = myUid < targetUid ? myUid + "_" + targetUid : targetUid + "_" + myUid;
 
-    try {
-        const messagesRef = collection(db, "chats", chatId, "messages");
-        const chatRef = doc(db, "chats", chatId);
+    // Structure de la réponse avec la photo précise à laquelle on répond
+    const customReplyHTML = `
+        <div style="margin-bottom: 8px; user-select: none;">
+            <div style="display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.05); padding: 6px; border-radius: 8px; border-left: 3px solid #29bd49; margin-bottom: 5px;">
+                <img src="${story.photoBase64 || 'https://cdn-icons-png.flaticon.com/512/2593/2593491.png'}" 
+                     style="width: 30px; height: 30px; border-radius: 4px; object-fit: cover;">
+                <span style="font-size: 11px; color: #666; font-style: italic;">En réponse à ce statut</span>
+            </div>
+            <div style="font-size: 14px;">${replyText}</div>
+        </div>`;
 
-        // 2. Construction du message "Système"
-        // On sépare le texte de l'utilisateur et les données du statut
-        await addDoc(messagesRef, {
+    try {
+        await addDoc(collection(db, "chats", chatId, "messages"), {
             senderId: myUid,
             receiverId: targetUid,
-            text: reply, // Le texte pur de l'utilisateur (ex: "Trop belle !")
-            
-            // CHAMPS DE CONTRÔLE (Infalsifiables)
-            type: 'status_reply',           // Type spécial pour ton CSS de chat
-            isReplyToStatus: true,
-            statusId: story.id,             // ID unique du statut
-            quotedContent: story.photoBase64 || "", // Miniature précise
-            quotedText: story.texte || "",   // Texte du statut s'il n'y a pas de photo
-            
+            text: customReplyHTML,
+            type: 'text',
             createdAt: serverTimestamp(),
             read: false
         });
 
-        // 3. Mise à jour de l'aperçu dans la liste des discussions
-        await setDoc(chatRef, {
-            lastMessage: `💬 Réponse au statut`, 
+        await setDoc(doc(db, "chats", chatId), {
+            lastMessage: `💬 ${replyText}`,
             lastTimestamp: serverTimestamp(),
             participants: [myUid, targetUid]
         }, { merge: true });
 
-        // 4. Feedback visuel
         replyInput.value = "";
-        replyInput.placeholder = "Envoyé !";
-        setTimeout(() => replyInput.placeholder = "Répondre...", 2000);
-
-    } catch (e) { 
-        console.error("Erreur Firebase :", e);
-        alert("Erreur lors de l'envoi");
-    }
+    } catch (e) { console.error("Erreur réponse:", e); }
 };
 
     // --- LOGIQUE STORY (IMAGE/TEXTE) ---
@@ -987,6 +975,7 @@ async function saveToDB(t, img) {
 </script>
 </body>
 </html>
+
 
 
 
