@@ -140,16 +140,31 @@
         /* Style pour le compteur de vues/likes (uniquement pour l'auteur) */
 .story-stats {
     position: absolute;
-    top: 70px;
-    right: 20px;
-    background: rgba(0, 0, 0, 0.5);
+    top: 50px; /* Aligné avec le bouton pause/delete */
+    left: 70px; /* Décalé pour ne pas cacher le bouton pause */
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(8px);
     color: white;
-    padding: 5px 12px;
-    border-radius: 15px;
-    font-size: 12px;
+    padding: 6px 15px;
+    border-radius: 20px;
+    font-size: 13px;
     display: flex;
-    gap: 10px;
+    align-items: center;
+    gap: 15px;
     z-index: 10004;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.stat-item svg {
+    width: 16px;
+    height: 16px;
+    fill: white;
 }
 
 /* Amélioration de la légende sur photo */
@@ -489,7 +504,7 @@
                 item.onclick = () => openUserStories(data.authorId);
                 item.innerHTML = `
                     <img src="${uData.photoURL || 'https://ui-avatars.com/api/?name=' + uData.prenom}" class="avatar">
-                    <div class="name">${uData.prenom || 'Utilisateur'}</div>
+                    <div class="name">${uData.prenom || ''} ${uData.nom || 'User'}</div>
                 `;
                 list.appendChild(item);
             }
@@ -658,14 +673,39 @@ window.sendReply = async () => {
         if (!isMine) {
             setDoc(doc(db, "notes", story.id, "views", currentUser.uid), { viewedAt: serverTimestamp() });
         } else {
-            onSnapshot(collection(db, "notes", story.id, "views"), (vSnap) => {
-                onSnapshot(collection(db, "notes", story.id, "likes"), (lSnap) => {
-                    const existingStats = document.querySelector('.story-stats');
-                    if(existingStats) existingStats.remove();
-                    mainZone.insertAdjacentHTML('beforeend', `
-                        <div class="story-stats"><span>👁️ ${vSnap.size}</span><span>❤️ ${lSnap.size}</span></div>
-                    `);
+            // On calcule le total pour TOUS les statuts affichés de cet utilisateur
+            let totalViews = 0;
+            let totalLikes = 0;
+
+            // On boucle sur tous les documents chargés dans currentStories
+            const promises = currentStories.map(async (s) => {
+                const vSnap = await getDocs(collection(db, "notes", s.id, "views"));
+                const lSnap = await getDocs(collection(db, "notes", s.id, "likes"));
+                return { views: vSnap.size, likes: lSnap.size };
+            });
+
+            Promise.all(promises).then(results => {
+                results.forEach(res => {
+                    totalViews += res.views;
+                    totalLikes += res.likes;
                 });
+
+                const existingStats = document.querySelector('.story-stats');
+                if(existingStats) existingStats.remove();
+
+                // Insertion avec SVG au lieu d'émojis
+                mainZone.insertAdjacentHTML('beforeend', `
+                    <div class="story-stats">
+                        <div class="stat-item">
+                            <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+                            <span>${totalViews}</span>
+                        </div>
+                        <div class="stat-item">
+                            <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                            <span>${totalLikes}</span>
+                        </div>
+                    </div>
+                `);
             });
         }
 
@@ -803,5 +843,6 @@ async function saveToDB(t, img) {
 </script>
 </body>
 </html>
+
 
 
