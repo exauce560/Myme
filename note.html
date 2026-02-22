@@ -103,28 +103,43 @@
         }
         .story-img { max-width: 90%; max-height: 70vh; object-fit: contain; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .story-text-overlay { position: absolute; bottom: 40px; background: rgba(0,0,0,0.6); color: white; padding: 10px 20px; border-radius: 10px; text-align: center; }
-        .story-text-content {
-            font-family: 'Caveat', cursive; /* Ou 'Permanent Marker' */
-            line-height: 1.2;
-            width: 85%;
-            aspect-ratio: 9/16;
-            max-height: 75vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 26px;
-            font-weight: bold;
-            color: white;
-            text-align: center;
-            padding: 30px;
-            box-sizing: border-box;
-            border-radius: 20px;
-            /* Transparence appliquée ici */
-            background: rgba(255, 255, 255, 0.15) !important; 
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-        }
+.story-text-content {
+    /* --- Ton design visuel conservé --- */
+    font-family: 'Caveat', cursive;
+    background: rgba(255, 255, 255, 0.15) !important; 
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    color: white;
+    font-weight: bold;
+    text-align: center;
+    box-sizing: border-box;
+
+    /* --- Les correctifs pour le texte --- */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 85%;
+    max-width: 90%;
+    max-height: 70vh; /* Empêche de dépasser sur PC et Mobile */
+    padding: 30px;
+    font-size: 26px; /* Taille sur PC */
+    line-height: 1.2;
+    
+    /* Gestion du débordement */
+    overflow-y: auto; 
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    
+    /* Cache la barre de scroll */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.story-text-content::-webkit-scrollbar {
+    display: none;
+}
 
         .reply-bar {
             padding: 20px; /* Plus d'espace pour ne pas coller au bord */
@@ -355,6 +370,12 @@
 .arrow-right { right: 15px; }
 
         @media (max-width: 768px) {
+            .story-text-content {
+                font-size: 1.3rem; /* Réduit la taille pour que 300 caractères rentrent mieux */
+                padding: 20px;
+                max-height: 60vh; /* Laisse de la place pour les stats en bas */
+                width: 90%;
+            }
             .nav-arrow { width: 40px; height: 40px; background: rgba(0, 0, 0, 0.1); }
             .sidebar { width: 100%; border-right: none; }
             .content-view { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1000; }
@@ -975,6 +996,7 @@ async function saveToDB(t, img) {
 </script>
 </body>
 </html>
+
 
 
 
