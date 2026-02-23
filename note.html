@@ -651,7 +651,7 @@ function loadProfiles() {
                     ${isMe ? '<div class="me-badge">Moi</div>' : ''}
                 </div>
                 <div class="name">
-                    ${isMe ? 'Mon Statut' : (uData.prenom || '') + ' ' + (uData.nom || 'User')}
+                    ${isMe ? 'Mon Statut' : (uData.prenom || 'User') + ' ' + (uData.nom || '')}
                 </div>
             `;
 
@@ -1069,3 +1069,4 @@ async function saveToDB(t, img) {
 </script>
 </body>
 </html>
+
