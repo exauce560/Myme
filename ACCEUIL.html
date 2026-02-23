@@ -161,7 +161,45 @@ body {
     align-items: center; justify-content: center;
     z-index: 10000;
 }
+/* Style des boutons du modal de surnom */
+.nickname-buttons button {
+    flex: 1;
+    padding: 14px;
+    border: none;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
 
+/* Bouton Annuler : Style doux et gris */
+.btn-nickname-cancel {
+    background: var(--sidebar-mini);
+    color: var(--gray);
+}
+
+.btn-nickname-cancel:hover {
+    background: #e4e6eb;
+    color: var(--text);
+}
+
+/* Bouton Enregistrer : Style bleu Myme */
+.btn-nickname-save {
+    background: var(--myme-blue);
+    color: white;
+    box-shadow: 0 4px 12px rgba(0, 136, 255, 0.2);
+}
+
+.btn-nickname-save:hover {
+    background: #0077e6;
+    transform: translateY(-2px); /* Petit effet de levée */
+    box-shadow: 0 6px 15px rgba(0, 136, 255, 0.3);
+}
+
+.btn-nickname-save:active {
+    transform: translateY(0); /* Redescend quand on clique */
+}
 /* --- MODAL GÉNÉRIQUE (Pour la suppression, etc.) --- */
 .modal-content {
     background: var(--bg);
@@ -498,13 +536,13 @@ body.dark-mode .main-chat-view::before {
     <div class="modal-content" onclick="event.stopPropagation()">
         
         <h3 style="margin: 0; color: var(--text);">Changer le nom</h3>
-        <p style="font-size: 13px; color: var(--gray); margin-top: 5px;">Visible uniquement par vous</p>
+        <p style="font-size: 13px; color: var(--gray); margin-top: 5px; margin-bottom: 5px;">Ce nom n'est visible que par vous</p>
         
         <input type="text" id="nickname-input" placeholder="Saisir un surnom..." maxlength="20">
         
         <div class="nickname-buttons">
-            <button onclick="closeNicknameModal()" class="btn-cancel" style="flex:1;">Annuler</button>
-            <button onclick="saveNickname()" class="btn-confirm" style="flex:1; background: var(--myme-blue);">Enregistrer</button>
+            <button onclick="closeNicknameModal()" class="btn-nickname-cancel">Annuler</button>
+            <button onclick="saveNickname()" class="btn-nickname-save">Enregistrer</button>
         </div>
     </div>
 </div>  
@@ -1065,6 +1103,7 @@ async function renderList() {
 </body>
 
 </html>
+
 
 
 
