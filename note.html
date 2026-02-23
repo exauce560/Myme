@@ -103,6 +103,46 @@
         }
         .story-img { max-width: 90%; max-height: 70vh; object-fit: contain; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .story-text-overlay { position: absolute; bottom: 40px; background: rgba(0,0,0,0.6); color: white; padding: 10px 20px; border-radius: 10px; text-align: center; }
+/* Style pour ton propre item dans la liste */
+.note-item.is-me {
+    background: rgba(255, 140, 26, 0.1) !important; /* Fond légèrement orangé */
+    border: 1.5px solid var(--accent) !important;
+    margin-bottom: 20px; /* Espace pour séparer des contacts */
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+/* Container de l'avatar pour le badge */
+.avatar-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+/* Petit badge "Moi" sur ton avatar */
+.me-badge {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    background: var(--accent);
+    color: white;
+    font-size: 9px;
+    font-weight: 800;
+    padding: 2px 5px;
+    border-radius: 10px;
+    border: 2px solid var(--bg);
+    text-transform: uppercase;
+}
+
+/* Titre de section pour séparer */
+.section-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    color: var(--gray);
+    margin: 10px 0 5px 5px;
+    font-weight: bold;
+    letter-spacing: 1px;
+}        
 .story-text-content {
     /* --- Ton design visuel conservé --- */
     font-family: 'Caveat', cursive;
@@ -573,37 +613,70 @@
     }
 };
     // --- CHARGEMENT (FILTRÉ 24H) ---
-    function loadProfiles() {
-        const twentyFourHoursAgo = Date.now() - (24 * 60 * 60 * 1000);
-        // On ne prend que ce qui est récent
-        const q = query(
-            collection(db, "notes"), 
-            where("createdAt", ">=", Timestamp.fromMillis(twentyFourHoursAgo)),
-            orderBy("createdAt", "desc")
-        );
+function loadProfiles() {
+    const twentyFourHoursAgo = Date.now() - (24 * 60 * 60 * 1000);
+    const q = query(
+        collection(db, "notes"), 
+        where("createdAt", ">=", Timestamp.fromMillis(twentyFourHoursAgo)),
+        orderBy("createdAt", "desc")
+    );
 
-        onSnapshot(q, async (snap) => {
-            const list = document.getElementById('notes-list');
-            list.innerHTML = "";
-            const usersSeen = new Set();
-            for (const d of snap.docs) {
-                const data = d.data();
-                if (usersSeen.has(data.authorId)) continue;
-                usersSeen.add(data.authorId);
-                const uSnap = await getDoc(doc(db, "users", data.authorId));
-                if (!uSnap.exists()) continue;
-                const uData = uSnap.data();
-                const item = document.createElement('div');
-                item.className = "note-item";
-                item.onclick = () => openUserStories(data.authorId);
-                item.innerHTML = `
+    onSnapshot(q, async (snap) => {
+        const list = document.getElementById('notes-list');
+        list.innerHTML = "";
+        const usersSeen = new Set();
+        
+        // Conteneurs temporaires pour le tri
+        let myItem = null;
+        let otherItems = [];
+
+        for (const d of snap.docs) {
+            const data = d.data();
+            if (usersSeen.has(data.authorId)) continue;
+            usersSeen.add(data.authorId);
+
+            const uSnap = await getDoc(doc(db, "users", data.authorId));
+            if (!uSnap.exists()) continue;
+            const uData = uSnap.data();
+
+            const isMe = data.authorId === currentUser.uid;
+            
+            const item = document.createElement('div');
+            item.className = `note-item ${isMe ? 'is-me' : ''}`;
+            item.onclick = () => openUserStories(data.authorId);
+            
+            item.innerHTML = `
+                <div class="avatar-wrapper">
                     <img src="${uData.photoURL || 'https://ui-avatars.com/api/?name=' + uData.prenom}" class="avatar">
-                    <div class="name">${uData.prenom || ''} ${uData.nom || 'User'}</div>
-                `;
-                list.appendChild(item);
-            }
-        });
-    }
+                    ${isMe ? '<div class="me-badge">Moi</div>' : ''}
+                </div>
+                <div class="name">
+                    ${isMe ? 'Mon Statut' : (uData.prenom || '') + ' ' + (uData.nom || 'User')}
+                </div>
+            `;
+
+            if (isMe) myItem = item;
+            else otherItems.push(item);
+        }
+
+        // Construction de la liste finale
+        if (myItem) {
+            const titleMe = document.createElement('div');
+            titleMe.className = "section-title";
+            titleMe.innerText = "Votre actualité";
+            list.appendChild(titleMe);
+            list.appendChild(myItem);
+        }
+
+        if (otherItems.length > 0) {
+            const titleOthers = document.createElement('div');
+            titleOthers.className = "section-title";
+            titleOthers.innerText = "Mises à jour récentes";
+            list.appendChild(titleOthers);
+            otherItems.forEach(it => list.appendChild(it));
+        }
+    });
+}
 // Fonction pour passer au statut suivant
 window.nextStory = () => {
     clearInterval(timer); // Arrête le chrono actuel
@@ -996,9 +1069,3 @@ async function saveToDB(t, img) {
 </script>
 </body>
 </html>
-
-
-
-
-
-
