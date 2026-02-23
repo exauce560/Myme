@@ -834,107 +834,115 @@ window.openEditNickname = () => {
     }
 
     // Remplace toute ta fonction renderList() par celle-ci :
-    async function renderList() {
-        if (isRendering) return;
-        isRendering = true;
+async function renderList() {
+    if (isRendering) return;
+    isRendering = true;
 
-        const container = document.getElementById('chat-container');
-        const emptyState = document.getElementById('empty-state');
-        const myUid = auth.currentUser?.uid;
+    const container = document.getElementById('chat-container');
+    const emptyState = document.getElementById('empty-state');
+    const myUid = auth.currentUser?.uid;
 
-        if (!myUid) { isRendering = false; return; }
+    if (!myUid) { isRendering = false; return; }
 
-        const localKeys = Object.keys(localStorage).filter(k => k.startsWith('chat_history_'));
-        let uniqueIds = localKeys.map(k => k.replace('chat_history_', ''));
+    const localKeys = Object.keys(localStorage).filter(k => k.startsWith('chat_history_'));
+    let uniqueIds = localKeys.map(k => k.replace('chat_history_', ''));
 
-        // GESTION DE L'AFFICHAGE VIDE
-        if (uniqueIds.length === 0) {
-            container.innerHTML = "";
-            emptyState.style.display = "flex";
-            isRendering = false;
-            return;
+    if (uniqueIds.length === 0) {
+        container.innerHTML = "";
+        emptyState.style.display = "flex";
+        isRendering = false;
+        return;
+    } else {
+        emptyState.style.display = "none";
+    }
+
+    uniqueIds.sort((a, b) => {
+        const histA = JSON.parse(localStorage.getItem(`chat_history_${a}`) || "[]");
+        const histB = JSON.parse(localStorage.getItem(`chat_history_${b}`) || "[]");
+        const getT = (h) => {
+            if (h.length === 0) return 0;
+            const last = h[h.length - 1];
+            return last.createdAt?.seconds || new Date(last.createdAt).getTime() / 1000 || 0;
+        };
+        return getT(histB) - getT(histA);
+    });
+
+    const fragment = document.createDocumentFragment();
+
+    for (const id of uniqueIds) {
+        const history = JSON.parse(localStorage.getItem(`chat_history_${id}`) || "[]");
+        const localCache = JSON.parse(localStorage.getItem(`cache_${id}`) || "{}");
+        const lastMsg = history.length > 0 ? history[history.length - 1] : { text: "...", type: "text" };
+        const timeStr = lastMsg.createdAt ? formatLastMsgTime(lastMsg.createdAt) : "";
+
+        // --- NOUVELLE LOGIQUE POUR LE NOM (Surnom de Julie) ---
+        const nickname = localStorage.getItem(`nickname_${id}`);
+        const displayName = nickname || localCache.nom || "Utilisateur";
+
+        // --- NOUVELLE LOGIQUE POUR LA PHOTO (WhatsApp Style) ---
+        let photoSrc = "";
+        if (localCache.photo) {
+            photoSrc = localCache.photo;
+        } else if (localCache.nom) {
+            photoSrc = `https://ui-avatars.com/api/?name=${localCache.nom}&background=0866ff&color=fff`;
         } else {
-            emptyState.style.display = "none";
+            photoSrc = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23bfc5cb'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>";
         }
 
-        uniqueIds.sort((a, b) => {
-            const histA = JSON.parse(localStorage.getItem(`chat_history_${a}`) || "[]");
-            const histB = JSON.parse(localStorage.getItem(`chat_history_${b}`) || "[]");
-            const getT = (h) => {
-                if (h.length === 0) return 0;
-                const last = h[h.length - 1];
-                return last.createdAt?.seconds || new Date(last.createdAt).getTime() / 1000 || 0;
-            };
-            return getT(histB) - getT(histA);
+        const item = document.createElement('div');
+        item.className = `chat-item`;
+        item.id = `item-${id}`;
+
+        let timer;
+        item.onmousedown = item.ontouchstart = () => {
+            timer = setTimeout(() => window.deleteChat(id, event), 800);
+        };
+        item.onmouseup = item.ontouchend = () => clearTimeout(timer);
+
+        // On sépare le clic sur l'image (Profil) du clic sur le texte (Chat)
+        item.innerHTML = `
+            <div style="position:relative; width:55px; height:55px; flex-shrink:0;" onclick="openQuickProfile('${id}', event)">
+                <img id="img-${id}" src="${photoSrc}" style="width:100%; height:100%; border-radius:50%; object-fit:cover; cursor:pointer; background:#F0F2F5;">
+                <div class="online-indicator" id="online-${id}"></div>
+            </div>
+            <div style="flex:1; overflow:hidden; margin-left:12px;" onclick="window.openChat('${id}')">
+                <div style="display:flex; justify-content:space-between;">
+                    <strong class="contact-name" style="color:var(--text);">${displayName}</strong>
+                    <span style="font-size:11px; color:var(--gray);">${timeStr}</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+                    <p style="margin:0; font-size:13px; color:var(--gray); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1;">
+                        ${lastMsg.type === 'voice' ? '🎤 Vocal' : (lastMsg.type === 'image' ? '📷 Photo' : (lastMsg.text || ''))}
+                    </p>
+                    <span id="badge-${id}" style="background:var(--myme-blue); color:white; border-radius:50%; min-width:18px; height:18px; display:none; align-items:center; justify-content:center; font-size:10px; font-weight:bold; padding:2px; margin-left:8px;">0</span>
+                </div>
+            </div>
+        `;
+        fragment.appendChild(item);
+
+        // Mise à jour en temps réel depuis Firebase
+        getDoc(doc(db, "users", id)).then(snap => {
+            if (snap.exists()) {
+                const d = snap.data();
+                const imgEl = document.getElementById(`img-${id}`);
+                const nameEl = item.querySelector('.contact-name');
+                
+                // On met à jour le cache
+                localStorage.setItem(`cache_${id}`, JSON.stringify({ nom: d.prenom + " " + (d.nom || ""), photo: d.photoURL }));
+                
+                // Si Julie n'a pas mis de surnom, on met à jour le nom Firebase
+                if (!nickname && nameEl) nameEl.textContent = d.prenom + " " + (d.nom || "");
+                if (imgEl && d.photoURL) imgEl.src = d.photoURL;
+            }
         });
 
-        const fragment = document.createDocumentFragment();
-
-        for (const id of uniqueIds) {
-            const history = JSON.parse(localStorage.getItem(`chat_history_${id}`) || "[]");
-            const localCache = JSON.parse(localStorage.getItem(`cache_${id}`) || "{}");
-            const lastMsg = history.length > 0 ? history[history.length - 1] : { text: "...", type: "text" };
-            const timeStr = lastMsg.createdAt ? formatLastMsgTime(lastMsg.createdAt) : "";
-
-            const item = document.createElement('div');
-            item.className = `chat-item`;
-            item.id = `item-${id}`;
-
-            // --- GESTION DU CLIC LONG (Suppression) ---
-            let timer;
-            item.onmousedown = item.ontouchstart = () => {
-                timer = setTimeout(() => window.deleteChat(id, event), 800);
-            };
-            item.onmouseup = item.ontouchend = () => clearTimeout(timer);
-
-            item.onclick = () => window.openChat(id);
-
-            item.innerHTML = `
-                <div style="position:relative; width:55px; height:55px; flex-shrink:0;" onclick="openQuickProfile('${id}', event)">
-                    <img id="img-${id}" src="${photoSrc}" style="width:100%; height:100%; border-radius:50%; object-fit:cover; cursor:pointer;">
-                    <div class="online-indicator" id="online-${id}"></div>
-                </div>
-                <div style="flex:1; overflow:hidden; margin-left:12px;" onclick="window.openChat('${id}')">
-                    <div style="display:flex; justify-content:space-between;">
-                        <strong style="color:var(--text);">${displayName}</strong>
-                        <span style="font-size:11px; color:var(--gray);">${timeStr}</span>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
-                        <p style="margin:0; font-size:13px; color:var(--gray); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1;">
-                            ${lastMsg.type === 'voice' ? '🎤 Vocal' : (lastMsg.type === 'image' ? '📷 Photo' : (lastMsg.text || ''))}
-                        </p>
-                        <span id="badge-${id}" style="background:var(--myme-blue); color:white; border-radius:50%; min-width:18px; height:18px; display:none; align-items:center; justify-content:center; font-size:10px; font-weight:bold; padding:2px; margin-left:8px;">0</span>
-            
-                        <button class="delete-chat-btn" onclick="window.deleteChat('${id}', event)">
-                            <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="3 6 5 6 21 6"></polyline>
-                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-            `;
-            fragment.appendChild(item);
-
-            getDoc(doc(db, "users", id)).then(snap => {
-                if (snap.exists()) {
-                    const d = snap.data();
-                    const nameEl = document.getElementById(`name-${id}`);
-                    const imgEl = document.getElementById(`img-${id}`);
-                    if(nameEl) nameEl.textContent = d.prenom + " " + (d.nom || "");
-                    if(imgEl) imgEl.src = d.photoURL || imgEl.src;
-                    if(d.isOnline) document.getElementById(`item-${id}`)?.classList.add('is-online');
-                    localStorage.setItem(`cache_${id}`, JSON.stringify({ nom: d.prenom, photo: d.photoURL }));
-                }
-            });
-
-            ecouterMessagesNonLus(myUid, id, `badge-${id}`);
-        }
-
-        container.innerHTML = "";
-        container.appendChild(fragment);
-        isRendering = false;
+        ecouterMessagesNonLus(myUid, id, `badge-${id}`);
     }
+
+    container.innerHTML = "";
+    container.appendChild(fragment);
+    isRendering = false;
+}
 
     async function applyTranslations() {
         const lang = localStorage.getItem("lang") || "fr";
@@ -960,9 +968,16 @@ window.openEditNickname = () => {
 
     document.getElementById('search-input').oninput = (e) => {
         const term = e.target.value.toLowerCase();
+    
         document.querySelectorAll('.chat-item').forEach(item => {
-            const name = item.querySelector('.contact-name').textContent.toLowerCase();
-            item.style.display = name.includes(term) ? 'flex' : 'none';
+            // On récupère l'élément du nom
+            const nameEl = item.querySelector('.contact-name');
+        
+            if (nameEl) {
+                const name = nameEl.textContent.toLowerCase();
+                // On affiche seulement si le nom contient la recherche
+                item.style.display = name.includes(term) ? 'flex' : 'none';
+            }
         });
     };
 
@@ -970,28 +985,3 @@ window.openEditNickname = () => {
 </body>
 
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
