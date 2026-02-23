@@ -632,13 +632,21 @@ body.dark-mode .main-chat-view::before {
                 const userData = snap.data();
                 const headerImg = document.getElementById('headerUserImg');
                 const onlineDot = document.getElementById('self-online-dot');
+                const prenom = userData.prenom || "";
+                const nom = userData.nom || "";
 
                 // Mise à jour de la photo
                 if (userData.photoURL) {
                     headerImg.src = userData.photoURL;
-                } else {
-                    headerImg.src = `https://ui-avatars.com/api/?name=${userData.prenom}+${userData.nom}&background=0866ff&color=fff`;
-                }
+                }else if (prenom.trim() !== "" || nom.trim() !== "") {
+                // S'il n'a pas de photo mais qu'il a au moins un prénom ou un nom
+                headerImg.src = `https://ui-avatars.com/api/?name=${prenom}+${nom}&background=0866ff&color=fff`;
+            } 
+            else {
+                // S'il n'a RIEN (Profil vide), on met la silhouette grise style WhatsApp
+                headerImg.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23bfc5cb'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>";
+                headerImg.style.backgroundColor = "#F0F2F5"; // Petit fond gris clair pour le look WhatsApp
+            }
 
                 // Gestion du point de statut (optionnel : l'afficher seulement si on est connecté)
                 if (userData.isOnline) {
@@ -895,6 +903,7 @@ body.dark-mode .main-chat-view::before {
 </body>
 
 </html>
+
 
 
 
