@@ -640,19 +640,23 @@ function loadProfiles() {
             const uData = uSnap.data();
 
             const isMe = data.authorId === currentUser.uid;
-            
+
+            // --- LOGIQUE SURNOM AJOUTÉE ICI ---
+            const surnomLocal = localStorage.getItem(`nickname_${data.authorId}`);
+            // Priorité : Surnom > Prénom + Nom Firebase > "User"
+            const nomAAfficher = surnomLocal || (uData.prenom || 'User') + ' ' + (uData.nom || '');
+    
             const item = document.createElement('div');
             item.className = `note-item ${isMe ? 'is-me' : ''}`;
             item.onclick = () => openUserStories(data.authorId);
-            
+    
             item.innerHTML = `
                 <div class="avatar-wrapper">
                     <img src="${uData.photoURL || 'https://ui-avatars.com/api/?name=' + uData.prenom}" class="avatar">
                     ${isMe ? '<div class="me-badge">Moi</div>' : ''}
                 </div>
                 <div class="name">
-                    ${isMe ? 'Mon Statut' : (uData.prenom || 'User') + ' ' + (uData.nom || '')}
-                </div>
+                    ${isMe ? 'Mon Statut' : nomAAfficher} </div>
             `;
 
             if (isMe) myItem = item;
@@ -712,15 +716,17 @@ window.sendLike = async () => {
         ? `<img src="${story.photoBase64}" style="width: 45px; height: 45px; border-radius: 8px; object-fit: cover;">`
         : `<div style="width: 45px; height: 45px; border-radius: 8px; background: linear-gradient(135deg, #ff8c1a, #ff4b4b); color: white; font-size: 8px; display: flex; align-items: center; justify-content: center; padding: 4px; overflow: hidden; text-align: center; line-height: 1;">${story.texte.substring(0, 20)}...</div>`;
 
-    // On prépare un HTML spécifique que le chat affichera
-    // Le style 'pointer-events: none' empêche de copier le texte facilement
-    const customLikeHTML = `
-        <div style="display: flex; align-items: center; gap: 12px; background: rgba(255,140,26,0.1); padding: 10px; border-radius: 15px; border-left: 5px solid #ff8c1a; pointer-events: none; user-select: none;">
-            ${miniature}
-            <div style="font-size: 13px; color: var(--text);">
-                <b style="color: #ff8c1a; display: block; font-size: 11px; text-transform: uppercase;">❤️ Like</b>
-                A aimé votre ${story.photoBase64 ? 'photo' : 'statut'}
+    const targetNickname = localStorage.getItem(`nickname_${targetUid}`);
+    const displayTargetName = targetNickname || "ce statut"; // On peut mettre le surnom ou garder "ce statut"
+
+    const customReplyHTML = `
+        <div style="margin-bottom: 8px; user-select: none;">
+            <div style="display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.05); padding: 6px; border-radius: 8px; border-left: 3px solid #29bd49; margin-bottom: 5px;">
+                <img src="${story.photoBase64 || 'https://cdn-icons-png.flaticon.com/512/2593/2593491.png'}" 
+                     style="width: 30px; height: 30px; border-radius: 4px; object-fit: cover;">
+                <span style="font-size: 11px; color: #666; font-style: italic;">En réponse à ${displayTargetName}</span>
             </div>
+            <div style="font-size: 14px;">${replyText}</div>
         </div>`;
 
     try {
@@ -964,6 +970,11 @@ window.sendReply = async () => {
         const uSnap = await getDoc(doc(db, "users", d.id)); 
         if (uSnap.exists()) {
             const u = uSnap.data();
+            
+            // --- LOGIQUE SURNOM AJOUTÉE ICI ---
+            const surnomLocal = localStorage.getItem(`nickname_${d.id}`);
+            const nomAAfficher = surnomLocal || `${u.prenom} ${u.nom || ''}`;
+            
             const timeData = d.data().viewedAt || d.data().likedAt;
             const timeStr = timeData ? timeData.toDate().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : "Récemment";
             
@@ -971,8 +982,7 @@ window.sendReply = async () => {
                 <div class="stats-user-item">
                     <img src="${u.photoURL || 'https://ui-avatars.com/api/?name='+u.prenom}" class="stats-avatar">
                     <div class="stats-info">
-                        <b>${u.prenom} ${u.nom || ''}</b>
-                        <span>Vu à ${timeStr}</span>
+                        <b>${nomAAfficher}</b> <span>Vu à ${timeStr}</span>
                     </div>
                 </div>`;
         }
@@ -1069,4 +1079,5 @@ async function saveToDB(t, img) {
 </script>
 </body>
 </html>
+
 
