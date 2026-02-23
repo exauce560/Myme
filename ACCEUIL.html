@@ -174,7 +174,40 @@ body {
     animation: modalPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     border: 1px solid var(--card-border);
 }
+/* Style amélioré pour le modal de surnom */
+#nickname-modal .modal-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centre horizontalement */
+    justify-content: center; /* Centre verticalement */
+    min-height: 250px; /* Donne de l'espace pour que le centrage soit visible */
+    background: var(--bg);
+    border: 1px solid var(--card-border);
+}
 
+#nickname-input {
+    width: 85%;
+    padding: 15px;
+    border-radius: 12px;
+    border: 2px solid var(--card-border);
+    background: var(--sidebar-mini);
+    color: var(--text);
+    margin: 20px 0; /* Espace équilibré haut/bas */
+    outline: none;
+    font-size: 18px;
+    text-align: center; /* Le texte à l'intérieur de l'input est aussi centré */
+    transition: border-color 0.3s;
+}
+
+#nickname-input:focus {
+    border-color: var(--myme-blue);
+}
+
+.nickname-buttons {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+}
 @keyframes modalPop {
     from { transform: scale(0.7); opacity: 0; }
     to { transform: scale(1); opacity: 1; }
@@ -454,19 +487,19 @@ body.dark-mode .main-chat-view::before {
 </div>
 
 <div id="nickname-modal" class="modal-overlay" style="display:none; z-index: 2100;" onclick="closeNicknameModal()">
-    <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 300px; text-align: center; border-radius: 20px; padding: 25px;">
-        <h3 style="margin-bottom: 10px; color: var(--text);">Changer le nom</h3>
-        <p style="font-size: 13px; color: var(--gray); margin-bottom: 15px;">Ce nom ne sera visible que par vous.</p>
+    <div class="modal-content" onclick="event.stopPropagation()">
         
-        <input type="text" id="nickname-input" placeholder="Ex: Maman ❤️" 
-               style="width: 100%; padding: 12px; border-radius: 12px; border: 2px solid #eee; margin-bottom: 20px; outline: none; font-size: 16px; text-align: center;">
+        <h3 style="margin: 0; color: var(--text);">Changer le nom</h3>
+        <p style="font-size: 13px; color: var(--gray); margin-top: 5px;">Visible uniquement par vous</p>
         
-        <div style="display: flex; gap: 10px;">
-            <button onclick="closeNicknameModal()" style="flex:1; padding: 12px; border-radius: 12px; border:none; background: #f0f2f5; color: #555; cursor:pointer; font-weight: 600;">Annuler</button>
-            <button onclick="saveNickname()" style="flex:1; padding: 12px; border-radius: 12px; border:none; background: var(--myme-blue); color:white; cursor:pointer; font-weight: 600;">Enregistrer</button>
+        <input type="text" id="nickname-input" placeholder="Saisir un surnom..." maxlength="20">
+        
+        <div class="nickname-buttons">
+            <button onclick="closeNicknameModal()" class="btn-cancel" style="flex:1;">Annuler</button>
+            <button onclick="saveNickname()" class="btn-confirm" style="flex:1; background: var(--myme-blue);">Enregistrer</button>
         </div>
     </div>
-</div>    
+</div>  
     
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -1018,4 +1051,5 @@ async function renderList() {
 </body>
 
 </html>
+
 
