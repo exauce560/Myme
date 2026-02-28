@@ -712,46 +712,51 @@ window.sendLike = async () => {
     const myUid = currentUser.uid;
     const targetUid = story.authorId;
     const chatId = myUid < targetUid ? myUid + "_" + targetUid : targetUid + "_" + myUid;
-    const miniature = story.photoBase64 
-        ? `<img src="${story.photoBase64}" style="width: 45px; height: 45px; border-radius: 8px; object-fit: cover;">`
-        : `<div style="width: 45px; height: 45px; border-radius: 8px; background: linear-gradient(135deg, #ff8c1a, #ff4b4b); color: white; font-size: 8px; display: flex; align-items: center; justify-content: center; padding: 4px; overflow: hidden; text-align: center; line-height: 1;">${story.texte.substring(0, 20)}...</div>`;
 
-    const targetNickname = localStorage.getItem(`nickname_${targetUid}`);
-    const displayTargetName = targetNickname || "ce statut"; // On peut mettre le surnom ou garder "ce statut"
+    // 1. On définit le texte fixe pour un LIKE
+    const likeText = "❤️ a aimé votre statut";
 
-    const customReplyHTML = `
+    // 2. Structure du HTML envoyé au chat
+    const customLikeHTML = `
         <div style="margin-bottom: 8px; user-select: none;">
-            <div style="display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.05); padding: 6px; border-radius: 8px; border-left: 3px solid #29bd49; margin-bottom: 5px;">
+            <div style="display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.05); padding: 6px; border-radius: 8px; border-left: 3px solid #ff4b4b; margin-bottom: 5px;">
                 <img src="${story.photoBase64 || 'https://cdn-icons-png.flaticon.com/512/2593/2593491.png'}" 
                      style="width: 30px; height: 30px; border-radius: 4px; object-fit: cover;">
-                <span style="font-size: 11px; color: #666; font-style: italic;">En réponse à ${displayTargetName}</span>
+                <span style="font-size: 11px; color: #666; font-style: italic;">En réponse à ce statut</span>
             </div>
-            <div style="font-size: 14px;">${replyText}</div>
+            <div style="font-size: 16px; display: flex; align-items: center; gap: 5px;">
+                ${likeText}
+            </div>
         </div>`;
 
     try {
+        // Envoi du message dans la collection
         await addDoc(collection(db, "chats", chatId, "messages"), {
             senderId: myUid,
             receiverId: targetUid,
-            text: customLikeHTML, // On envoie le HTML directement dans le champ texte
-            type: 'text', // On laisse 'text' pour que ton chat l'affiche sans modif
+            text: customLikeHTML, // On envoie la variable qu'on vient de créer
+            type: 'text',
             createdAt: serverTimestamp(),
             read: false
         });
 
-        // Mise à jour de l'aperçu (lastMessage) sans le code HTML pour que ce soit propre dans la liste des discussions
+        // Mise à jour de l'aperçu dans la liste des discussions
         await setDoc(doc(db, "chats", chatId), {
-            lastMessage: "❤️ a aimé votre statut",
+            lastMessage: "❤️ Statut aimé",
             lastTimestamp: serverTimestamp(),
             participants: [myUid, targetUid]
         }, { merge: true });
 
-        // Animation bouton
+        // Animation visuelle du bouton
         const btn = document.getElementById('like-btn');
-        btn.classList.add('liked');
-        setTimeout(() => btn.classList.remove('liked'), 1000);
+        if (btn) {
+            btn.classList.add('liked');
+            setTimeout(() => btn.classList.remove('liked'), 1000);
+        }
         
-    } catch (e) { console.error("Erreur Like:", e); }
+    } catch (e) { 
+        console.error("Erreur Like:", e); 
+    }
 };
 
 window.sendReply = async () => {
@@ -1079,5 +1084,6 @@ async function saveToDB(t, img) {
 </script>
 </body>
 </html>
+
 
 
