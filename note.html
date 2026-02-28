@@ -502,7 +502,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, getDoc, doc, where, getDocs, serverTimestamp, deleteDoc, Timestamp, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, getDoc, doc, where, getDocs, serverTimestamp, deleteDoc, Timestamp, setDoc, increment, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
     const firebaseConfig = {
@@ -730,12 +730,23 @@ window.sendLike = async () => {
         </div>`;
 
     try {
+        const storyRef = doc(db, "notes", story.id);
+        await updateDoc(storyRef, {
+            likes: increment(1), // Utilise increment de Firebase
+            likedBy: arrayUnion(myUid) // Optionnel: pour éviter qu'une personne like 100 fois
+        });
+
+        // Optionnel: Mettre à jour l'affichage local immédiatement
+        const likeCountElem = document.getElementById('story-like-count');
+        if (likeCountElem) {
+            likeCountElem.innerText = parseInt(likeCountElem.innerText || 0) + 1;
+        }
         // Envoi du message dans la collection
         await addDoc(collection(db, "chats", chatId, "messages"), {
             senderId: myUid,
             receiverId: targetUid,
             text: customLikeHTML, // On envoie la variable qu'on vient de créer
-            type: 'text',
+            type: 'story_reply',
             createdAt: serverTimestamp(),
             read: false
         });
@@ -786,13 +797,13 @@ window.sendReply = async () => {
             senderId: myUid,
             receiverId: targetUid,
             text: customReplyHTML,
-            type: 'text',
+            type: 'story_reply',
             createdAt: serverTimestamp(),
             read: false
         });
 
         await setDoc(doc(db, "chats", chatId), {
-            lastMessage: `💬 ${replyText}`,
+            lastMessage: `💬 `,
             lastTimestamp: serverTimestamp(),
             participants: [myUid, targetUid]
         }, { merge: true });
@@ -1084,6 +1095,7 @@ async function saveToDB(t, img) {
 </script>
 </body>
 </html>
+
 
 
 
