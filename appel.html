@@ -59,7 +59,64 @@
             flex-direction: column; animation: slideUp 0.3s ease-out;
         }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+/* Style du conteneur de l'item pour permettre le positionnement du bouton */
+.user-item {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    user-select: none; /* Évite de sélectionner le texte lors d'un appui long */
+}
 
+/* Style du bouton supprimer (caché par défaut) */
+.delete-btn {
+    position: absolute;
+    right: -60px; /* Caché à droite */
+    top: 0;
+    bottom: 0;
+    width: 60px;
+    background-color: var(--danger);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: right 0.3s ease;
+    cursor: pointer;
+    border: none;
+    z-index: 5;
+}
+
+/* Sur PC : Le bouton apparaît quand on passe la souris sur l'élément */
+@media (hover: hover) {
+    .user-item:hover {
+        background-color: var(--hover-bg);
+    }
+    
+    .user-item:hover .delete-btn {
+        right: 0;
+    }
+    
+    /* On décale un peu l'icône de téléphone pour ne pas qu'elle soit sous le bouton */
+    .user-item:hover .info {
+        margin-right: 50px;
+    }
+}
+
+/* Animation lors de la suppression (utilisée dans le JS) */
+.user-item.removing {
+    transform: translateX(-100%);
+    opacity: 0;
+    height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin: 0;
+    border: none;
+}
+
+/* Style de l'icône à l'intérieur du bouton supprimer */
+.delete-btn i {
+    width: 20px;
+    height: 20px;
+}
         .search-box { padding: 10px 20px; background: var(--header-bg); border-bottom: var(--app-border-weight) solid var(--card-border); }
         .search-box input {
             width: 100%; padding: 10px 15px; border-radius: var(--app-radius);
@@ -195,7 +252,7 @@
             where,
             orderBy,
             addDoc,
-            serverTimestamp
+            serverTimestamp, deleteDoc, doc
         } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -295,7 +352,7 @@
                         emptyMsg.style.display = 'none';
                         snapshot.forEach(docSnap => {
                             // ON PASSE L'UID DE L'UTILISATEUR CONNECTÉ ICI
-                            renderHistoryItem(docSnap.data(), auth.currentUser.uid);
+                            renderHistoryItem(docSnap.data(), auth.currentUser.uid, docSnap.id);
                         });
                     }
                     refreshIcons();
@@ -305,28 +362,53 @@
             }
         });
 
-        function renderHistoryItem(call, currentUid) {
+        function renderHistoryItem(call, currentUid, docId) { // Ajout de docId
             const container = document.getElementById('callHistory');
             const div = document.createElement('div');
             div.className = 'user-item';
+            div.id = `call-${docId}`; // Pour pouvoir le retirer du DOM après suppression
 
-            // Si c'est moi qui ai lancé l'appel
             const isOutgoing = call.callerId === currentUid;
             const displayName = isOutgoing ? call.receiverName : call.callerName;
             const displayPhoto = isOutgoing ? call.receiverPhoto : call.callerPhoto;
-
             const time = call.timestamp ? new Date(call.timestamp.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
+
+            // --- GESTION SUPPRESSION ---
+            let timer;
+            // Clic droit (PC)
+            div.oncontextmenu = (e) => {
+                e.preventDefault();
+                window.confirmDeleteCall(docId, displayName);
+            };
+            // Appui long (Mobile)
+            div.ontouchstart = () => {
+                timer = setTimeout(() => window.confirmDeleteCall(docId, displayName), 800);
+            };
+            div.ontouchend = () => clearTimeout(timer);
+            // ---------------------------
 
             div.innerHTML = `
                 <img src="${displayPhoto || 'https://ui-avatars.com/api/?name=' + displayName}" class="avatar">
                 <div class="info">
-                        <h4>${displayName}</h4>
+                    <h4>${displayName}</h4>
                     <p>
                         <i data-lucide="${isOutgoing ? 'phone-outgoing' : 'phone-incoming'}" size="12"></i>
                         ${isOutgoing ? 'Sortant' : 'Entrant'} • ${time}
                     </p>
                 </div>
-                <i data-lucide="phone" size="18" color="var(--myme-blue)"></i>`;
+                <i data-lucide="phone" size="18" color="var(--myme-blue)" class="phone-icon"></i>
+    
+                <button class="delete-btn" onclick="event.stopPropagation(); window.confirmDeleteCall('${docId}', '${displayName}')">
+                    <i data-lucide="trash-2"></i>
+                </button>
+            `;
+    
+            // Le clic simple lance toujours l'appel
+            div.onclick = () => {
+                const tel = isOutgoing ? call.receiverTel : call.callerTel; // Assure-toi d'avoir le tel dans l'objet call
+                if(tel) window.location.href = `tel:${tel}`;
+            };
+
             container.appendChild(div);
         }
 
@@ -383,6 +465,28 @@
                 list.innerHTML = '<p style="text-align:center; padding:20px; color:red;">Erreur de chargement.</p>';
             }
         };
+        // Fenêtre de confirmation simple (tu peux la remplacer par un beau modal plus tard)
+window.confirmDeleteCall = (docId, name) => {
+    if (confirm(`Supprimer l'appel avec ${name} de l'historique ?`)) {
+        window.executeCallDeletion(docId);
+    }
+};
+
+window.executeCallDeletion = async (docId) => {
+    try {
+        const { deleteDoc, doc } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js");
+        await deleteDoc(doc(db, "calls", docId));
+        
+        // Retrait visuel immédiat
+        const el = document.getElementById(`call-${docId}`);
+        if (el) el.style.opacity = '0';
+        setTimeout(() => el?.remove(), 300);
+        
+        console.log("Appel supprimé");
+    } catch (error) {
+        console.error("Erreur suppression:", error);
+    }
+};
 
         function renderContactRow(u) {
             const list = document.getElementById('contactList');
@@ -437,8 +541,10 @@
                     callerId: myUser.uid,      // ID de celui qui appelle
                     callerName: myName,
                     callerPhoto: myPhoto,
+                    callerTel: localStorage.getItem('myme-user-phone') || "", // Ajoute ceci
                     receiverId: contactId,    // ID de celui qui reçoit
                     receiverName: targetName,
+                    receiverTel: contact.telephone, // Ajoute ceci
                     receiverPhoto: contact.photoURL || "",
                     timestamp: serverTimestamp()
                 });
@@ -459,6 +565,7 @@
 </body>
 
 </html>
+
 
 
 
