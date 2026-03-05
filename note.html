@@ -502,7 +502,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, getDoc, doc, where, getDocs, serverTimestamp, deleteDoc, Timestamp, setDoc, increment, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, query, updateDoc, orderBy, getDoc, doc, where, getDocs, serverTimestamp, deleteDoc, Timestamp, setDoc, increment, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
     const firebaseConfig = {
@@ -1095,6 +1095,7 @@ async function saveToDB(t, img) {
 </script>
 </body>
 </html>
+
 
 
 
