@@ -117,6 +117,10 @@
     width: 20px;
     height: 20px;
 }
+        .info-click-zone {
+            cursor: pointer;
+            width: 100%;
+        }
         .search-box { padding: 10px 20px; background: var(--header-bg); border-bottom: var(--app-border-weight) solid var(--card-border); }
         .search-box input {
             width: 100%; padding: 10px 15px; border-radius: var(--app-radius);
@@ -362,50 +366,44 @@
             }
         });
 
-        function renderHistoryItem(call, currentUid, docId) { // Ajout de docId
+        function renderHistoryItem(call, currentUid, docId) {
             const container = document.getElementById('callHistory');
             const div = document.createElement('div');
             div.className = 'user-item';
-            div.id = `call-${docId}`; // Pour pouvoir le retirer du DOM après suppression
+            div.id = `call-${docId}`;
 
             const isOutgoing = call.callerId === currentUid;
             const displayName = isOutgoing ? call.receiverName : call.callerName;
             const displayPhoto = isOutgoing ? call.receiverPhoto : call.callerPhoto;
             const time = call.timestamp ? new Date(call.timestamp.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
 
-            // --- GESTION SUPPRESSION ---
+            // Gestion Appui long (Mobile)
             let timer;
-            // Clic droit (PC)
-            div.oncontextmenu = (e) => {
-                e.preventDefault();
-                window.confirmDeleteCall(docId, displayName);
-            };
-            // Appui long (Mobile)
-            div.ontouchstart = () => {
-                timer = setTimeout(() => window.confirmDeleteCall(docId, displayName), 800);
-            };
+            div.ontouchstart = () => { timer = setTimeout(() => window.confirmDeleteCall(docId, displayName), 800); };
             div.ontouchend = () => clearTimeout(timer);
-            // ---------------------------
+            div.oncontextmenu = (e) => { e.preventDefault(); window.confirmDeleteCall(docId, displayName); };
 
             div.innerHTML = `
-                <img src="${displayPhoto || 'https://ui-avatars.com/api/?name=' + displayName}" class="avatar">
-                <div class="info">
-                    <h4>${displayName}</h4>
-                    <p>
-                        <i data-lucide="${isOutgoing ? 'phone-outgoing' : 'phone-incoming'}" size="12"></i>
-                        ${isOutgoing ? 'Sortant' : 'Entrant'} • ${time}
-                    </p>
+                <div class="info-click-zone" style="display:flex; align-items:center; flex:1;">
+                    <img src="${displayPhoto || 'https://ui-avatars.com/api/?name=' + displayName}" class="avatar">
+                    <div class="info">
+                        <h4>${displayName}</h4>
+                        <p>
+                            <i data-lucide="${isOutgoing ? 'phone-outgoing' : 'phone-incoming'}" size="12"></i>
+                            ${isOutgoing ? 'Sortant' : 'Entrant'} • ${time}
+                        </p>
+                    </div>
+                    <i data-lucide="phone" size="18" color="var(--myme-blue)" style="margin-right:15px;"></i>
                 </div>
-                <i data-lucide="phone" size="18" color="var(--myme-blue)" class="phone-icon"></i>
-    
-                <button class="delete-btn" onclick="event.stopPropagation(); window.confirmDeleteCall('${docId}', '${displayName}')">
-                    <i data-lucide="trash-2"></i>
-                </button>
+        
+                    <button class="delete-btn" onclick="event.stopPropagation(); window.confirmDeleteCall('${docId}', '${displayName}')">
+                        <i data-lucide="trash-2"></i>
+                    </button>
             `;
-    
-            // Le clic simple lance toujours l'appel
-            div.onclick = () => {
-                const tel = isOutgoing ? call.receiverTel : call.callerTel; // Assure-toi d'avoir le tel dans l'objet call
+
+            // On met l'événement de clic uniquement sur la zone d'info, pas sur toute la div
+            div.querySelector('.info-click-zone').onclick = () => {
+                const tel = isOutgoing ? call.receiverTel : call.callerTel;
                 if(tel) window.location.href = `tel:${tel}`;
             };
 
@@ -479,7 +477,7 @@ window.executeCallDeletion = async (docId) => {
         
         // Retrait visuel immédiat
         const el = document.getElementById(`call-${docId}`);
-        if (el) el.style.opacity = '0';
+        if (el) el.classList.add('removing');
         setTimeout(() => el?.remove(), 300);
         
         console.log("Appel supprimé");
@@ -565,6 +563,7 @@ window.executeCallDeletion = async (docId) => {
 </body>
 
 </html>
+
 
 
 
