@@ -1030,10 +1030,23 @@ async function renderList() {
         item.id = `item-${id}`;
 
         let timer;
-        item.onmousedown = item.ontouchstart = () => {
-            timer = setTimeout(() => window.deleteChat(id, event), 800);
+
+        // Gestion PC : Clic droit
+        item.oncontextmenu = (e) => {
+            e.preventDefault(); // Empêche le menu "Inspecter / Enregistrer sous" d'apparaître
+            window.deleteChat(id, e);
         };
+
+        // Gestion Mobile : Appui long (ton code actuel amélioré)
+        item.onmousedown = item.ontouchstart = (e) => {
+            // On ne lance le timer que si c'est un clic gauche ou un touch
+            if (e.button === 0 || e.type === 'touchstart') { 
+                timer = setTimeout(() => window.deleteChat(id, e), 800);
+            }
+        };
+
         item.onmouseup = item.ontouchend = () => clearTimeout(timer);
+        item.onmouseleave = () => clearTimeout(timer);
 
         // On sépare le clic sur l'image (Profil) du clic sur le texte (Chat)
         item.innerHTML = `
@@ -1121,12 +1134,3 @@ async function renderList() {
 </body>
 
 </html>
-
-
-
-
-
-
-
-
-
